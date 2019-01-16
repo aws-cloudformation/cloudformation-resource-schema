@@ -1,4 +1,4 @@
-## AWS GCloudFormation Resource Schema
+## AWS CloudFormation Resource Schema
 
 This document describes the [Resource Provider Definition Schema](https://github.com/aws-cloudformation/aws-cloudformation-resource-schema/blob/master/src/data/schema/provider.definition.schema.v1.json) which is a _meta-schema_ that extends [draft-07](https://json-schema.org/draft-07/json-schema-release-notes.html) of [JSON Schema](https://json-schema.org/) to define a validating document against which resource schemas can be authored.
 
@@ -70,7 +70,7 @@ The following (truncated) example shows some of the semantic definitions for an 
 
 We have taken an opinion on certain aspects of the core JSON Schema and introduced certain constrains and changes from the core schema. In the context of this project, we are not building arbitrary documents, but rather, defining a very specific shape and semantic for cloud resources.
 
-* **`readOnly`**: the readOnly field as defined in JSON Schema does not align with our determination that this is actually a restriction with semantic meaning. A property may be readOnly when specified for a particular resource (for example it's `Arn`), but when that same property is _referenced_ (using `$ref` tokens) from a dependency, the dependency must be allowed to specify an input for that property, and as such, it is no longer `readOnly` in that context.
+* **`readOnly`**: the readOnly field as defined in JSON Schema does not align with our determination that this is actually a restriction with semantic meaning. A property may be readOnly when specified for a particular resource (for example it's `Arn`), but when that same property is _referenced_ (using `$ref` tokens) from a dependency, the dependency must be allowed to specify an input for that property, and as such, it is no longer `readOnly` in that context. The AWS CloudFormation Resource Schema uses the concept of `readOnlyProperties` for this mechanic.
 * **`writeOnly`**: see above
 
 ### Constraints
