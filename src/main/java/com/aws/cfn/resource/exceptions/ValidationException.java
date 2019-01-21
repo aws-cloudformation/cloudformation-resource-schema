@@ -1,5 +1,6 @@
 package com.aws.cfn.resource.exceptions;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -34,7 +35,7 @@ public class ValidationException extends RuntimeException {
                         final String keyword,
                         final String schemaLocation) {
         super(message);
-        this.causingExceptions = Collections.unmodifiableList(causingExceptions);
+        this.causingExceptions =  new ArrayList<>(causingExceptions);
         this.keyword = keyword;
         this.schemaLocation = schemaLocation;
     }

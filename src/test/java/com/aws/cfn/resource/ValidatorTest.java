@@ -103,4 +103,34 @@ public class ValidatorTest {
         }
     }
 
+    @Test
+    public void test_ValidateModel_MultipleValidationFailures() throws IOException {
+        final Validator validator = new Validator();
+
+        final JSONObject model = new JSONObject();
+        model.put("propertyA", 123);
+        model.put("propertyB", Arrays.asList(1, 2, 3));
+        model.put("propertyC", "notpartofschema");
+        model.put("propertyD", "notpartofschema");
+
+        try {
+            validator.validateModel(
+                model,
+                loadRequestStream("test-schema.json"));
+            fail("Expected ValidationException not thrown");
+        } catch (final ValidationException e) {
+            assertThat(
+                e.getCausingExceptions().size(),
+                is(equalTo(3))
+            );
+            assertThat(
+                e.getMessage(),
+                is(equalTo("#: 3 schema violations found"))
+            );
+            assertThat(
+                e.getSchemaLocation(),
+                is(equalTo("#"))
+            );
+        }
+    }
 }
