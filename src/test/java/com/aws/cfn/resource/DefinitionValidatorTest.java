@@ -6,12 +6,11 @@ import org.json.JSONTokener;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.junit.MatcherAssert.assertThat;
 
 
 public class DefinitionValidatorTest {
-    private static final String TEST_SCHEMA_PATH= "src/test/java/com/aws/cfn/resource/data/test-schema.json";
+    private static final String TEST_SCHEMA_PATH= "/test-schema.json";
     private static final String TYPE_NAME_KEY = "typeName";
     private static final String PROPERTIES_KEY = "properties";
     private static final String EXAMPLE_TYPE_NAME = "Organization::Service::Resource";
@@ -23,14 +22,13 @@ public class DefinitionValidatorTest {
         final JSONObject model = new JSONObject();
         model.put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME);
         model.put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject()));
-
         validator.validate(model);
     }
 
     @Test
     public void test_ValidateExampleSchema() {
         final DefinitionValidator validator = new DefinitionValidator();
-        final JSONObject schema = new JSONObject(new JSONTokener(Validator.loadStream(TEST_SCHEMA_PATH)));
+        final JSONObject schema = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
         validator.validate(schema);
     }
 
@@ -44,11 +42,11 @@ public class DefinitionValidatorTest {
         } catch (ValidationException e) {
             assertThat(
                     e.getCausingExceptions().size(),
-                    is(equalTo(0))
+                    is(0)
             );
             assertThat(
                     e.getMessage(),
-                    is(equalTo("#: required key [properties] not found"))
+                    is("#: required key [properties] not found")
             );
         }
     }
@@ -64,11 +62,11 @@ public class DefinitionValidatorTest {
         } catch (ValidationException e) {
             assertThat(
                     e.getCausingExceptions().size(),
-                    is(equalTo(0))
+                    is(0)
             );
             assertThat(
                     e.getMessage(),
-                    is(equalTo("#/properties: minimum size: [1], found: [0]"))
+                    is("#/properties: minimum size: [1], found: [0]")
             );
         }
     }

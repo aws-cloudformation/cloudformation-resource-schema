@@ -9,15 +9,15 @@ import java.io.InputStream;
 * */
 public class DefinitionValidator extends Validator {
 
-    private static final String METASCHEMA_PATH = "src/data/schema/provider.definition.schema.v1.json";
+    private static final String METASCHEMA_PATH = "/schema/provider.definition.schema.v1.json";
     private final InputStream schemaStream;
 
     public DefinitionValidator(){
-        schemaStream = loadStream(METASCHEMA_PATH);
+        schemaStream = this.getClass().getResourceAsStream(METASCHEMA_PATH);
     }
 
 
-    public void validate(JSONObject definition) throws ValidationException {
+    public void validate(final JSONObject definition) throws ValidationException {
         validateModel(definition, schemaStream);
     }
 }

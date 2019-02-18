@@ -6,24 +6,9 @@ import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 public class Validator implements SchemaValidator {
-
-    public static InputStream loadStream(String filePath){
-        final File file = new File(filePath);
-        InputStream in = null;
-        try {
-            in = new FileInputStream(file);
-        } catch (final FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        return in;
-    }
 
     public void validateModel(final JSONObject modelObject,
                               final InputStream schemaStream) throws ValidationException {

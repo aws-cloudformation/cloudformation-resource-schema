@@ -20,7 +20,7 @@
         <dependency>
             <groupId>com.github.everit-org.json-schema</groupId>
             <artifactId>org.everit.json.schema</artifactId>
-            <version>1.10.0</version>
+            <version>1.11.0</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/junit/junit -->
@@ -47,4 +47,15 @@
             <url>https://jitpack.io</url>
         </repository>
     </repositories>
+    <build>
+        <resources>
+            <resource>
+                <directory>${basedir}/src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>${basedir}/src/test/resources</directory>
+            </resource>
+        </resources>
+    </build>
+
 </project>
