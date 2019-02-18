@@ -4,11 +4,7 @@ import com.aws.cfn.resource.exceptions.ValidationException;
 import org.json.JSONObject;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 
 import static org.hamcrest.Matchers.is;
@@ -17,23 +13,9 @@ import static org.hamcrest.junit.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 
 public class ValidatorTest {
-
-    private static final String TEST_DATA_BASE_PATH = "src/test/java/com/aws/cfn/resource/data/%s";
-
-    private InputStream loadRequestStream(final String fileName) {
-        final File file = new File(String.format(TEST_DATA_BASE_PATH, fileName));
-        InputStream in = null;
-        try {
-            in = new FileInputStream(file);
-        } catch (final FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        return in;
-    }
-
+    private static final String TEST_SCHEMA_PATH= "src/test/java/com/aws/cfn/resource/data/test-schema.json";
     @Test
-    public void test_ValidateModel_Valid() throws IOException {
+    public void test_ValidateModel_Valid() {
         final Validator validator = new Validator();
 
         final JSONObject model = new JSONObject();
@@ -42,11 +24,11 @@ public class ValidatorTest {
 
         validator.validateModel(
             model,
-            loadRequestStream("test-schema.json"));
+            Validator.loadStream(TEST_SCHEMA_PATH));
     }
 
     @Test
-    public void test_ValidateModel_MissingRequiredProperties() throws IOException {
+    public void test_ValidateModel_MissingRequiredProperties() {
         final Validator validator = new Validator();
 
         final JSONObject model = new JSONObject();
@@ -55,7 +37,7 @@ public class ValidatorTest {
         try {
             validator.validateModel(
                 model,
-                loadRequestStream("test-schema.json"));
+                Validator.loadStream(TEST_SCHEMA_PATH));
             fail("Expected ValidationException not thrown");
         } catch (final ValidationException e) {
             assertThat(
@@ -74,7 +56,7 @@ public class ValidatorTest {
     }
 
     @Test
-    public void test_ValidateModel_InvalidAdditionalProperties() throws IOException {
+    public void test_ValidateModel_InvalidAdditionalProperties() {
         final Validator validator = new Validator();
 
         final JSONObject model = new JSONObject();
@@ -85,7 +67,7 @@ public class ValidatorTest {
         try {
             validator.validateModel(
                 model,
-                loadRequestStream("test-schema.json"));
+                Validator.loadStream(TEST_SCHEMA_PATH));
             fail("Expected ValidationException not thrown");
         } catch (final ValidationException e) {
             assertThat(
@@ -104,7 +86,7 @@ public class ValidatorTest {
     }
 
     @Test
-    public void test_ValidateModel_MultipleValidationFailures() throws IOException {
+    public void test_ValidateModel_MultipleValidationFailures() {
         final Validator validator = new Validator();
 
         final JSONObject model = new JSONObject();
@@ -116,7 +98,7 @@ public class ValidatorTest {
         try {
             validator.validateModel(
                 model,
-                loadRequestStream("test-schema.json"));
+                Validator.loadStream(TEST_SCHEMA_PATH));
             fail("Expected ValidationException not thrown");
         } catch (final ValidationException e) {
             assertThat(

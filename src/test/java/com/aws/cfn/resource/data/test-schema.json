@@ -1,6 +1,5 @@
 {
   "typeName": "AWS::Test::TestModel",
-  "$schema": "provider.definition.schema.v1.json",
   "properties": {
     "propertyA": {
       "type": "string"
