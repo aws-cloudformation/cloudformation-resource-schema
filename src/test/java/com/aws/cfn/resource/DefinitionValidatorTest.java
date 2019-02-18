@@ -5,6 +5,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.junit.Test;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.junit.MatcherAssert.assertThat;
 
@@ -40,10 +41,7 @@ public class DefinitionValidatorTest {
         try {
             validator.validate(model);
         } catch (ValidationException e) {
-            assertThat(
-                    e.getCausingExceptions().size(),
-                    is(0)
-            );
+            assertThat(e.getCausingExceptions(), hasSize(0));
             assertThat(
                     e.getMessage(),
                     is("#: required key [properties] not found")
@@ -60,10 +58,7 @@ public class DefinitionValidatorTest {
         try {
             validator.validate(model);
         } catch (ValidationException e) {
-            assertThat(
-                    e.getCausingExceptions().size(),
-                    is(0)
-            );
+            assertThat(e.getCausingExceptions(), hasSize(0));
             assertThat(
                     e.getMessage(),
                     is("#/properties: minimum size: [1], found: [0]")

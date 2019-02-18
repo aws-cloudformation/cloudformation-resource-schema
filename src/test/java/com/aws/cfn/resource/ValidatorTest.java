@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.junit.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
@@ -40,10 +41,7 @@ public class ValidatorTest {
             );
             fail("Expected ValidationException not thrown");
         } catch (final ValidationException e) {
-            assertThat(
-                e.getCausingExceptions().size(),
-                is(0)
-            );
+            assertThat(e.getCausingExceptions(), hasSize(0));
             assertThat(
                 e.getMessage(),
                 is("#: required key [propertyA] not found")
@@ -71,10 +69,7 @@ public class ValidatorTest {
             );
             fail("Expected ValidationException not thrown");
         } catch (final ValidationException e) {
-            assertThat(
-                e.getCausingExceptions().size(),
-                is(0)
-            );
+            assertThat(e.getCausingExceptions(), hasSize(0));
             assertThat(
                 e.getMessage(),
                 is("#: extraneous key [propertyC] is not permitted")
@@ -103,10 +98,7 @@ public class ValidatorTest {
             );
             fail("Expected ValidationException not thrown");
         } catch (final ValidationException e) {
-            assertThat(
-                e.getCausingExceptions().size(),
-                is(3)
-            );
+            assertThat(e.getCausingExceptions(), hasSize(3));
             assertThat(
                 e.getMessage(),
                 is("#: 3 schema violations found")
