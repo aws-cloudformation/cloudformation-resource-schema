@@ -2,6 +2,7 @@ package com.aws.cfn.resource;
 
 import com.aws.cfn.resource.exceptions.ValidationException;
 import org.json.JSONObject;
+
 import java.io.InputStream;
 
 /*
@@ -13,9 +14,9 @@ public class DefinitionValidator extends Validator {
     private final InputStream schemaStream;
 
     public DefinitionValidator(){
+        super();
         schemaStream = this.getClass().getResourceAsStream(METASCHEMA_PATH);
     }
-
 
     public void validate(final JSONObject definition) throws ValidationException {
         validateModel(definition, schemaStream);
