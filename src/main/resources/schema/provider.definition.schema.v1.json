@@ -49,7 +49,7 @@
                 },
                 {
 
-                    "$comment": "The following subset of https://json-schema.org/draft-07/schema property references is supported for resource definitions. Nested properties are disallowed and should be specified as a $ref to a definitions block.",
+                    "$comment": "The following subset of draft-07 property references is supported for resource definitions. Nested properties are disallowed and should be specified as a $ref to a definitions block.",
                     "type": "object",
                     "properties": {
                         "insertionOrder": {
