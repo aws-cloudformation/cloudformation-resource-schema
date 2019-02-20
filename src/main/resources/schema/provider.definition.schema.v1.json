@@ -48,7 +48,6 @@
                     "$ref": "#/definitions/validations"
                 },
                 {
-
                     "$comment": "The following subset of draft-07 property references is supported for resource definitions. Nested properties are disallowed and should be specified as a $ref to a definitions block.",
                     "type": "object",
                     "properties": {

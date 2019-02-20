@@ -2,6 +2,7 @@ package com.aws.cfn.resource;
 
 import com.aws.cfn.resource.exceptions.ValidationException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -13,6 +14,10 @@ import static org.junit.Assert.fail;
 
 public class ValidatorTest {
     private static final String TEST_SCHEMA_PATH= "/test-schema.json";
+    private static final String TYPE_NAME_KEY = "typeName";
+    private static final String PROPERTIES_KEY = "properties";
+    private static final String EXAMPLE_TYPE_NAME = "Organization::Service::Resource";
+
     @Test
     public void test_ValidateModel_Valid() {
         final Validator validator = new Validator();
@@ -106,6 +111,55 @@ public class ValidatorTest {
             assertThat(
                 e.getSchemaLocation(),
                 is("#")
+            );
+        }
+    }
+
+    @Test
+    public void test_ValidateDefinitionSchema_ValidMinimal() {
+        final Validator validator = new Validator();
+        final JSONObject model = new JSONObject();
+        model.put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME);
+        model.put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject()));
+        validator.validateResourceDefinition(model);
+    }
+
+    @Test
+    public void test_ValidateDefinitionExampleSchema() {
+        final Validator validator = new Validator();
+        final JSONObject schema = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
+        validator.validateResourceDefinition(schema);
+    }
+
+    @Test
+    public void test_ValidateDefinition_InvalidNoPropertiesKey() {
+        final Validator validator = new Validator();
+        final JSONObject model = new JSONObject();
+        model.put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME);
+        try {
+            validator.validateResourceDefinition(model);
+        } catch (ValidationException e) {
+            assertThat(e.getCausingExceptions(), hasSize(0));
+            assertThat(
+                    e.getMessage(),
+                    is("#: required key [properties] not found")
+            );
+        }
+    }
+
+    @Test
+    public void test_ValidateDefinition_InvalidNoProperties() {
+        final Validator validator = new Validator();
+        final JSONObject model = new JSONObject();
+        model.put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME);
+        model.put(PROPERTIES_KEY, new JSONObject());
+        try {
+            validator.validateResourceDefinition(model);
+        } catch (ValidationException e) {
+            assertThat(e.getCausingExceptions(), hasSize(0));
+            assertThat(
+                    e.getMessage(),
+                    is("#/properties: minimum size: [1], found: [0]")
             );
         }
     }

@@ -14,12 +14,14 @@ public class Validator implements SchemaValidator {
 
     private static final String JSON_SCHEMA_ID = "https://json-schema.org/draft-07/schema";
     private static final String JSON_SCHEMA_PATH = "/schema/schema";
-
+    private static final String METASCHEMA_PATH = "/schema/provider.definition.schema.v1.json";
+    private final InputStream definitionSchemaStream;
     private final JSONObject jsonSchemaObject;
 
     public Validator() {
         //local copy of the draft-07 schema used to avoid remote reference calls
         jsonSchemaObject = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(JSON_SCHEMA_PATH)));
+        definitionSchemaStream = this.getClass().getResourceAsStream(METASCHEMA_PATH);
     }
 
     public void validateModel(final JSONObject modelObject,
@@ -44,4 +46,14 @@ public class Validator implements SchemaValidator {
             throw new RuntimeException("Invalid URI format for json schema.");
         }
     }
+
+    /**
+     * Perform JSON Schema validation for the input resource definition against the resource provider definition schema
+     * @param definition  JSON-encoded resource definition
+     * @throws ValidationException  Thrown for any schema validation errors
+     */
+    public void validateResourceDefinition(final JSONObject definition) throws ValidationException {
+        validateModel(definition, definitionSchemaStream);
+    }
+
 }
