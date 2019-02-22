@@ -47,6 +47,7 @@
             <url>https://jitpack.io</url>
         </repository>
     </repositories>
+
     <build>
         <resources>
             <resource>
@@ -73,8 +74,6 @@
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
-
 </project>
