@@ -2,134 +2,164 @@ package com.aws.cfn.resource;
 
 import com.aws.cfn.resource.exceptions.ValidationException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.junit.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 
 public class ValidatorTest {
+    private static final String TEST_SCHEMA_PATH = "/test-schema.json";
+    private static final String TYPE_NAME_KEY = "typeName";
+    private static final String PROPERTIES_KEY = "properties";
+    private static final String EXAMPLE_TYPE_NAME = "Organization::Service::Resource";
 
-    private static final String TEST_DATA_BASE_PATH = "src/test/java/com/aws/cfn/resource/data/%s";
+    @Test
+    public void validateObject_validObject_shouldNotThrow() {
+        final Validator validator = new Validator();
 
-    private InputStream loadRequestStream(final String fileName) {
-        final File file = new File(String.format(TEST_DATA_BASE_PATH, fileName));
-        InputStream in = null;
-        try {
-            in = new FileInputStream(file);
-        } catch (final FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        final JSONObject object = new JSONObject()
+                .put("propertyA", "abc")
+                .put("propertyB", Arrays.asList(1, 2, 3));
 
-        return in;
+        validator.validateObject(
+            object,
+            this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)
+        );
     }
 
     @Test
-    public void test_ValidateModel_Valid() throws IOException {
+    public void validateObject_invalidObjectMissingRequiredProperties_shouldThrow() {
         final Validator validator = new Validator();
 
-        final JSONObject model = new JSONObject();
-        model.put("propertyA", "abc");
-        model.put("propertyB", Arrays.asList(1, 2, 3));
-
-        validator.validateModel(
-            model,
-            loadRequestStream("test-schema.json"));
-    }
-
-    @Test
-    public void test_ValidateModel_MissingRequiredProperties() throws IOException {
-        final Validator validator = new Validator();
-
-        final JSONObject model = new JSONObject();
-        model.put("propertyB", Arrays.asList(1, 2, 3));
+        final JSONObject object = new JSONObject()
+                .put("propertyB", Arrays.asList(1, 2, 3));
 
         try {
-            validator.validateModel(
-                model,
-                loadRequestStream("test-schema.json"));
+            validator.validateObject(
+                    object,
+                    this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)
+            );
             fail("Expected ValidationException not thrown");
         } catch (final ValidationException e) {
-            assertThat(
-                e.getCausingExceptions().size(),
-                is(equalTo(0))
-            );
+            assertThat(e.getCausingExceptions(), hasSize(0));
             assertThat(
                 e.getMessage(),
-                is(equalTo("#: required key [propertyA] not found"))
+                is("#: required key [propertyA] not found")
             );
             assertThat(
                 e.getSchemaLocation(),
-                is(equalTo("#"))
+                is("#")
             );
         }
     }
 
     @Test
-    public void test_ValidateModel_InvalidAdditionalProperties() throws IOException {
+    public void validateObject_invalidObjectAdditionalProperties_shouldThrow() {
         final Validator validator = new Validator();
 
-        final JSONObject model = new JSONObject();
-        model.put("propertyA", "abc");
-        model.put("propertyB", Arrays.asList(1, 2, 3));
-        model.put("propertyC", "notpartofschema");
+        final JSONObject object = new JSONObject()
+                .put("propertyA", "abc")
+                .put("propertyB", Arrays.asList(1, 2, 3))
+                .put("propertyC", "notpartofschema");
 
         try {
-            validator.validateModel(
-                model,
-                loadRequestStream("test-schema.json"));
+            validator.validateObject(
+                    object,
+                    this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)
+            );
             fail("Expected ValidationException not thrown");
         } catch (final ValidationException e) {
-            assertThat(
-                e.getCausingExceptions().size(),
-                is(equalTo(0))
-            );
+            assertThat(e.getCausingExceptions(), hasSize(0));
             assertThat(
                 e.getMessage(),
-                is(equalTo("#: extraneous key [propertyC] is not permitted"))
+                is("#: extraneous key [propertyC] is not permitted")
             );
             assertThat(
                 e.getSchemaLocation(),
-                is(equalTo("#"))
+                is("#")
             );
         }
     }
 
     @Test
-    public void test_ValidateModel_MultipleValidationFailures() throws IOException {
+    public void validateObject_invalidObjectMultiple_shouldThrow() {
         final Validator validator = new Validator();
 
-        final JSONObject model = new JSONObject();
-        model.put("propertyA", 123);
-        model.put("propertyB", Arrays.asList(1, 2, 3));
-        model.put("propertyC", "notpartofschema");
-        model.put("propertyD", "notpartofschema");
+        final JSONObject object = new JSONObject()
+                .put("propertyA", 123)
+                .put("propertyB", Arrays.asList(1, 2, 3))
+                .put("propertyC", "notpartofschema")
+                .put("propertyD", "notpartofschema");
 
         try {
-            validator.validateModel(
-                model,
-                loadRequestStream("test-schema.json"));
+            validator.validateObject(
+                    object,
+                    this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)
+            );
             fail("Expected ValidationException not thrown");
         } catch (final ValidationException e) {
-            assertThat(
-                e.getCausingExceptions().size(),
-                is(equalTo(3))
-            );
+            assertThat(e.getCausingExceptions(), hasSize(3));
             assertThat(
                 e.getMessage(),
-                is(equalTo("#: 3 schema violations found"))
+                is("#: 3 schema violations found")
             );
             assertThat(
                 e.getSchemaLocation(),
-                is(equalTo("#"))
+                is("#")
+            );
+        }
+    }
+
+    @Test
+    public void validateDefinition_validMinimalDefinition_shouldNotThrow() {
+        final Validator validator = new Validator();
+        final JSONObject definition = new JSONObject()
+                .put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
+                .put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject()));
+        validator.validateResourceDefinition(definition);
+    }
+
+    @Test
+    public void validateDefinition_validExampleDefinition_shouldNotThrow() {
+        final Validator validator = new Validator();
+        final JSONObject definition = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
+        validator.validateResourceDefinition(definition);
+    }
+
+    @Test
+    public void validateDefinition_invalidDefinitionNoPropertiesKey_shouldThrow() {
+        final Validator validator = new Validator();
+        final JSONObject definition = new JSONObject()
+                .put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME);
+        try {
+            validator.validateResourceDefinition(definition);
+        } catch (final ValidationException e) {
+            assertThat(e.getCausingExceptions(), hasSize(0));
+            assertThat(
+                    e.getMessage(),
+                    is("#: required key [properties] not found")
+            );
+        }
+    }
+
+    @Test
+    public void validateDefinition_invalidDefinitionNoProperties_shouldThrow() {
+        final Validator validator = new Validator();
+        final JSONObject definition = new JSONObject()
+                .put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
+                .put(PROPERTIES_KEY, new JSONObject());
+        try {
+            validator.validateResourceDefinition(definition);
+        } catch (final ValidationException e) {
+            assertThat(e.getCausingExceptions(), hasSize(0));
+            assertThat(
+                    e.getMessage(),
+                    is("#/properties: minimum size: [1], found: [0]")
             );
         }
     }
