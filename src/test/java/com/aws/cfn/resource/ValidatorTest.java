@@ -13,35 +13,35 @@ import static org.hamcrest.junit.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 
 public class ValidatorTest {
-    private static final String TEST_SCHEMA_PATH= "/test-schema.json";
+    private static final String TEST_SCHEMA_PATH = "/test-schema.json";
     private static final String TYPE_NAME_KEY = "typeName";
     private static final String PROPERTIES_KEY = "properties";
     private static final String EXAMPLE_TYPE_NAME = "Organization::Service::Resource";
 
     @Test
-    public void test_ValidateModel_Valid() {
+    public void validateObject_validObject_shouldNotThrow() {
         final Validator validator = new Validator();
 
-        final JSONObject model = new JSONObject();
-        model.put("propertyA", "abc");
-        model.put("propertyB", Arrays.asList(1, 2, 3));
+        final JSONObject object = new JSONObject()
+                .put("propertyA", "abc")
+                .put("propertyB", Arrays.asList(1, 2, 3));
 
-        validator.validateModel(
-            model,
+        validator.validateObject(
+            object,
             this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)
         );
     }
 
     @Test
-    public void test_ValidateModel_MissingRequiredProperties() {
+    public void validateObject_invalidObjectMissingRequiredProperties_shouldThrow() {
         final Validator validator = new Validator();
 
-        final JSONObject model = new JSONObject();
-        model.put("propertyB", Arrays.asList(1, 2, 3));
+        final JSONObject object = new JSONObject()
+                .put("propertyB", Arrays.asList(1, 2, 3));
 
         try {
-            validator.validateModel(
-                    model,
+            validator.validateObject(
+                    object,
                     this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)
             );
             fail("Expected ValidationException not thrown");
@@ -59,17 +59,17 @@ public class ValidatorTest {
     }
 
     @Test
-    public void test_ValidateModel_InvalidAdditionalProperties() {
+    public void validateObject_invalidObjectAdditionalProperties_shouldThrow() {
         final Validator validator = new Validator();
 
-        final JSONObject model = new JSONObject();
-        model.put("propertyA", "abc");
-        model.put("propertyB", Arrays.asList(1, 2, 3));
-        model.put("propertyC", "notpartofschema");
+        final JSONObject object = new JSONObject()
+                .put("propertyA", "abc")
+                .put("propertyB", Arrays.asList(1, 2, 3))
+                .put("propertyC", "notpartofschema");
 
         try {
-            validator.validateModel(
-                    model,
+            validator.validateObject(
+                    object,
                     this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)
             );
             fail("Expected ValidationException not thrown");
@@ -87,18 +87,18 @@ public class ValidatorTest {
     }
 
     @Test
-    public void test_ValidateModel_MultipleValidationFailures() {
+    public void validateObject_invalidObjectMultiple_shouldThrow() {
         final Validator validator = new Validator();
 
-        final JSONObject model = new JSONObject();
-        model.put("propertyA", 123);
-        model.put("propertyB", Arrays.asList(1, 2, 3));
-        model.put("propertyC", "notpartofschema");
-        model.put("propertyD", "notpartofschema");
+        final JSONObject object = new JSONObject()
+                .put("propertyA", 123)
+                .put("propertyB", Arrays.asList(1, 2, 3))
+                .put("propertyC", "notpartofschema")
+                .put("propertyD", "notpartofschema");
 
         try {
-            validator.validateModel(
-                    model,
+            validator.validateObject(
+                    object,
                     this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)
             );
             fail("Expected ValidationException not thrown");
@@ -116,29 +116,29 @@ public class ValidatorTest {
     }
 
     @Test
-    public void test_ValidateDefinitionSchema_ValidMinimal() {
+    public void validateDefinition_validMinimalDefinition_shouldNotThrow() {
         final Validator validator = new Validator();
-        final JSONObject model = new JSONObject();
-        model.put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME);
-        model.put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject()));
-        validator.validateResourceDefinition(model);
+        final JSONObject definition = new JSONObject()
+                .put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
+                .put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject()));
+        validator.validateResourceDefinition(definition);
     }
 
     @Test
-    public void test_ValidateDefinitionExampleSchema() {
+    public void validateDefinition_validExampleDefinition_shouldNotThrow() {
         final Validator validator = new Validator();
-        final JSONObject schema = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
-        validator.validateResourceDefinition(schema);
+        final JSONObject definition = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
+        validator.validateResourceDefinition(definition);
     }
 
     @Test
-    public void test_ValidateDefinition_InvalidNoPropertiesKey() {
+    public void validateDefinition_invalidDefinitionNoPropertiesKey_shouldThrow() {
         final Validator validator = new Validator();
-        final JSONObject model = new JSONObject();
-        model.put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME);
+        final JSONObject definition = new JSONObject()
+                .put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME);
         try {
-            validator.validateResourceDefinition(model);
-        } catch (ValidationException e) {
+            validator.validateResourceDefinition(definition);
+        } catch (final ValidationException e) {
             assertThat(e.getCausingExceptions(), hasSize(0));
             assertThat(
                     e.getMessage(),
@@ -148,14 +148,14 @@ public class ValidatorTest {
     }
 
     @Test
-    public void test_ValidateDefinition_InvalidNoProperties() {
+    public void validateDefinition_invalidDefinitionNoProperties_shouldThrow() {
         final Validator validator = new Validator();
-        final JSONObject model = new JSONObject();
-        model.put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME);
-        model.put(PROPERTIES_KEY, new JSONObject());
+        final JSONObject definition = new JSONObject()
+                .put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
+                .put(PROPERTIES_KEY, new JSONObject());
         try {
-            validator.validateResourceDefinition(model);
-        } catch (ValidationException e) {
+            validator.validateResourceDefinition(definition);
+        } catch (final ValidationException e) {
             assertThat(e.getCausingExceptions(), hasSize(0));
             assertThat(
                     e.getMessage(),

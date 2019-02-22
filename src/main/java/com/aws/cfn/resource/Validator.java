@@ -19,19 +19,19 @@ public class Validator implements SchemaValidator {
     private final JSONObject jsonSchemaObject;
 
     public Validator() {
-        //local copy of the draft-07 schema used to avoid remote reference calls
+        // local copy of the draft-07 schema used to avoid remote reference calls
         jsonSchemaObject = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(JSON_SCHEMA_PATH)));
         definitionSchemaStream = this.getClass().getResourceAsStream(METASCHEMA_PATH);
     }
 
-    public void validateModel(final JSONObject modelObject,
-                              final InputStream schemaStream) throws ValidationException {
+    public void validateObject(final JSONObject modelObject,
+                               final InputStream schemaStream) throws ValidationException {
         final JSONObject schemaObject = new JSONObject(new JSONTokener(schemaStream));
         try {
             final URI schemaURI = new URI(JSON_SCHEMA_ID);
             final SchemaLoader loader = SchemaLoader.builder()
                     .schemaJson(schemaObject)
-                    //registers the local schema as with the draft-07 url
+                    // registers the local schema with the draft-07 url
                     .registerSchemaByURI(schemaURI, jsonSchemaObject)
                     .draftV7Support()
                     .build();
@@ -39,11 +39,11 @@ public class Validator implements SchemaValidator {
 
             try {
                 schema.validate(modelObject); // throws a ValidationException if this object is invalid
-            } catch (org.everit.json.schema.ValidationException e) {
+            } catch (final org.everit.json.schema.ValidationException e) {
                 throw new ValidationException(e);
             }
-        } catch (URISyntaxException e) {
-            throw new RuntimeException("Invalid URI format for json schema.");
+        } catch (final URISyntaxException e) {
+            throw new RuntimeException("Invalid URI format for JSON schema.");
         }
     }
 
@@ -53,7 +53,7 @@ public class Validator implements SchemaValidator {
      * @throws ValidationException  Thrown for any schema validation errors
      */
     public void validateResourceDefinition(final JSONObject definition) throws ValidationException {
-        validateModel(definition, definitionSchemaStream);
+        validateObject(definition, definitionSchemaStream);
     }
 
 }
