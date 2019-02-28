@@ -21,7 +21,7 @@
     "/properties/propertyB"
   ],
   "identifiers": [
-    "/properties/propertyA"
+    ["/properties/propertyA"]
   ],
   "additionalProperties": false
 }
