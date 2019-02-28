@@ -284,7 +284,7 @@
             "$ref": "#/definitions/jsonPointerArray"
         },
         "identifiers": {
-            "description": "A list of identifiers. An identifier is a list of JSON pointers that uniquely identify the resource. An identifier can be a single or multiple properties.",
+            "description": "A list of identifiers. An identifier is a list of JSON pointers to properties that uniquely identify the resource. An identifier can be a single or multiple properties.",
             "type": "array",
             "minItems": "1",
             "items": {
