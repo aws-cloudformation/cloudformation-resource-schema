@@ -1,6 +1,6 @@
 ## AWS CloudFormation Resource Schema
 
-This document describes the [Resource Provider Definition Schema](https://github.com/aws-cloudformation/aws-cloudformation-resource-schema/blob/master/src/data/schema/provider.definition.schema.v1.json) which is a _meta-schema_ that extends [draft-07](https://json-schema.org/draft-07/json-schema-release-notes.html) of [JSON Schema](https://json-schema.org/) to define a validating document against which resource schemas can be authored.
+This document describes the [Resource Provider Definition Schema](https://github.com/aws-cloudformation/aws-cloudformation-resource-schema/blob/master/src/main/resources/schema/provider.definition.schema.v1.json) which is a _meta-schema_ that extends [draft-07](https://json-schema.org/draft-07/json-schema-release-notes.html) of [JSON Schema](https://json-schema.org/) to define a validating document against which resource schemas can be authored.
 
 ## Examples
 
@@ -58,8 +58,8 @@ The following (truncated) example shows some of the semantic definitions for an 
         "/properties/Arn"
     ],
     "identifiers": [
-        "/properties/Arn",
-        "/properties/BucketName"
+        [ "/properties/Arn" ],
+        [ "/properties/BucketName" ]
     ]
 }
 ```
