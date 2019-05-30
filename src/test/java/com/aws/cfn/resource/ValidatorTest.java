@@ -53,6 +53,7 @@ public class ValidatorTest {
         );
 
         assertThat(e).hasNoCause().hasMessageContaining("propertyA");
+        assertThat(e.getCausingExceptions()).isEmpty();
         assertThat(e.getSchemaLocation()).isEqualTo("#");
     }
 
@@ -72,6 +73,7 @@ public class ValidatorTest {
         );
 
         assertThat(e).hasNoCause().hasMessageContaining("propertyC");
+        assertThat(e.getCausingExceptions()).isEmpty();
         assertThat(e.getSchemaLocation()).isEqualTo("#");
     }
 
