@@ -16,7 +16,9 @@ public class ValidatorTest {
     private static final String TEST_SCHEMA_PATH = "/test-schema.json";
     private static final String TYPE_NAME_KEY = "typeName";
     private static final String PROPERTIES_KEY = "properties";
+    private static final String DESCRIPTION_KEY = "description";
     private static final String EXAMPLE_TYPE_NAME = "Organization::Service::Resource";
+    private static final String EXAMPLE_DESCRIPTION = "Resource provider descriptions are important for customers to know what the resource is expected to do.";
 
     private Validator validator;
 
@@ -27,8 +29,6 @@ public class ValidatorTest {
 
     @Test
     public void validateObject_validObject_shouldNotThrow() {
-        final Validator validator = new Validator();
-
         final JSONObject object = new JSONObject()
                 .put("propertyA", "abc")
                 .put("propertyB", Arrays.asList(1, 2, 3));
@@ -41,8 +41,6 @@ public class ValidatorTest {
 
     @Test
     public void validateObject_invalidObjectMissingRequiredProperties_shouldThrow() {
-        final Validator validator = new Validator();
-
         final JSONObject object = new JSONObject()
                 .put("propertyB", Arrays.asList(1, 2, 3));
 
@@ -60,8 +58,6 @@ public class ValidatorTest {
 
     @Test
     public void validateObject_invalidObjectAdditionalProperties_shouldThrow() {
-        final Validator validator = new Validator();
-
         final JSONObject object = new JSONObject()
                 .put("propertyA", "abc")
                 .put("propertyB", Arrays.asList(1, 2, 3))
@@ -81,8 +77,6 @@ public class ValidatorTest {
 
     @Test
     public void validateObject_invalidObjectMultiple_shouldThrow() {
-        final Validator validator = new Validator();
-
         final JSONObject object = new JSONObject()
                 .put("propertyA", 123)
                 .put("propertyB", Arrays.asList(1, 2, 3))
@@ -104,37 +98,48 @@ public class ValidatorTest {
 
     @Test
     public void validateDefinition_validMinimalDefinition_shouldNotThrow() {
-        final Validator validator = new Validator();
         final JSONObject definition = new JSONObject()
                 .put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
+                .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION)
                 .put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject()));
         validator.validateResourceDefinition(definition);
     }
 
     @Test
     public void validateDefinition_validExampleDefinition_shouldNotThrow() {
-        final Validator validator = new Validator();
         final JSONObject definition = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
         validator.validateResourceDefinition(definition);
     }
 
     @Test
     public void validateDefinition_invalidDefinitionNoPropertiesKey_shouldThrow() {
-        final Validator validator = new Validator();
         final JSONObject definition = new JSONObject()
-                .put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME);
+                .put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
+                .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION);
 
         assertThatExceptionOfType(ValidationException.class)
                 .isThrownBy(() -> validator.validateResourceDefinition(definition))
                 .withNoCause()
-                .withMessage("#: required key [properties] not found");
+                .withMessage("#: required key [" + PROPERTIES_KEY + "] not found");
+    }
+
+    @Test
+    public void validateDefinition_invalidDefinitionNoDescriptionKey_shouldThrow() {
+        final JSONObject definition = new JSONObject()
+                .put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
+                .put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject()));
+
+        assertThatExceptionOfType(ValidationException.class)
+                .isThrownBy(() -> validator.validateResourceDefinition(definition))
+                .withNoCause()
+                .withMessage("#: required key [" + DESCRIPTION_KEY + "] not found");
     }
 
     @Test
     public void validateDefinition_invalidDefinitionNoProperties_shouldThrow() {
-        final Validator validator = new Validator();
         final JSONObject definition = new JSONObject()
                 .put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
+                .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION)
                 .put(PROPERTIES_KEY, new JSONObject());
 
         assertThatExceptionOfType(ValidationException.class)
