@@ -1,5 +1,6 @@
 {
   "typeName": "AWS::Test::TestModel",
+  "description": "A test schema for unit tests.",
   "properties": {
     "propertyA": {
       "type": "string"

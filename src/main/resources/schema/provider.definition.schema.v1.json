@@ -214,12 +214,20 @@
             "$ref": "https://json-schema.org/draft-07/schema#/properties/title"
         },
         "description": {
+            "$comment": "A short description of the resource provider. This will be shown in the AWS CloudFormation console.",
             "$ref": "https://json-schema.org/draft-07/schema#/properties/description"
         },
         "sourceUrl": {
-            "$comment": "Source Code Location (e.g; .git URL)",
+            "$comment": "The location of the source code for this resource provider, to help interested parties submit issues or improvements.",
             "examples": [
-                "git@github.com:awslabs/aws-cloudformation-rpdk.git"
+                "https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-s3"
+            ],
+            "type": "string"
+        },
+        "documentationUrl": {
+            "$comment": "A page with supplemental documentation. The property documentation in schemas should be able to stand alone, but this is an opportunity for e.g. rich examples or more guided documents.",
+            "examples": [
+                "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/CHAP_Using.html"
             ],
             "type": "string"
         },
@@ -245,8 +253,7 @@
                     "$ref": "#/definitions/properties"
                 }
             },
-            "additionalProperties": false,
-            "minProperties": 1
+            "additionalProperties": false
         },
         "remote": {
             "description": "Reserved for CloudFormation use. A namespace to inline remote schemas.",
@@ -310,7 +317,8 @@
     },
     "required": [
         "typeName",
-        "properties"
+        "properties",
+        "description"
     ],
     "additionalProperties": false
 }
