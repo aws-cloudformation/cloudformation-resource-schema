@@ -20,14 +20,14 @@ public class ValidationException extends RuntimeException {
         this(message, Collections.emptyList(), keyword, schemaLocation);
     }
 
-    public ValidationException(org.everit.json.schema.ValidationException validationException) {
+    public ValidationException(final org.everit.json.schema.ValidationException validationException) {
        this(validationException.getMessage(),
            Collections.emptyList(),
            validationException.getKeyword(),
            validationException.getSchemaLocation());
 
         if (validationException.getCausingExceptions() != null) {
-            for (org.everit.json.schema.ValidationException e : validationException.getCausingExceptions()) {
+            for (final org.everit.json.schema.ValidationException e : validationException.getCausingExceptions()) {
                 this.causingExceptions.add(new ValidationException(e));
             }
         }
@@ -38,7 +38,7 @@ public class ValidationException extends RuntimeException {
                         final String keyword,
                         final String schemaLocation) {
         super(message);
-        this.causingExceptions =  new ArrayList<>(causingExceptions);
+        this.causingExceptions = new ArrayList<>(causingExceptions);
         this.keyword = keyword;
         this.schemaLocation = schemaLocation;
     }
