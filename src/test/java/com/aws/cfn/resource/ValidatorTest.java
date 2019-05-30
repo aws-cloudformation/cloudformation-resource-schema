@@ -3,14 +3,12 @@ package com.aws.cfn.resource;
 import com.aws.cfn.resource.exceptions.ValidationException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.junit.MatcherAssert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ValidatorTest {
     private static final String TEST_SCHEMA_PATH = "/test-schema.json";
@@ -46,15 +44,9 @@ public class ValidatorTest {
             );
             fail("Expected ValidationException not thrown");
         } catch (final ValidationException e) {
-            assertThat(e.getCausingExceptions(), hasSize(0));
-            assertThat(
-                e.getMessage(),
-                is("#: required key [propertyA] not found")
-            );
-            assertThat(
-                e.getSchemaLocation(),
-                is("#")
-            );
+            assertThat(e.getCausingExceptions()).hasSize(0);
+            assertThat(e.getMessage()).isEqualTo("#: required key [propertyA] not found");
+            assertThat(e.getSchemaLocation()).isEqualTo("#");
         }
     }
 
@@ -74,15 +66,9 @@ public class ValidatorTest {
             );
             fail("Expected ValidationException not thrown");
         } catch (final ValidationException e) {
-            assertThat(e.getCausingExceptions(), hasSize(0));
-            assertThat(
-                e.getMessage(),
-                is("#: extraneous key [propertyC] is not permitted")
-            );
-            assertThat(
-                e.getSchemaLocation(),
-                is("#")
-            );
+            assertThat(e.getCausingExceptions()).hasSize(0);
+            assertThat(e.getMessage()).isEqualTo("#: extraneous key [propertyC] is not permitted");
+            assertThat(e.getSchemaLocation()).isEqualTo("#");
         }
     }
 
@@ -103,15 +89,9 @@ public class ValidatorTest {
             );
             fail("Expected ValidationException not thrown");
         } catch (final ValidationException e) {
-            assertThat(e.getCausingExceptions(), hasSize(3));
-            assertThat(
-                e.getMessage(),
-                is("#: 3 schema violations found")
-            );
-            assertThat(
-                e.getSchemaLocation(),
-                is("#")
-            );
+            assertThat(e.getCausingExceptions()).hasSize(3);
+            assertThat(e.getMessage()).isEqualTo("#: 3 schema violations found");
+            assertThat(e.getSchemaLocation()).isEqualTo("#");
         }
     }
 
@@ -139,11 +119,8 @@ public class ValidatorTest {
         try {
             validator.validateResourceDefinition(definition);
         } catch (final ValidationException e) {
-            assertThat(e.getCausingExceptions(), hasSize(0));
-            assertThat(
-                    e.getMessage(),
-                    is("#: required key [properties] not found")
-            );
+            assertThat(e.getCausingExceptions()).hasSize(0);
+            assertThat(e.getMessage()).isEqualTo("#: required key [properties] not found");
         }
     }
 
@@ -156,11 +133,8 @@ public class ValidatorTest {
         try {
             validator.validateResourceDefinition(definition);
         } catch (final ValidationException e) {
-            assertThat(e.getCausingExceptions(), hasSize(0));
-            assertThat(
-                    e.getMessage(),
-                    is("#/properties: minimum size: [1], found: [0]")
-            );
+            assertThat(e.getCausingExceptions()).hasSize(0);
+            assertThat(e.getMessage()).isEqualTo("#/properties: minimum size: [1], found: [0]");
         }
     }
 }
