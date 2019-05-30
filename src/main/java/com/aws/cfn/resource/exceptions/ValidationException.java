@@ -1,9 +1,12 @@
 package com.aws.cfn.resource.exceptions;
 
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@Getter
 public class ValidationException extends RuntimeException {
     private static final long serialVersionUID = 42L;
 
@@ -39,17 +42,4 @@ public class ValidationException extends RuntimeException {
         this.keyword = keyword;
         this.schemaLocation = schemaLocation;
     }
-
-    public List<ValidationException> getCausingExceptions() {
-        return this.causingExceptions;
-    }
-
-    public String getKeyword() {
-        return this.keyword;
-    }
-
-    public String getSchemaLocation() {
-        return this.schemaLocation;
-    }
-
 }

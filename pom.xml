@@ -37,7 +37,13 @@
             <version>5.5.0-M1</version>
             <scope>test</scope>
         </dependency>
-
+        <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.8</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <repositories>
@@ -65,7 +71,7 @@
                 <configuration>
                     <showWarnings>true</showWarnings>
                     <compilerArgs>
-                        <arg>-Xlint:all,-options</arg>
+                        <arg>-Xlint:all,-options,-processing</arg>
                         <arg>-Werror</arg>
                     </compilerArgs>
                 </configuration>
