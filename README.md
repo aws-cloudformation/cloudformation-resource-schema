@@ -31,7 +31,7 @@ Certain properties of a resource are _semantic_ and have special meaning when us
 * **`readOnlyProperties`**: A property in the `readOnlyProperties` list cannot be specified in a **CREATE** or **UPDATE** request, and attempting to do so will produce a runtime error from the handler.
 * **`writeOnlyProperties`**: A property in the `writeOnlyProperties` cannot be returned in a **READ** or **LIST** request, and can be used to express things like passwords, secrets or other sensitive data.
 * **`createOnlyProperties`**: A property in the `createOnlyProperties` cannot be specified in an **UPDATE** request, and can only be specified in a **CREATE** request. Another way to think about this - these are properties which are 'write-once', such as the [`Engine`](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-rds-database-instance.html#cfn-rds-dbinstance-engine) property for an [`AWS::RDS::DBInstance`](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-rds-database-instance.html) and if you wish to change such a property on a live resource, you should replace that resource by creating a new instance of the resource and terminating the old one. This is the behaviour CloudFormation follows for all properties documented as _'Update Requires: Replacement'_. An attempt to supply these properties to an **UPDATE** request will produce a runtime error from the handler.
-* **`deprecatedProperties`: A property in the `deprecatedProperties` is not guaranteed to be present in the response from a **READ** request. These fields will still be accepted as input to **CREATE** and **UPDATE** requests however they may be ignored, or converted to new API forms when outbound service calls are made. 
+* **`deprecatedProperties`: A property in the `deprecatedProperties` is not guaranteed to be present in the response from a **READ** request. These fields will still be accepted as input to **CREATE** and **UPDATE** requests however they may be ignored, or converted to new API forms when outbound service calls are made.
 
 #### Application
 
@@ -86,5 +86,4 @@ We have taken an opinion on certain aspects of the core JSON Schema and introduc
 
 ## License
 
-This library is licensed under the Apache 2.0 License. 
-
+This library is licensed under the Apache 2.0 License.

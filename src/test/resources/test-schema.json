@@ -1,27 +1,29 @@
 {
-  "typeName": "AWS::Test::TestModel",
-  "properties": {
-    "propertyA": {
-      "type": "string"
+    "typeName": "AWS::Test::TestModel",
+    "properties": {
+        "propertyA": {
+            "type": "string"
+        },
+        "propertyB": {
+            "type": "array",
+            "items": {
+                "type": "integer"
+            }
+        }
     },
-    "propertyB": {
-      "type": "array",
-      "items": {
-        "type": "integer"
-      }
-    }
-  },
-  "required": [
-    "propertyA"
-  ],
-  "createOnlyProperties": [
-    "/properties/propertyA"
-  ],
-  "readOnlyProperties": [
-    "/properties/propertyB"
-  ],
-  "identifiers": [
-    ["/properties/propertyA"]
-  ],
-  "additionalProperties": false
+    "required": [
+        "propertyA"
+    ],
+    "createOnlyProperties": [
+        "/properties/propertyA"
+    ],
+    "readOnlyProperties": [
+        "/properties/propertyB"
+    ],
+    "identifiers": [
+        [
+            "/properties/propertyA"
+        ]
+    ],
+    "additionalProperties": false
 }
