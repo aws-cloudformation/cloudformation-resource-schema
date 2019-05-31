@@ -1,14 +1,18 @@
 package com.aws.cfn.resource;
 
+import com.aws.cfn.resource.exceptions.ValidationException;
 import lombok.Getter;
 import org.everit.json.schema.JSONPointer;
 import org.everit.json.schema.ObjectSchema;
+import org.everit.json.schema.loader.SchemaLoader;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Getter
 public class ResourceTypeSchema extends ObjectSchema {
@@ -33,43 +37,83 @@ public class ResourceTypeSchema extends ObjectSchema {
             : null;
         this.unprocessedProperties.remove("sourceUrl");
 
-        this.typeName = this.unprocessedProperties.containsKey("typeName")
-            ? this.unprocessedProperties.get("typeName").toString()
-            : null;
+        // typeName is mandatory by schema
+        this.typeName = this.unprocessedProperties.get("typeName").toString();
         this.unprocessedProperties.remove("typeName");
 
-        if (this.unprocessedProperties.containsKey("createOnlyProperties")) {
-            ((ArrayList<?>) this.unprocessedProperties.get("createOnlyProperties"))
-                .forEach(p -> this.createOnlyProperties.add(new JSONPointer(p.toString())));
-        }
-        this.unprocessedProperties.remove("createOnlyProperties");
+        this.unprocessedProperties.computeIfPresent("createOnlyProperties", (k, v) -> {
+            ((ArrayList<?>) v).forEach(p -> this.createOnlyProperties.add(new JSONPointer(p.toString())));
+            return null;
+        });
 
-        if (this.unprocessedProperties.containsKey("deprecatedProperties")) {
-            ((ArrayList<?>) this.unprocessedProperties.get("deprecatedProperties"))
-                .forEach(p -> this.deprecatedProperties.add(new JSONPointer(p.toString())));
-        }
-        this.unprocessedProperties.remove("deprecatedProperties");
+        this.unprocessedProperties.computeIfPresent("deprecatedProperties", (k, v) -> {
+            ((ArrayList<?>) v).forEach(p -> this.deprecatedProperties.add(new JSONPointer(p.toString())));
+            return null;
+        });
 
-        if (this.unprocessedProperties.containsKey("identifiers")) {
-            ((ArrayList<?>) this.unprocessedProperties.get("identifiers")).forEach(p -> {
+        this.unprocessedProperties.computeIfPresent("identifiers", (k, v) -> {
+           ((ArrayList<?>) v).forEach(p -> {
                 final ArrayList<JSONPointer> identifiers = new ArrayList<>();
                 ((ArrayList<?>) p).forEach(pi -> identifiers.add(new JSONPointer(pi.toString())));
                 this.identifiers.add(identifiers);
             });
-        }
-        this.unprocessedProperties.remove("identifiers");
+           return null;
+        });
 
-        if (this.unprocessedProperties.containsKey("readOnlyProperties")) {
-            ((ArrayList<?>) this.unprocessedProperties.get("readOnlyProperties"))
-                .forEach(p -> this.readOnlyProperties.add(new JSONPointer(p.toString())));
-        }
-        this.unprocessedProperties.remove("readOnlyProperties");
+        this.unprocessedProperties.computeIfPresent("readOnlyProperties", (k, v) -> {
+            ((ArrayList<?>) v).forEach(p -> this.readOnlyProperties.add(new JSONPointer(p.toString())));
+            return null;
+        });
 
-        if (this.unprocessedProperties.containsKey("writeOnlyProperties")) {
-            ((ArrayList<?>) this.unprocessedProperties.get("writeOnlyProperties"))
-                .forEach(p -> this.writeOnlyProperties.add(new JSONPointer(p.toString())));
-        }
-        this.unprocessedProperties.remove("writeOnlyProperties");
+        this.unprocessedProperties.computeIfPresent("writeOnlyProperties", (k, v) -> {
+            ((ArrayList<?>) v).forEach(p -> this.writeOnlyProperties.add(new JSONPointer(p.toString())));
+            return null;
+        });
+    }
+
+    public static ResourceTypeSchema load(final JSONObject schemaJson) {
+        // first validate incoming resource schema against definition schema
+        Validator.builder().build().validateObject(
+            schemaJson,
+            ResourceTypeSchema.class.getResourceAsStream(SchemaValidator.DEFINITION_SCHEMA_PATH)
+        );
+
+        // now extract identifiers from resource schema
+        final SchemaLoader loader = SchemaLoader.builder()
+            .schemaJson(schemaJson)
+            // registers the local schema with the draft-07 url
+            .draftV7Support()
+            .build();
+
+        final ObjectSchema.Builder builder = (ObjectSchema.Builder) loader.load();
+
+        return new ResourceTypeSchema(builder);
+    }
+
+    public List<String> getCreateOnlyPropertiesAsStrings() throws ValidationException {
+        return this.createOnlyProperties.stream().map(JSONPointer::toString).collect(Collectors.toList());
+    }
+
+    public List<String> getDeprecatedPropertiesAsStrings() throws ValidationException {
+        return this.deprecatedProperties.stream().map(JSONPointer::toString).collect(Collectors.toList());
+    }
+
+    public List<List<String>> getIdentifiersAsStrings() throws ValidationException {
+        final List<List<String>> identifiers = new ArrayList<>();
+        this.identifiers.forEach(i ->
+            identifiers.add(
+                i.stream().map(Object::toString).collect(Collectors.toList())
+            )
+        );
+        return identifiers;
+    }
+
+    public List<String> getReadOnlyPropertiesAsStrings() throws ValidationException {
+        return this.readOnlyProperties.stream().map(JSONPointer::toString).collect(Collectors.toList());
+    }
+
+    public List<String> getWriteOnlyPropertiesAsStrings() throws ValidationException {
+        return this.writeOnlyProperties.stream().map(JSONPointer::toString).collect(Collectors.toList());
     }
 
     @Override

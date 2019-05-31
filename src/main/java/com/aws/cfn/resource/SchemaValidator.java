@@ -8,6 +8,8 @@ import java.io.InputStream;
 
 public interface SchemaValidator {
 
+    String DEFINITION_SCHEMA_PATH = "/schema/provider.definition.schema.v1.json";
+
     /**
      * Perform JSON Schema validation for the input model against the specified schema
      * @param modelObject   JSON-encoded resource model

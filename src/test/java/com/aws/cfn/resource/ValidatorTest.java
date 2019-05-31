@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
 public class ValidatorTest {
     private static final String TEST_SCHEMA_PATH = "/test-schema.json";
+    private static final String EMPTY_SCHEMA_PATH = "/empty-schema.json";
     private static final String TYPE_NAME_KEY = "typeName";
     private static final String PROPERTIES_KEY = "properties";
     private static final String DESCRIPTION_KEY = "description";
