@@ -1,6 +1,6 @@
-package com.aws.cfn.resource;
+package com.amazonaws.cloudformation.resource;
 
-import com.aws.cfn.resource.exceptions.ValidationException;
+import com.amazonaws.cloudformation.resource.exceptions.ValidationException;
 import lombok.Getter;
 import org.everit.json.schema.JSONPointer;
 import org.everit.json.schema.ObjectSchema;
