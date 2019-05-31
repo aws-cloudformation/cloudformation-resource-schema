@@ -10,16 +10,26 @@
             "items": {
                 "type": "integer"
             }
+        },
+        "propertyC": {
+            "type": "string"
+        },
+        "propertyD": {
+            "type": "boolean"
         }
     },
     "required": [
         "propertyA"
     ],
     "createOnlyProperties": [
-        "/properties/propertyA"
+        "/properties/propertyA",
+        "/properties/propertyD"
     ],
     "readOnlyProperties": [
         "/properties/propertyB"
+    ],
+    "writeOnlyProperties": [
+        "/properties/propertyC"
     ],
     "identifiers": [
         [
