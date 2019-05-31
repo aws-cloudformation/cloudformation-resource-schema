@@ -1,9 +1,12 @@
 package com.aws.cfn.resource.exceptions;
 
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@Getter
 public class ValidationException extends RuntimeException {
     private static final long serialVersionUID = 42L;
 
@@ -17,14 +20,14 @@ public class ValidationException extends RuntimeException {
         this(message, Collections.emptyList(), keyword, schemaLocation);
     }
 
-    public ValidationException(org.everit.json.schema.ValidationException validationException) {
+    public ValidationException(final org.everit.json.schema.ValidationException validationException) {
        this(validationException.getMessage(),
            Collections.emptyList(),
            validationException.getKeyword(),
            validationException.getSchemaLocation());
 
         if (validationException.getCausingExceptions() != null) {
-            for (org.everit.json.schema.ValidationException e : validationException.getCausingExceptions()) {
+            for (final org.everit.json.schema.ValidationException e : validationException.getCausingExceptions()) {
                 this.causingExceptions.add(new ValidationException(e));
             }
         }
@@ -35,21 +38,8 @@ public class ValidationException extends RuntimeException {
                         final String keyword,
                         final String schemaLocation) {
         super(message);
-        this.causingExceptions =  new ArrayList<>(causingExceptions);
+        this.causingExceptions = new ArrayList<>(causingExceptions);
         this.keyword = keyword;
         this.schemaLocation = schemaLocation;
     }
-
-    public List<ValidationException> getCausingExceptions() {
-        return this.causingExceptions;
-    }
-
-    public String getKeyword() {
-        return this.keyword;
-    }
-
-    public String getSchemaLocation() {
-        return this.schemaLocation;
-    }
-
 }

@@ -14,7 +14,7 @@ public interface SchemaValidator {
      * @param schemaStream  The JSON schema to validate the model against
      * @throws ValidationException  Thrown for any schema validation errors
      */
-    void validateObject(final JSONObject modelObject,
-                        final InputStream schemaStream) throws ValidationException;
+    void validateObject(JSONObject modelObject,
+                        InputStream schemaStream) throws ValidationException;
 
 }

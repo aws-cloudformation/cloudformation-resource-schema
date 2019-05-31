@@ -116,6 +116,6 @@ out/
 # Maven outputs
 .classpath
 
-# IntelliJ 
+# IntelliJ
 .settings
 .project

@@ -3,14 +3,14 @@ package com.aws.cfn.resource;
 import com.aws.cfn.resource.exceptions.ValidationException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.junit.MatcherAssert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
 public class ValidatorTest {
     private static final String TEST_SCHEMA_PATH = "/test-schema.json";
@@ -18,12 +18,17 @@ public class ValidatorTest {
     private static final String PROPERTIES_KEY = "properties";
     private static final String DESCRIPTION_KEY = "description";
     private static final String EXAMPLE_TYPE_NAME = "Organization::Service::Resource";
-    private static final String EXAMPLE_DESCRIPTION = "description";
+    private static final String EXAMPLE_DESCRIPTION = "Resource provider descriptions are important for customers to know what the resource is expected to do.";
+
+    private Validator validator;
+
+    @BeforeEach
+    public void setUp() {
+        validator = new Validator();
+    }
 
     @Test
     public void validateObject_validObject_shouldNotThrow() {
-        final Validator validator = new Validator();
-
         final JSONObject object = new JSONObject()
                 .put("propertyA", "abc")
                 .put("propertyB", Arrays.asList(1, 2, 3));
@@ -36,90 +41,65 @@ public class ValidatorTest {
 
     @Test
     public void validateObject_invalidObjectMissingRequiredProperties_shouldThrow() {
-        final Validator validator = new Validator();
-
         final JSONObject object = new JSONObject()
                 .put("propertyB", Arrays.asList(1, 2, 3));
 
-        try {
-            validator.validateObject(
-                    object,
-                    this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)
-            );
-            fail("Expected ValidationException not thrown");
-        } catch (final ValidationException e) {
-            assertThat(e.getCausingExceptions(), hasSize(0));
-            assertThat(
-                e.getMessage(),
-                is("#: required key [propertyA] not found")
-            );
-            assertThat(
-                e.getSchemaLocation(),
-                is("#")
-            );
-        }
+        final ValidationException e = catchThrowableOfType(
+                () -> validator.validateObject(
+                        object,
+                        this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)
+                ),
+                ValidationException.class
+        );
+
+        assertThat(e).hasNoCause().hasMessageContaining("propertyA");
+        assertThat(e.getCausingExceptions()).isEmpty();
+        assertThat(e.getSchemaLocation()).isEqualTo("#");
     }
 
     @Test
     public void validateObject_invalidObjectAdditionalProperties_shouldThrow() {
-        final Validator validator = new Validator();
-
         final JSONObject object = new JSONObject()
                 .put("propertyA", "abc")
                 .put("propertyB", Arrays.asList(1, 2, 3))
                 .put("propertyC", "notpartofschema");
 
-        try {
-            validator.validateObject(
-                    object,
-                    this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)
-            );
-            fail("Expected ValidationException not thrown");
-        } catch (final ValidationException e) {
-            assertThat(e.getCausingExceptions(), hasSize(0));
-            assertThat(
-                e.getMessage(),
-                is("#: extraneous key [propertyC] is not permitted")
-            );
-            assertThat(
-                e.getSchemaLocation(),
-                is("#")
-            );
-        }
+        final ValidationException e = catchThrowableOfType(
+                () -> validator.validateObject(
+                        object,
+                        this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)
+                ),
+                ValidationException.class
+        );
+
+        assertThat(e).hasNoCause().hasMessageContaining("propertyC");
+        assertThat(e.getCausingExceptions()).isEmpty();
+        assertThat(e.getSchemaLocation()).isEqualTo("#");
     }
 
     @Test
     public void validateObject_invalidObjectMultiple_shouldThrow() {
-        final Validator validator = new Validator();
-
         final JSONObject object = new JSONObject()
                 .put("propertyA", 123)
                 .put("propertyB", Arrays.asList(1, 2, 3))
                 .put("propertyC", "notpartofschema")
                 .put("propertyD", "notpartofschema");
 
-        try {
-            validator.validateObject(
-                    object,
-                    this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)
-            );
-            fail("Expected ValidationException not thrown");
-        } catch (final ValidationException e) {
-            assertThat(e.getCausingExceptions(), hasSize(3));
-            assertThat(
-                e.getMessage(),
-                is("#: 3 schema violations found")
-            );
-            assertThat(
-                e.getSchemaLocation(),
-                is("#")
-            );
-        }
+        final ValidationException e = catchThrowableOfType(
+                () -> validator.validateObject(
+                        object,
+                        this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)
+                ),
+                ValidationException.class
+        );
+
+        assertThat(e.getCausingExceptions()).hasSize(3);
+        assertThat(e).hasMessage("#: 3 schema violations found");
+        assertThat(e.getSchemaLocation()).isEqualTo("#");
     }
 
     @Test
     public void validateDefinition_validMinimalDefinition_shouldNotThrow() {
-        final Validator validator = new Validator();
         final JSONObject definition = new JSONObject()
                 .put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
                 .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION)
@@ -129,60 +109,44 @@ public class ValidatorTest {
 
     @Test
     public void validateDefinition_validExampleDefinition_shouldNotThrow() {
-        final Validator validator = new Validator();
         final JSONObject definition = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
         validator.validateResourceDefinition(definition);
     }
 
     @Test
     public void validateDefinition_invalidDefinitionNoPropertiesKey_shouldThrow() {
-        final Validator validator = new Validator();
         final JSONObject definition = new JSONObject()
                 .put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
                 .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION);
-        try {
-            validator.validateResourceDefinition(definition);
-        } catch (final ValidationException e) {
-            assertThat(e.getCausingExceptions(), hasSize(0));
-            assertThat(
-                    e.getMessage(),
-                    is("#: required key [properties] not found")
-            );
-        }
+
+        assertThatExceptionOfType(ValidationException.class)
+                .isThrownBy(() -> validator.validateResourceDefinition(definition))
+                .withNoCause()
+                .withMessage("#: required key [" + PROPERTIES_KEY + "] not found");
     }
 
     @Test
     public void validateDefinition_invalidDefinitionNoDescriptionKey_shouldThrow() {
-        final Validator validator = new Validator();
         final JSONObject definition = new JSONObject()
                 .put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
                 .put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject()));
-        try {
-            validator.validateResourceDefinition(definition);
-        } catch (final ValidationException e) {
-            assertThat(e.getCausingExceptions(), hasSize(0));
-            assertThat(
-                    e.getMessage(),
-                    is("#: required key [description] not found")
-            );
-        }
+
+        assertThatExceptionOfType(ValidationException.class)
+                .isThrownBy(() -> validator.validateResourceDefinition(definition))
+                .withNoCause()
+                .withMessage("#: required key [" + DESCRIPTION_KEY + "] not found");
     }
 
     @Test
     public void validateDefinition_invalidDefinitionNoProperties_shouldThrow() {
-        final Validator validator = new Validator();
         final JSONObject definition = new JSONObject()
                 .put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
                 .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION)
                 .put(PROPERTIES_KEY, new JSONObject());
-        try {
-            validator.validateResourceDefinition(definition);
-        } catch (final ValidationException e) {
-            assertThat(e.getCausingExceptions(), hasSize(0));
-            assertThat(
-                    e.getMessage(),
-                    is("#/properties: minimum size: [1], found: [0]")
-            );
-        }
+
+        assertThatExceptionOfType(ValidationException.class)
+                .isThrownBy(() -> validator.validateResourceDefinition(definition))
+                .withNoCause()
+                .withMessage("#/properties: minimum size: [1], found: [0]");
     }
 }
