@@ -23,7 +23,7 @@ public class ResourceTypeSchemaTest {
         assertThat(schema.getDescription()).isEqualTo("A test schema for unit tests.");
         assertThat(schema.getSourceUrl()).isEqualTo("my-repo.git");
         assertThat(schema.getTypeName()).isEqualTo("AWS::Test::TestModel");
-        assertThat(schema.getUnprocessedProperties()).hasSize(0);
+        assertThat(schema.getUnprocessedProperties()).isEmpty();
     }
 
     @Test
@@ -33,9 +33,9 @@ public class ResourceTypeSchemaTest {
 
         List<String> result = schema.getCreateOnlyPropertiesAsStrings();
 
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0)).isEqualTo("/properties/propertyA");
-        assertThat(result.get(1)).isEqualTo("/properties/propertyD");
+        assertThat(result).containsExactly(
+            "/properties/propertyA",
+            "/properties/propertyD");
     }
 
     @Test
@@ -44,8 +44,7 @@ public class ResourceTypeSchemaTest {
         final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
 
         List<String> result = schema.getDeprecatedPropertiesAsStrings();
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0)).isEqualTo("/properties/propertyC");
+        assertThat(result).containsExactly("/properties/propertyC");
     }
 
     @Test
@@ -55,8 +54,7 @@ public class ResourceTypeSchemaTest {
 
         List<List<String>> result = schema.getIdentifiersAsStrings();
         assertThat(result).hasSize(1);
-        assertThat(result.get(0)).hasSize(1);
-        assertThat(result.get(0).get(0)).isEqualTo("/properties/propertyA");
+        assertThat(result.get(0)).containsExactly("/properties/propertyA");
     }
 
     @Test
@@ -65,8 +63,7 @@ public class ResourceTypeSchemaTest {
         final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
 
         List<String> result = schema.getReadOnlyPropertiesAsStrings();
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0)).isEqualTo("/properties/propertyB");
+        assertThat(result).containsExactly("/properties/propertyB");
     }
 
     @Test
@@ -75,8 +72,7 @@ public class ResourceTypeSchemaTest {
         final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
 
         List<String> result = schema.getWriteOnlyPropertiesAsStrings();
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0)).isEqualTo("/properties/propertyC");
+        assertThat(result).containsExactly("/properties/propertyC");
     }
 
     @Test
@@ -97,11 +93,11 @@ public class ResourceTypeSchemaTest {
         assertThat(schema.getDescription()).isEqualTo("A test schema for unit tests.");
         assertThat(schema.getSourceUrl()).isNull();
         assertThat(schema.getTypeName()).isEqualTo("AWS::Test::TestModel");
-        assertThat(schema.getUnprocessedProperties()).hasSize(0);
-        assertThat(schema.getCreateOnlyPropertiesAsStrings()).hasSize(0);
-        assertThat(schema.getDeprecatedPropertiesAsStrings()).hasSize(0);
-        assertThat(schema.getIdentifiersAsStrings()).hasSize(0);
-        assertThat(schema.getReadOnlyPropertiesAsStrings()).hasSize(0);
-        assertThat(schema.getWriteOnlyPropertiesAsStrings()).hasSize(0);
+        assertThat(schema.getUnprocessedProperties()).isEmpty();
+        assertThat(schema.getCreateOnlyPropertiesAsStrings()).isEmpty();
+        assertThat(schema.getDeprecatedPropertiesAsStrings()).isEmpty();
+        assertThat(schema.getIdentifiersAsStrings()).isEmpty();
+        assertThat(schema.getReadOnlyPropertiesAsStrings()).isEmpty();
+        assertThat(schema.getWriteOnlyPropertiesAsStrings()).isEmpty();
     }
 }
