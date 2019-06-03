@@ -1,6 +1,6 @@
-package com.aws.cfn.resource;
+package com.amazonaws.cloudformation.resource;
 
-import com.aws.cfn.resource.exceptions.ValidationException;
+import com.amazonaws.cloudformation.resource.exceptions.ValidationException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.junit.jupiter.api.BeforeEach;

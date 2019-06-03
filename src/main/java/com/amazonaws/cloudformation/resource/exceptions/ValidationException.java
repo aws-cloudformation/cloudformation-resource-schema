@@ -1,4 +1,4 @@
-package com.aws.cfn.resource.exceptions;
+package com.amazonaws.cloudformation.resource.exceptions;
 
 import lombok.Getter;
 
