@@ -1,6 +1,7 @@
 {
     "typeName": "AWS::Test::TestModel",
     "description": "A test schema for unit tests.",
+    "sourceUrl": "my-repo.git",
     "properties": {
         "propertyA": {
             "type": "string"
@@ -10,16 +11,29 @@
             "items": {
                 "type": "integer"
             }
+        },
+        "propertyC": {
+            "type": "string"
+        },
+        "propertyD": {
+            "type": "boolean"
         }
     },
     "required": [
         "propertyA"
     ],
     "createOnlyProperties": [
-        "/properties/propertyA"
+        "/properties/propertyA",
+        "/properties/propertyD"
+    ],
+    "deprecatedProperties": [
+        "/properties/propertyC"
     ],
     "readOnlyProperties": [
         "/properties/propertyB"
+    ],
+    "writeOnlyProperties": [
+        "/properties/propertyC"
     ],
     "identifiers": [
         [

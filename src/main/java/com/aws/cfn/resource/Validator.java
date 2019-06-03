@@ -1,6 +1,7 @@
 package com.aws.cfn.resource;
 
 import com.aws.cfn.resource.exceptions.ValidationException;
+import lombok.Builder;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
@@ -18,6 +19,7 @@ public class Validator implements SchemaValidator {
     private final InputStream definitionSchemaStream;
     private final JSONObject jsonSchemaObject;
 
+    @Builder
     public Validator() {
         // local copy of the draft-07 schema used to avoid remote reference calls
         jsonSchemaObject = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(JSON_SCHEMA_PATH)));

@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
 public class ValidatorTest {
     private static final String TEST_SCHEMA_PATH = "/test-schema.json";
+    private static final String EMPTY_SCHEMA_PATH = "/empty-schema.json";
     private static final String TYPE_NAME_KEY = "typeName";
     private static final String PROPERTIES_KEY = "properties";
     private static final String DESCRIPTION_KEY = "description";
@@ -62,7 +63,7 @@ public class ValidatorTest {
         final JSONObject object = new JSONObject()
                 .put("propertyA", "abc")
                 .put("propertyB", Arrays.asList(1, 2, 3))
-                .put("propertyC", "notpartofschema");
+                .put("propertyX", "notpartofschema");
 
         final ValidationException e = catchThrowableOfType(
                 () -> validator.validateObject(
@@ -72,7 +73,7 @@ public class ValidatorTest {
                 ValidationException.class
         );
 
-        assertThat(e).hasNoCause().hasMessageContaining("propertyC");
+        assertThat(e).hasNoCause().hasMessageContaining("propertyX");
         assertThat(e.getCausingExceptions()).isEmpty();
         assertThat(e.getSchemaLocation()).isEqualTo("#");
     }
@@ -82,8 +83,8 @@ public class ValidatorTest {
         final JSONObject object = new JSONObject()
                 .put("propertyA", 123)
                 .put("propertyB", Arrays.asList(1, 2, 3))
-                .put("propertyC", "notpartofschema")
-                .put("propertyD", "notpartofschema");
+                .put("propertyX", "notpartofschema")
+                .put("propertyY", "notpartofschema");
 
         final ValidationException e = catchThrowableOfType(
                 () -> validator.validateObject(
