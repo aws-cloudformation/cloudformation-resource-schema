@@ -294,8 +294,12 @@
             "description": "A list of JSON pointers to properties that have been deprecated by the underlying service provider. These properties are still accepted in create & update operations, however they may be ignored, or converted to a consistent model on application. Deprecated properties are not guaranteed to be present in read paths.",
             "$ref": "#/definitions/jsonPointerArray"
         },
-        "identifiers": {
-            "description": "A list of identifiers. An identifier is a list of JSON pointers to properties that uniquely identify the resource. An identifier can be a single or multiple properties.",
+        "primaryIdentifier": {
+            "description": "A required identifier which uniquely identifies an instance of this resource type. An identifier is a non-zero-length list of JSON pointers to properties that form a single key. An identifier can be a single or multiple properties to support composite-key identifiers.",
+            "$ref": "#/definitions/jsonPointerArray"
+        },
+        "additionalIdentifiers": {
+            "description": "An optional list of supplementary identifiers, each of which uniquely identifies an instance of this resource type. An identifier is a non-zero-length list of JSON pointers to properties that form a single key. An identifier can be a single or multiple properties to support composite-key identifiers.",
             "type": "array",
             "minItems": 1,
             "items": {
@@ -318,7 +322,8 @@
     "required": [
         "typeName",
         "properties",
-        "description"
+        "description",
+        "primaryIdentifier"
     ],
     "additionalProperties": false
 }

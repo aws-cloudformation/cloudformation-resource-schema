@@ -6,5 +6,8 @@
             "type": "boolean"
         }
     },
+    "primaryIdentifier": [
+        "/properties/PropertyA"
+    ],
     "additionalProperties": false
 }

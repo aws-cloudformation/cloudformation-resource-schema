@@ -60,9 +60,7 @@
     "readOnlyProperties": [
         "/properties/tps_code"
     ],
-    "identifiers": [
-        [
-            "/properties/tps_code"
-        ]
+    "primaryIdentifiers": [
+        "/properties/tps_code"
     ]
 }
