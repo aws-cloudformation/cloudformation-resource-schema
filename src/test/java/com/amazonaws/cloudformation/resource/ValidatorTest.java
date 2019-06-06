@@ -14,7 +14,6 @@ import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
 public class ValidatorTest {
     private static final String TEST_SCHEMA_PATH = "/test-schema.json";
-    private static final String EMPTY_SCHEMA_PATH = "/empty-schema.json";
     private static final String TYPE_NAME_KEY = "typeName";
     private static final String PROPERTIES_KEY = "properties";
     private static final String DESCRIPTION_KEY = "description";
@@ -149,5 +148,28 @@ public class ValidatorTest {
                 .isThrownBy(() -> validator.validateResourceDefinition(definition))
                 .withNoCause()
                 .withMessage("#/properties: minimum size: [1], found: [0]");
+    }
+
+    @Test
+    public void validateDefinition_invalidHandlerSection_shouldThrow() {
+
+        final JSONObject definitiion = new JSONObject(
+            new JSONTokener(this.getClass().getResourceAsStream("/invalid-handlers.json"))
+        );
+
+        assertThatExceptionOfType(ValidationException.class)
+            .isThrownBy(() -> validator.validateResourceDefinition(definitiion))
+            .withNoCause()
+            .withMessage("#/handlers/read: #: only 1 subschema matches out of 2");
+    }
+
+    @Test
+    public void validateDefinition_validHandlerSection_shouldNotThrow() {
+
+        final JSONObject definitiion = new JSONObject(
+            new JSONTokener(this.getClass().getResourceAsStream("/valid-with-handlers.json"))
+        );
+
+        validator.validateResourceDefinition(definitiion);
     }
 }
