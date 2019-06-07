@@ -10,7 +10,7 @@ Numerous [examples](https://github.com/aws-cloudformation/aws-cloudformation-res
 
 ### Overview
 
-The _meta-schema_ which controls and validates your resource type definition is called the [Resource Provider Definition Schema](https://github.com/awslabs/aws-cloudformation-rpdk/blob/master/src/rpdk/data/schema/provider.definition.schema.v1.json). It is fully compliant with [draft-07](https://json-schema.org/draft-07/json-schema-release-notes.html) of [JSON Schema](https://json-schema.org/) and many IDEs including [IntelliJ](https://www.jetbrains.com/idea/), [PyCharm](https://www.jetbrains.com/pycharm/) and [Visual Studio Code](https://code.visualstudio.com/) come with built-in or plugin-based support for code-completion and syntax validation while editing documents for JSON Schema compliance. Comprehensive [documentation](https://json-schema.org/understanding-json-schema/reference/) for JSON Schema exists and can answer many questions around correct usage.
+The _meta-schema_ which controls and validates your resource type definition is called the [Resource Provider Definition Schema](https://github.com/aws-cloudformation/aws-cloudformation-rpdk/blob/master/src/rpdk/data/schema/provider.definition.schema.v1.json). It is fully compliant with [draft-07](https://json-schema.org/draft-07/json-schema-release-notes.html) of [JSON Schema](https://json-schema.org/) and many IDEs including [IntelliJ](https://www.jetbrains.com/idea/), [PyCharm](https://www.jetbrains.com/pycharm/) and [Visual Studio Code](https://code.visualstudio.com/) come with built-in or plugin-based support for code-completion and syntax validation while editing documents for JSON Schema compliance. Comprehensive [documentation](https://json-schema.org/understanding-json-schema/reference/) for JSON Schema exists and can answer many questions around correct usage.
 
 To get started, you will author a _specification_ for your resource type in a JSON document, which must be compliant with this _meta-schema_. To make authoring resource _specifications_ simpler, we have constrained the scope of the full JSON Schema standard to apply opinions around how certain validations can be expressed and encourage consistent modelling for all resource schemas. These opinions are codified in the _meta-schema_ and described in this document.
 
@@ -27,15 +27,16 @@ The _shape_ of your resource defines the properties for that resource and how th
 
 Certain properties of a resource are _semantic_ and have special meaning when used in different contexts. For example, a property of a resource may be `readOnly` when read back for state changes - but can be specified in a settable context when used as the target of a `$ref` from a related resource. Because of this semantic difference in how this property metadata should be interpreted, certain aspects of the resource definition are applied to the parent resource definition, rather than at a property level. Those elements are;
 
-* **`identifiers`**: Each property listed in the `identifiers` section must be able to be used to uniquely identify the resource. These properties can be independently provided as keys to a **READ** or **DELETE** request. These properties are usually also marked as `readOnlyProperties` and are only returned from **READ** and **LIST** operations.
+* **`primaryIdentifier`**: Must be either a single property, or a set of properties which can be used to uniquely identify the resource. If multiple properties are specified, these are treated as a **composite key** and combined into a single logical identifier. You would use this modelling to express contained identity (such as a named service within a container). This property can be independently provided as keys to a **READ** or **DELETE** request and **MUST** be supported as the only input to those operations. These properties are usually also marked as `readOnlyProperties` and **MUST** be returned from **READ** and **LIST** operations.
+* **`additionalIdentifiers`**: Each property listed in the `additionalIdentifiers` section must be able to be used to uniquely identify the resource. These properties can be independently provided as keys to a **READ** or **DELETE** request and **MUST** be supported as the only input to those operations. These properties are usually also marked as `readOnlyProperties` and **MUST** be returned from **READ** and **LIST** operations. A provider is not required to support `additionalIdentifiers`; doing so allows for other unique keys to be used to **READ** resources.
 * **`readOnlyProperties`**: A property in the `readOnlyProperties` list cannot be specified in a **CREATE** or **UPDATE** request, and attempting to do so will produce a runtime error from the handler.
 * **`writeOnlyProperties`**: A property in the `writeOnlyProperties` cannot be returned in a **READ** or **LIST** request, and can be used to express things like passwords, secrets or other sensitive data.
 * **`createOnlyProperties`**: A property in the `createOnlyProperties` cannot be specified in an **UPDATE** request, and can only be specified in a **CREATE** request. Another way to think about this - these are properties which are 'write-once', such as the [`Engine`](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-rds-database-instance.html#cfn-rds-dbinstance-engine) property for an [`AWS::RDS::DBInstance`](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-rds-database-instance.html) and if you wish to change such a property on a live resource, you should replace that resource by creating a new instance of the resource and terminating the old one. This is the behaviour CloudFormation follows for all properties documented as _'Update Requires: Replacement'_. An attempt to supply these properties to an **UPDATE** request will produce a runtime error from the handler.
-* **`deprecatedProperties`: A property in the `deprecatedProperties` is not guaranteed to be present in the response from a **READ** request. These fields will still be accepted as input to **CREATE** and **UPDATE** requests however they may be ignored, or converted to new API forms when outbound service calls are made.
+* **`deprecatedProperties`**: A property in the `deprecatedProperties` is not guaranteed to be present in the response from a **READ** request. These fields will still be accepted as input to **CREATE** and **UPDATE** requests however they may be ignored, or converted to new API forms when outbound service calls are made.
 
 #### Application
 
-When defining resource semantics like `createOnly`, `identifiers` you are expected to use a `$ref` to a property definition in the same resource document. This is not enforced directly by the meta-schema but is enforced at runtime and can be checked with the RPDK CLI `validate` command.
+When defining resource semantics like `createOnlyProperties`, `primaryIdentifier` you are expected to use a JSON Pointer to a property definition in the same resource document. Schemas you author can be checked with the CFN CLI `validate` command.
 
 The following (truncated) example shows some of the semantic definitions for an `AWS::S3::Bucket` resource type;
 
@@ -58,9 +59,12 @@ The following (truncated) example shows some of the semantic definitions for an 
     "readOnlyProperties": [
         "/properties/Arn"
     ],
-    "identifiers": [
-        [ "/properties/Arn" ],
-        [ "/properties/BucketName" ]
+    "primaryIdentifier": [
+        "/properties/BucketName"
+    ],
+    "additionalIdentifiers": [
+        "/properties/Arn",
+        "/properties/WebsiteURL"
     ]
 }
 ```

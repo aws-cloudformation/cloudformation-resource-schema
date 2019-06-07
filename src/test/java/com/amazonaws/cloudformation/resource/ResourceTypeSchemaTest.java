@@ -48,13 +48,22 @@ public class ResourceTypeSchemaTest {
     }
 
     @Test
-    public void getIdentifiers() {
+    public void getPrimaryIdentifier() {
         JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
         final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
 
-        List<List<String>> result = schema.getIdentifiersAsStrings();
+        List<String> result = schema.getPrimaryIdentifierAsStrings();
+        assertThat(result).containsExactly("/properties/propertyA");
+    }
+
+    @Test
+    public void getAdditionalIdentifiers() {
+        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
+        final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
+
+        List<List<String>> result = schema.getAdditionalIdentifiersAsStrings();
         assertThat(result).hasSize(1);
-        assertThat(result.get(0)).containsExactly("/properties/propertyA");
+        assertThat(result.get(0)).containsExactly("/properties/propertyB");
     }
 
     @Test
@@ -96,7 +105,8 @@ public class ResourceTypeSchemaTest {
         assertThat(schema.getUnprocessedProperties()).isEmpty();
         assertThat(schema.getCreateOnlyPropertiesAsStrings()).isEmpty();
         assertThat(schema.getDeprecatedPropertiesAsStrings()).isEmpty();
-        assertThat(schema.getIdentifiersAsStrings()).isEmpty();
+        assertThat(schema.getPrimaryIdentifierAsStrings()).containsExactly("/properties/PropertyA");
+        assertThat(schema.getAdditionalIdentifiersAsStrings()).isEmpty();
         assertThat(schema.getReadOnlyPropertiesAsStrings()).isEmpty();
         assertThat(schema.getWriteOnlyPropertiesAsStrings()).isEmpty();
     }

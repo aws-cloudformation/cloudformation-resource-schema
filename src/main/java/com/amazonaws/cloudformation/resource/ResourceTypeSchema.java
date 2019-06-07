@@ -23,7 +23,8 @@ public class ResourceTypeSchema extends ObjectSchema {
     private final String typeName;
     private final List<JSONPointer> createOnlyProperties = new ArrayList<>();
     private final List<JSONPointer> deprecatedProperties = new ArrayList<>();
-    private final List<List<JSONPointer>> identifiers = new ArrayList<>();
+    private final List<JSONPointer> primaryIdentifier = new ArrayList<>();
+    private final List<List<JSONPointer>> additionalIdentifiers = new ArrayList<>();
     private final List<JSONPointer> readOnlyProperties = new ArrayList<>();
     private final List<JSONPointer> writeOnlyProperties = new ArrayList<>();
 
@@ -51,11 +52,16 @@ public class ResourceTypeSchema extends ObjectSchema {
             return null;
         });
 
-        this.unprocessedProperties.computeIfPresent("identifiers", (k, v) -> {
+        this.unprocessedProperties.computeIfPresent("primaryIdentifier", (k, v) -> {
+            ((ArrayList<?>) v).forEach(p -> this.primaryIdentifier.add(new JSONPointer(p.toString())));
+            return null;
+        });
+
+        this.unprocessedProperties.computeIfPresent("additionalIdentifiers", (k, v) -> {
            ((ArrayList<?>) v).forEach(p -> {
                 final ArrayList<JSONPointer> identifiers = new ArrayList<>();
                 ((ArrayList<?>) p).forEach(pi -> identifiers.add(new JSONPointer(pi.toString())));
-                this.identifiers.add(identifiers);
+                this.additionalIdentifiers.add(identifiers);
             });
            return null;
         });
@@ -98,9 +104,13 @@ public class ResourceTypeSchema extends ObjectSchema {
         return this.deprecatedProperties.stream().map(JSONPointer::toString).collect(Collectors.toList());
     }
 
-    public List<List<String>> getIdentifiersAsStrings() throws ValidationException {
+    public List<String> getPrimaryIdentifierAsStrings() throws ValidationException {
+        return this.primaryIdentifier.stream().map(JSONPointer::toString).collect(Collectors.toList());
+    }
+
+    public List<List<String>> getAdditionalIdentifiersAsStrings() throws ValidationException {
         final List<List<String>> identifiers = new ArrayList<>();
-        this.identifiers.forEach(i ->
+        this.additionalIdentifiers.forEach(i ->
             identifiers.add(
                 i.stream().map(Object::toString).collect(Collectors.toList())
             )

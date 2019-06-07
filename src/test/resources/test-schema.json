@@ -35,9 +35,12 @@
     "writeOnlyProperties": [
         "/properties/propertyC"
     ],
-    "identifiers": [
+    "primaryIdentifier": [
+        "/properties/propertyA"
+    ],
+    "additionalIdentifiers": [
         [
-            "/properties/propertyA"
+            "/properties/propertyB"
         ]
     ],
     "additionalProperties": false

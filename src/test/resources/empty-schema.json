@@ -2,5 +2,8 @@
     "typeName": "AWS::Test::TestModel",
     "description": "A test schema for unit tests.",
     "properties": {},
+    "primaryIdentifier": [
+        "/properties/NONE"
+    ],
     "additionalProperties": false
 }
