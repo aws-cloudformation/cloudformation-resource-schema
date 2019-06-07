@@ -65,6 +65,42 @@ The following (truncated) example shows some of the semantic definitions for an 
 }
 ```
 
+### Relationships
+
+Relationships between resources can be expressed through the use of the `$ref` keyword when defining a property schema. The use of the `$ref` keyword to establish relationships is described in [JSON Schema documentation](https://cswr.github.io/JsonSchema/spec/definitions_references/#reference-specification).
+
+#### Example
+
+The following example shows a property relationship between an `AWS::EC2::Subnet.VpcId` and an `AWS::EC2::VPC.Name`. The schema for the 'remote' type (`AWS::EC2::VPC`) is used to validate the content of the 'local' type (`AWS::EC2::Subnet`) and can be inferred as a dependency from the local to the remote type.
+
+```
+{
+    "$id": "aws.ec2.subnet.v1.json",
+    "typeName": "AWS::EC2::Subnet",
+    "definitions": { ... },
+    "properties": {
+        { ... }
+        "VpcId": {
+            "$ref": "http://cloudformation.amazonaws.com/type/resource/aws/ec2/vpc/properties/Name"
+        }
+    }
+}
+```
+
+```
+{
+    "$id": "aws.ec2.vpc.v1.json",
+    "typeName": "AWS::EC2::VPC",
+    "definitions": { ... },
+    "properties": {
+        "Name": {
+            "type": "string",
+            "pattern": "$vpc-[0-9]{8,10}^"
+        }
+    }
+}
+```
+
 ## Divergence From JSON Schema
 
 ### Changes
