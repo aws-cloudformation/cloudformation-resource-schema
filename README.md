@@ -67,7 +67,7 @@ The following (truncated) example shows some of the semantic definitions for an 
 
 ### Relationships
 
-Relationships between resources can be expressed through the use of the `$ref` keywork when defining a property schema. The use of the `$ref` keyword to establish relationships is described in [JSON Schema documentation](https://cswr.github.io/JsonSchema/spec/definitions_references/#reference-specification).
+Relationships between resources can be expressed through the use of the `$ref` keyword when defining a property schema. The use of the `$ref` keyword to establish relationships is described in [JSON Schema documentation](https://cswr.github.io/JsonSchema/spec/definitions_references/#reference-specification).
 
 #### Example
 
