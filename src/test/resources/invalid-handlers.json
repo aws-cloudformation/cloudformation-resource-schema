@@ -6,6 +6,9 @@
             "type": "array"
         }
     },
+    "primaryIdentifier": [
+        "/property1"
+    ],
     "handlers": {
         "create": {
             "permissions": [

@@ -6,3 +6,4 @@ phases:
   build:
     commands:
       - pre-commit run --all-files
+      - mvn clean verify
