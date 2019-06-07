@@ -1,0 +1,19 @@
+{
+    "typeName": "AWS::Valid::TypeName",
+    "description": "A test schema for unit tests.",
+    "properties": {
+        "property1": {
+            "type": "array"
+        }
+    },
+    "handlers": {
+        "create": {
+            "permissions": [
+                "test:permission"
+            ]
+        },
+        "read": {
+            "description": "test"
+        }
+    }
+}

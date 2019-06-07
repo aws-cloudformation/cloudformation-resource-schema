@@ -168,4 +168,27 @@ public class ValidatorTest {
             .withNoCause()
             .withMessage("#: required key [primaryIdentifier] not found");
     }
+
+    @Test
+    public void validateDefinition_invalidHandlerSection_shouldThrow() {
+
+        final JSONObject definitiion = new JSONObject(
+            new JSONTokener(this.getClass().getResourceAsStream("/invalid-handlers.json"))
+        );
+
+        assertThatExceptionOfType(ValidationException.class)
+            .isThrownBy(() -> validator.validateResourceDefinition(definitiion))
+            .withNoCause()
+            .withMessage("#/handlers/read: #: only 1 subschema matches out of 2");
+    }
+
+    @Test
+    public void validateDefinition_validHandlerSection_shouldNotThrow() {
+
+        final JSONObject definitiion = new JSONObject(
+            new JSONTokener(this.getClass().getResourceAsStream("/valid-with-handlers.json"))
+        );
+
+        validator.validateResourceDefinition(definitiion);
+    }
 }
