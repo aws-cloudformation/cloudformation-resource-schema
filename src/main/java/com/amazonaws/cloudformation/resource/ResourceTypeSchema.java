@@ -1,11 +1,20 @@
+/*
+* Copyright 2010-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License").
+* You may not use this file except in compliance with the License.
+* A copy of the License is located at
+*
+*  http://aws.amazon.com/apache2.0
+*
+* or in the "license" file accompanying this file. This file is distributed
+* on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+* express or implied. See the License for the specific language governing
+* permissions and limitations under the License.
+*/
 package com.amazonaws.cloudformation.resource;
 
 import com.amazonaws.cloudformation.resource.exceptions.ValidationException;
-import lombok.Getter;
-import org.everit.json.schema.JSONPointer;
-import org.everit.json.schema.ObjectSchema;
-import org.everit.json.schema.loader.SchemaLoader;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,6 +22,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import lombok.Getter;
+
+import org.everit.json.schema.JSONPointer;
+import org.everit.json.schema.ObjectSchema;
+import org.everit.json.schema.loader.SchemaLoader;
+import org.json.JSONObject;
 
 @Getter
 public class ResourceTypeSchema extends ObjectSchema {
@@ -58,12 +74,12 @@ public class ResourceTypeSchema extends ObjectSchema {
         });
 
         this.unprocessedProperties.computeIfPresent("additionalIdentifiers", (k, v) -> {
-           ((ArrayList<?>) v).forEach(p -> {
+            ((ArrayList<?>) v).forEach(p -> {
                 final ArrayList<JSONPointer> identifiers = new ArrayList<>();
                 ((ArrayList<?>) p).forEach(pi -> identifiers.add(new JSONPointer(pi.toString())));
                 this.additionalIdentifiers.add(identifiers);
             });
-           return null;
+            return null;
         });
 
         this.unprocessedProperties.computeIfPresent("readOnlyProperties", (k, v) -> {
@@ -79,17 +95,13 @@ public class ResourceTypeSchema extends ObjectSchema {
 
     public static ResourceTypeSchema load(final JSONObject schemaJson) {
         // first validate incoming resource schema against definition schema
-        Validator.builder().build().validateObject(
-            schemaJson,
-            ResourceTypeSchema.class.getResourceAsStream(SchemaValidator.DEFINITION_SCHEMA_PATH)
-        );
+        Validator.builder().build().validateObject(schemaJson,
+            ResourceTypeSchema.class.getResourceAsStream(SchemaValidator.DEFINITION_SCHEMA_PATH));
 
         // now extract identifiers from resource schema
-        final SchemaLoader loader = SchemaLoader.builder()
-            .schemaJson(schemaJson)
+        final SchemaLoader loader = SchemaLoader.builder().schemaJson(schemaJson)
             // registers the local schema with the draft-07 url
-            .draftV7Support()
-            .build();
+            .draftV7Support().build();
 
         final ObjectSchema.Builder builder = (ObjectSchema.Builder) loader.load();
 
@@ -110,11 +122,7 @@ public class ResourceTypeSchema extends ObjectSchema {
 
     public List<List<String>> getAdditionalIdentifiersAsStrings() throws ValidationException {
         final List<List<String>> identifiers = new ArrayList<>();
-        this.additionalIdentifiers.forEach(i ->
-            identifiers.add(
-                i.stream().map(Object::toString).collect(Collectors.toList())
-            )
-        );
+        this.additionalIdentifiers.forEach(i -> identifiers.add(i.stream().map(Object::toString).collect(Collectors.toList())));
         return identifiers;
     }
 
