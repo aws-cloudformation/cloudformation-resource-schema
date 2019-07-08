@@ -1,20 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>com.amazonaws.cloudformation</groupId>
     <artifactId>aws-cloudformation-resource-schema</artifactId>
     <version>1.0.0</version>
-
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
-
     <dependencies>
         <!-- https://mvnrepository.com/artifact/com.github.everit-org.json-schema/org.everit.json.schema -->
         <dependency>
@@ -22,7 +17,6 @@
             <artifactId>org.everit.json.schema</artifactId>
             <version>1.11.0</version>
         </dependency>
-
         <!-- https://mvnrepository.com/artifact/org.assertj/assertj-core -->
         <dependency>
             <groupId>org.assertj</groupId>
@@ -45,7 +39,6 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
-
     <repositories>
         <!-- Supports org.everit.json.schema per https://github.com/everit-org/json-schema -->
         <repository>
@@ -53,7 +46,6 @@
             <url>https://jitpack.io</url>
         </repository>
     </repositories>
-
     <build>
         <resources>
             <resource>
@@ -64,6 +56,36 @@
             </resource>
         </resources>
         <plugins>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>1.23.1</version>
+                <configuration>
+                    <java>
+                        <eclipse>
+                            <!-- This formatter covers alot of linting, but not 100% of what checkstyle will enforce -->
+                            <file>/src/main/resources/eclipse-java-formatter.xml</file>
+                            <version>4.11.0</version>
+                        </eclipse>
+                        <licenseHeader>
+                            <file>/src/main/resources/licenseHeader</file>
+                        </licenseHeader>
+                        <removeUnusedImports/>
+                        <importOrder>
+                            <order>com,java,javax,org,software</order>
+                        </importOrder>
+                    </java>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>lint</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>apply</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -151,7 +173,7 @@
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <configLocation>checkstyle.xml</configLocation>
+                    <configLocation>src/main/resources/checkstyle.xml</configLocation>
                     <encoding>UTF-8</encoding>
                     <consoleOutput>true</consoleOutput>
                     <failsOnError>true</failsOnError>

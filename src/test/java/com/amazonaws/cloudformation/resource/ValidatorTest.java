@@ -1,16 +1,31 @@
+/*
+* Copyright 2010-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License").
+* You may not use this file except in compliance with the License.
+* A copy of the License is located at
+*
+*  http://aws.amazon.com/apache2.0
+*
+* or in the "license" file accompanying this file. This file is distributed
+* on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+* express or implied. See the License for the specific language governing
+* permissions and limitations under the License.
+*/
 package com.amazonaws.cloudformation.resource;
-
-import com.amazonaws.cloudformation.resource.exceptions.ValidationException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
+
+import com.amazonaws.cloudformation.resource.exceptions.ValidationException;
+
+import java.util.Arrays;
+
+import org.json.JSONObject;
+import org.json.JSONTokener;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ValidatorTest {
     private static final String TEST_SCHEMA_PATH = "/test-schema.json";
@@ -31,28 +46,18 @@ public class ValidatorTest {
 
     @Test
     public void validateObject_validObject_shouldNotThrow() {
-        final JSONObject object = new JSONObject()
-            .put("propertyA", "abc")
-            .put("propertyB", Arrays.asList(1, 2, 3));
+        final JSONObject object = new JSONObject().put("propertyA", "abc").put("propertyB", Arrays.asList(1, 2, 3));
 
-        validator.validateObject(
-            object,
-            this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)
-        );
+        validator.validateObject(object, this.getClass().getResourceAsStream(TEST_SCHEMA_PATH));
     }
 
     @Test
     public void validateObject_invalidObjectMissingRequiredProperties_shouldThrow() {
-        final JSONObject object = new JSONObject()
-                .put("propertyB", Arrays.asList(1, 2, 3));
+        final JSONObject object = new JSONObject().put("propertyB", Arrays.asList(1, 2, 3));
 
         final ValidationException e = catchThrowableOfType(
-            () -> validator.validateObject(
-                object,
-                this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)
-            ),
-            ValidationException.class
-        );
+            () -> validator.validateObject(object, this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)),
+            ValidationException.class);
 
         assertThat(e).hasNoCause().hasMessageContaining("propertyA");
         assertThat(e.getCausingExceptions()).isEmpty();
@@ -61,18 +66,12 @@ public class ValidatorTest {
 
     @Test
     public void validateObject_invalidObjectAdditionalProperties_shouldThrow() {
-        final JSONObject object = new JSONObject()
-            .put("propertyA", "abc")
-            .put("propertyB", Arrays.asList(1, 2, 3))
+        final JSONObject object = new JSONObject().put("propertyA", "abc").put("propertyB", Arrays.asList(1, 2, 3))
             .put("propertyX", "notpartofschema");
 
         final ValidationException e = catchThrowableOfType(
-            () -> validator.validateObject(
-                object,
-                this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)
-            ),
-            ValidationException.class
-        );
+            () -> validator.validateObject(object, this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)),
+            ValidationException.class);
 
         assertThat(e).hasNoCause().hasMessageContaining("propertyX");
         assertThat(e.getCausingExceptions()).isEmpty();
@@ -81,19 +80,12 @@ public class ValidatorTest {
 
     @Test
     public void validateObject_invalidObjectMultiple_shouldThrow() {
-        final JSONObject object = new JSONObject()
-            .put("propertyA", 123)
-            .put("propertyB", Arrays.asList(1, 2, 3))
-            .put("propertyX", "notpartofschema")
-            .put("propertyY", "notpartofschema");
+        final JSONObject object = new JSONObject().put("propertyA", 123).put("propertyB", Arrays.asList(1, 2, 3))
+            .put("propertyX", "notpartofschema").put("propertyY", "notpartofschema");
 
         final ValidationException e = catchThrowableOfType(
-            () -> validator.validateObject(
-                object,
-                this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)
-            ),
-            ValidationException.class
-        );
+            () -> validator.validateObject(object, this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)),
+            ValidationException.class);
 
         assertThat(e.getCausingExceptions()).hasSize(3);
         assertThat(e).hasMessage("#: 3 schema violations found");
@@ -102,10 +94,8 @@ public class ValidatorTest {
 
     @Test
     public void validateDefinition_validMinimalDefinition_shouldNotThrow() {
-        final JSONObject definition = new JSONObject()
-            .put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
-            .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION)
-            .put(PRIMARY_IDENTIFIER_KEY, Arrays.asList(EXAMPLE_PRIMARY_IDENTIFIER))
+        final JSONObject definition = new JSONObject().put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
+            .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION).put(PRIMARY_IDENTIFIER_KEY, Arrays.asList(EXAMPLE_PRIMARY_IDENTIFIER))
             .put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject()));
         validator.validateResourceDefinition(definition);
     }
@@ -118,76 +108,57 @@ public class ValidatorTest {
 
     @Test
     public void validateDefinition_invalidDefinitionNoPropertiesKey_shouldThrow() {
-        final JSONObject definition = new JSONObject()
-            .put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
-            .put(PRIMARY_IDENTIFIER_KEY, Arrays.asList(EXAMPLE_PRIMARY_IDENTIFIER))
-            .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION);
+        final JSONObject definition = new JSONObject().put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
+            .put(PRIMARY_IDENTIFIER_KEY, Arrays.asList(EXAMPLE_PRIMARY_IDENTIFIER)).put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION);
 
-        assertThatExceptionOfType(ValidationException.class)
-            .isThrownBy(() -> validator.validateResourceDefinition(definition))
-            .withNoCause()
-            .withMessage("#: required key [" + PROPERTIES_KEY + "] not found");
+        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
+            .withNoCause().withMessage("#: required key [" + PROPERTIES_KEY + "] not found");
     }
 
     @Test
     public void validateDefinition_invalidDefinitionNoDescriptionKey_shouldThrow() {
-        final JSONObject definition = new JSONObject()
-            .put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
+        final JSONObject definition = new JSONObject().put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
             .put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject()))
             .put(PRIMARY_IDENTIFIER_KEY, Arrays.asList(EXAMPLE_PRIMARY_IDENTIFIER));
 
-        assertThatExceptionOfType(ValidationException.class)
-            .isThrownBy(() -> validator.validateResourceDefinition(definition))
-            .withNoCause()
-            .withMessage("#: required key [" + DESCRIPTION_KEY + "] not found");
+        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
+            .withNoCause().withMessage("#: required key [" + DESCRIPTION_KEY + "] not found");
     }
 
     @Test
     public void validateDefinition_invalidDefinitionNoProperties_shouldThrow() {
-        final JSONObject definition = new JSONObject()
-            .put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
-            .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION)
-            .put(PROPERTIES_KEY, new JSONObject())
+        final JSONObject definition = new JSONObject().put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
+            .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION).put(PROPERTIES_KEY, new JSONObject())
             .put(PRIMARY_IDENTIFIER_KEY, Arrays.asList(EXAMPLE_PRIMARY_IDENTIFIER));
 
-        assertThatExceptionOfType(ValidationException.class)
-            .isThrownBy(() -> validator.validateResourceDefinition(definition))
-            .withNoCause()
-            .withMessage("#/properties: minimum size: [1], found: [0]");
+        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
+            .withNoCause().withMessage("#/properties: minimum size: [1], found: [0]");
     }
 
     @Test
     public void validateDefinition_invalidDefinitionNoPrimaryIdentifier_shouldThrow() {
-        final JSONObject definition = new JSONObject()
-            .put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
-            .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION)
-            .put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject()));
+        final JSONObject definition = new JSONObject().put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
+            .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION).put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject()));
 
-        assertThatExceptionOfType(ValidationException.class)
-            .isThrownBy(() -> validator.validateResourceDefinition(definition))
-            .withNoCause()
-            .withMessage("#: required key [primaryIdentifier] not found");
+        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
+            .withNoCause().withMessage("#: required key [primaryIdentifier] not found");
     }
 
     @Test
     public void validateDefinition_invalidHandlerSection_shouldThrow() {
 
-        final JSONObject definitiion = new JSONObject(
-            new JSONTokener(this.getClass().getResourceAsStream("/invalid-handlers.json"))
-        );
+        final JSONObject definitiion = new JSONObject(new JSONTokener(this.getClass()
+            .getResourceAsStream("/invalid-handlers.json")));
 
-        assertThatExceptionOfType(ValidationException.class)
-            .isThrownBy(() -> validator.validateResourceDefinition(definitiion))
-            .withNoCause()
-            .withMessage("#/handlers/read: #: only 1 subschema matches out of 2");
+        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definitiion))
+            .withNoCause().withMessage("#/handlers/read: #: only 1 subschema matches out of 2");
     }
 
     @Test
     public void validateDefinition_validHandlerSection_shouldNotThrow() {
 
-        final JSONObject definitiion = new JSONObject(
-            new JSONTokener(this.getClass().getResourceAsStream("/valid-with-handlers.json"))
-        );
+        final JSONObject definitiion = new JSONObject(new JSONTokener(this.getClass()
+            .getResourceAsStream("/valid-with-handlers.json")));
 
         validator.validateResourceDefinition(definitiion);
     }

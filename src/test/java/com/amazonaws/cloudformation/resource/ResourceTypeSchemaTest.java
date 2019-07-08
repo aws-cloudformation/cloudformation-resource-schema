@@ -1,14 +1,29 @@
+/*
+* Copyright 2010-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License").
+* You may not use this file except in compliance with the License.
+* A copy of the License is located at
+*
+*  http://aws.amazon.com/apache2.0
+*
+* or in the "license" file accompanying this file. This file is distributed
+* on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+* express or implied. See the License for the specific language governing
+* permissions and limitations under the License.
+*/
 package com.amazonaws.cloudformation.resource;
-
-import com.amazonaws.cloudformation.resource.exceptions.ValidationException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
-import org.junit.jupiter.api.Test;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
+import com.amazonaws.cloudformation.resource.exceptions.ValidationException;
+
+import java.util.List;
+
+import org.json.JSONObject;
+import org.json.JSONTokener;
+import org.junit.jupiter.api.Test;
 
 public class ResourceTypeSchemaTest {
     private static final String TEST_SCHEMA_PATH = "/test-schema.json";
@@ -33,9 +48,7 @@ public class ResourceTypeSchemaTest {
 
         List<String> result = schema.getCreateOnlyPropertiesAsStrings();
 
-        assertThat(result).containsExactly(
-            "/properties/propertyA",
-            "/properties/propertyD");
+        assertThat(result).containsExactly("/properties/propertyA", "/properties/propertyD");
     }
 
     @Test
@@ -88,9 +101,7 @@ public class ResourceTypeSchemaTest {
     public void invalidSchema_shouldThrow() {
         JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(EMPTY_SCHEMA_PATH)));
 
-        assertThatExceptionOfType(ValidationException.class)
-            .isThrownBy(() -> ResourceTypeSchema.load(o))
-            .withNoCause()
+        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> ResourceTypeSchema.load(o)).withNoCause()
             .withMessage("#/properties: minimum size: [1], found: [0]");
     }
 
