@@ -29,6 +29,7 @@ import org.everit.json.schema.JSONPointer;
 import org.everit.json.schema.ObjectSchema;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 @Getter
 public class ResourceTypeSchema extends ObjectSchema {
@@ -95,8 +96,8 @@ public class ResourceTypeSchema extends ObjectSchema {
 
     public static ResourceTypeSchema load(final JSONObject schemaJson) {
         // first validate incoming resource schema against definition schema
-        Validator.builder().build().validateObject(schemaJson,
-            ResourceTypeSchema.class.getResourceAsStream(SchemaValidator.DEFINITION_SCHEMA_PATH));
+        Validator.builder().build().validateObject(schemaJson, new JSONObject(new JSONTokener(ResourceTypeSchema.class
+            .getResourceAsStream(SchemaValidator.DEFINITION_SCHEMA_PATH))));
 
         // now extract identifiers from resource schema
         final SchemaLoader loader = SchemaLoader.builder().schemaJson(schemaJson)

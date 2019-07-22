@@ -16,7 +16,6 @@ package com.amazonaws.cloudformation.resource;
 
 import com.amazonaws.cloudformation.resource.exceptions.ValidationException;
 
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -43,11 +42,6 @@ public class Validator implements SchemaValidator {
     }
 
     @Override
-    public void validateObject(final JSONObject modelObject, final InputStream inputStream) throws ValidationException {
-        final JSONObject schemaObject = new JSONObject(new JSONTokener(inputStream));
-        this.validateObject(modelObject, schemaObject);
-    }
-
     public void validateObject(final JSONObject modelObject, final JSONObject definitionSchemaObject) throws ValidationException {
         try {
             final URI schemaURI = new URI(JSON_SCHEMA_ID);
