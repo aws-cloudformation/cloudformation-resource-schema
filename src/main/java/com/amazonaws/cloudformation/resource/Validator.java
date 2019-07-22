@@ -32,21 +32,26 @@ public class Validator implements SchemaValidator {
     private static final String JSON_SCHEMA_ID = "https://json-schema.org/draft-07/schema";
     private static final String JSON_SCHEMA_PATH = "/schema/schema";
     private static final String METASCHEMA_PATH = "/schema/provider.definition.schema.v1.json";
-    private final InputStream definitionSchemaStream;
+    private final JSONObject definitionSchemaJsonObject;
     private final JSONObject jsonSchemaObject;
 
     @Builder
     public Validator() {
         // local copy of the draft-07 schema used to avoid remote reference calls
         jsonSchemaObject = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(JSON_SCHEMA_PATH)));
-        definitionSchemaStream = this.getClass().getResourceAsStream(METASCHEMA_PATH);
+        definitionSchemaJsonObject = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(METASCHEMA_PATH)));
     }
 
-    public void validateObject(final JSONObject modelObject, final InputStream schemaStream) throws ValidationException {
-        final JSONObject schemaObject = new JSONObject(new JSONTokener(schemaStream));
+    @Override
+    public void validateObject(final JSONObject modelObject, final InputStream inputStream) throws ValidationException {
+        final JSONObject schemaObject = new JSONObject(new JSONTokener(inputStream));
+        this.validateObject(modelObject, schemaObject);
+    }
+
+    public void validateObject(final JSONObject modelObject, final JSONObject definitionSchemaObject) throws ValidationException {
         try {
             final URI schemaURI = new URI(JSON_SCHEMA_ID);
-            final SchemaLoader loader = SchemaLoader.builder().schemaJson(schemaObject)
+            final SchemaLoader loader = SchemaLoader.builder().schemaJson(definitionSchemaObject)
                 // registers the local schema with the draft-07 url
                 .registerSchemaByURI(schemaURI, jsonSchemaObject).draftV7Support().build();
             final Schema schema = loader.load().build();
@@ -69,7 +74,7 @@ public class Validator implements SchemaValidator {
      * @throws ValidationException Thrown for any schema validation errors
      */
     public void validateResourceDefinition(final JSONObject definition) throws ValidationException {
-        validateObject(definition, definitionSchemaStream);
+        validateObject(definition, definitionSchemaJsonObject);
     }
 
 }
