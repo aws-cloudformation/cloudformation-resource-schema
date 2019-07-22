@@ -16,8 +16,6 @@ package com.amazonaws.cloudformation.resource;
 
 import com.amazonaws.cloudformation.resource.exceptions.ValidationException;
 
-import java.io.InputStream;
-
 import org.json.JSONObject;
 
 public interface SchemaValidator {
@@ -29,9 +27,9 @@ public interface SchemaValidator {
      * schema
      *
      * @param modelObject JSON-encoded resource model
-     * @param schemaStream The JSON schema to validate the model against
+     * @param schemaObject The JSON schema object to validate the model against
      * @throws ValidationException Thrown for any schema validation errors
      */
-    void validateObject(JSONObject modelObject, InputStream schemaStream) throws ValidationException;
+    void validateObject(JSONObject modelObject, JSONObject schemaObject) throws ValidationException;
 
 }

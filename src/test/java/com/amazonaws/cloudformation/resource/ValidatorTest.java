@@ -48,7 +48,7 @@ public class ValidatorTest {
     public void validateObject_validObject_shouldNotThrow() {
         final JSONObject object = new JSONObject().put("propertyA", "abc").put("propertyB", Arrays.asList(1, 2, 3));
 
-        validator.validateObject(object, this.getClass().getResourceAsStream(TEST_SCHEMA_PATH));
+        validator.validateObject(object, new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH))));
     }
 
     @Test
@@ -56,7 +56,8 @@ public class ValidatorTest {
         final JSONObject object = new JSONObject().put("propertyB", Arrays.asList(1, 2, 3));
 
         final ValidationException e = catchThrowableOfType(
-            () -> validator.validateObject(object, this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)),
+            () -> validator.validateObject(object,
+                new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)))),
             ValidationException.class);
 
         assertThat(e).hasNoCause().hasMessageContaining("propertyA");
@@ -70,7 +71,8 @@ public class ValidatorTest {
             .put("propertyX", "notpartofschema");
 
         final ValidationException e = catchThrowableOfType(
-            () -> validator.validateObject(object, this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)),
+            () -> validator.validateObject(object,
+                new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)))),
             ValidationException.class);
 
         assertThat(e).hasNoCause().hasMessageContaining("propertyX");
@@ -84,7 +86,8 @@ public class ValidatorTest {
             .put("propertyX", "notpartofschema").put("propertyY", "notpartofschema");
 
         final ValidationException e = catchThrowableOfType(
-            () -> validator.validateObject(object, this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)),
+            () -> validator.validateObject(object,
+                new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)))),
             ValidationException.class);
 
         assertThat(e.getCausingExceptions()).hasSize(3);
