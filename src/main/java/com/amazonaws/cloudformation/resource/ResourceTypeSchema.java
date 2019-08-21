@@ -37,6 +37,7 @@ public class ResourceTypeSchema extends ObjectSchema {
     private final Map<String, Object> unprocessedProperties = new HashMap<>();
 
     private final String sourceUrl;
+    private final String documentationUrl;
     private final String typeName;
     private final List<JSONPointer> createOnlyProperties = new ArrayList<>();
     private final List<JSONPointer> deprecatedProperties = new ArrayList<>();
@@ -54,6 +55,11 @@ public class ResourceTypeSchema extends ObjectSchema {
             ? this.unprocessedProperties.get("sourceUrl").toString()
             : null;
         this.unprocessedProperties.remove("sourceUrl");
+
+        this.documentationUrl = this.unprocessedProperties.containsKey("documentationUrl")
+            ? this.unprocessedProperties.get("documentationUrl").toString()
+            : null;
+        this.unprocessedProperties.remove("documentationUrl");
 
         // typeName is mandatory by schema
         this.typeName = this.unprocessedProperties.get("typeName").toString();
