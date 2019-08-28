@@ -1,7 +1,7 @@
 {
     "typeName": "AWS::Test::TestModel",
     "description": "A test schema for unit tests.",
-    "sourceUrl": "my-repo.git",
+    "sourceUrl": "https://mycorp.com/my-repo.git",
     "properties": {
         "propertyA": {
             "type": "string"

@@ -4,6 +4,11 @@
     "title": "CloudFormation Resource Provider Definition MetaSchema",
     "description": "This schema validates a CloudFormation resource provider definition.",
     "definitions": {
+        "httpsUrl": {
+            "type": "string",
+            "pattern": "^https://[0-9a-zA-Z]([-.\\w]*[0-9a-zA-Z])(:[0-9]*)*([?/#].*)?$",
+            "maxLength": 4096
+        },
         "handlerDefinition": {
             "description": "Defines any execution operations which can be performed on this resource provider",
             "type": "object",
@@ -240,14 +245,14 @@
             "examples": [
                 "https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-s3"
             ],
-            "type": "string"
+            "$ref": "#/definitions/httpsUrl"
         },
         "documentationUrl": {
             "$comment": "A page with supplemental documentation. The property documentation in schemas should be able to stand alone, but this is an opportunity for e.g. rich examples or more guided documents.",
             "examples": [
                 "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/CHAP_Using.html"
             ],
-            "type": "string"
+            "$ref": "#/definitions/httpsUrl"
         },
         "additionalProperties": {
             "$comment": "All properties of a resource must be expressed in the schema - arbitrary inputs are not allowed",

@@ -36,7 +36,7 @@ public class ResourceTypeSchemaTest {
         final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
 
         assertThat(schema.getDescription()).isEqualTo("A test schema for unit tests.");
-        assertThat(schema.getSourceUrl()).isEqualTo("my-repo.git");
+        assertThat(schema.getSourceUrl()).isEqualTo("https://mycorp.com/my-repo.git");
         assertThat(schema.getTypeName()).isEqualTo("AWS::Test::TestModel");
         assertThat(schema.getUnprocessedProperties()).isEmpty();
     }
@@ -112,6 +112,7 @@ public class ResourceTypeSchemaTest {
 
         assertThat(schema.getDescription()).isEqualTo("A test schema for unit tests.");
         assertThat(schema.getSourceUrl()).isNull();
+        assertThat(schema.getDocumentationUrl()).isNull();
         assertThat(schema.getTypeName()).isEqualTo("AWS::Test::TestModel");
         assertThat(schema.getUnprocessedProperties()).isEmpty();
         assertThat(schema.getCreateOnlyPropertiesAsStrings()).isEmpty();
