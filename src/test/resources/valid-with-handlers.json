@@ -16,9 +16,7 @@
             ]
         },
         "read": {
-            "permissions": [
-                "test:permission"
-            ]
+            "permissions": []
         },
         "update": {
             "permissions": [
