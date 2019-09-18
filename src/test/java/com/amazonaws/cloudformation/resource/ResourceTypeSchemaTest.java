@@ -29,6 +29,7 @@ public class ResourceTypeSchemaTest {
     private static final String TEST_SCHEMA_PATH = "/test-schema.json";
     private static final String EMPTY_SCHEMA_PATH = "/empty-schema.json";
     private static final String MINIMAL_SCHEMA_PATH = "/minimal-schema.json";
+    private static final String NO_ADDITIONAL_PROPERTIES_SCHEMA_PATH = "/no-additional-properties-schema.json";
 
     @Test
     public void getProperties() {
@@ -103,6 +104,14 @@ public class ResourceTypeSchemaTest {
 
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> ResourceTypeSchema.load(o)).withNoCause()
             .withMessage("#/properties: minimum size: [1], found: [0]");
+    }
+
+    @Test
+    public void invalidSchema_noAdditionalProperties_shouldThrow() {
+        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(NO_ADDITIONAL_PROPERTIES_SCHEMA_PATH)));
+
+        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> ResourceTypeSchema.load(o)).withNoCause()
+            .withMessage("#: required key [additionalProperties] not found");
     }
 
     @Test

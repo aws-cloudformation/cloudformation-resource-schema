@@ -35,9 +35,11 @@ public class ValidatorTest {
     private static final String PROPERTIES_KEY = "properties";
     private static final String DESCRIPTION_KEY = "description";
     private static final String PRIMARY_IDENTIFIER_KEY = "primaryIdentifier";
+    private static final String ADDITIONAL_PROPERTIES_KEY = "additionalProperties";
     private static final String EXAMPLE_TYPE_NAME = "Organization::Service::Resource";
     private static final String EXAMPLE_DESCRIPTION = "Resource provider descriptions are important for customers to know what the resource is expected to do.";
     private static final String EXAMPLE_PRIMARY_IDENTIFIER = "/properties/propertyA";
+    private static final Boolean ADDITIONAL_PROPERTIES_VALUE = false;
 
     private Validator validator;
 
@@ -101,7 +103,9 @@ public class ValidatorTest {
     public void validateDefinition_validMinimalDefinition_shouldNotThrow() {
         final JSONObject definition = new JSONObject().put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
             .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION).put(PRIMARY_IDENTIFIER_KEY, Arrays.asList(EXAMPLE_PRIMARY_IDENTIFIER))
-            .put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject()));
+            .put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject()))
+            .put(ADDITIONAL_PROPERTIES_KEY, ADDITIONAL_PROPERTIES_VALUE);
+
         validator.validateResourceDefinition(definition);
     }
 
@@ -114,7 +118,8 @@ public class ValidatorTest {
     @Test
     public void validateDefinition_invalidDefinitionNoPropertiesKey_shouldThrow() {
         final JSONObject definition = new JSONObject().put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
-            .put(PRIMARY_IDENTIFIER_KEY, Arrays.asList(EXAMPLE_PRIMARY_IDENTIFIER)).put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION);
+            .put(PRIMARY_IDENTIFIER_KEY, Arrays.asList(EXAMPLE_PRIMARY_IDENTIFIER)).put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION)
+            .put(ADDITIONAL_PROPERTIES_KEY, ADDITIONAL_PROPERTIES_VALUE);
 
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
             .withNoCause().withMessage("#: required key [" + PROPERTIES_KEY + "] not found");
@@ -124,7 +129,8 @@ public class ValidatorTest {
     public void validateDefinition_invalidDefinitionNoDescriptionKey_shouldThrow() {
         final JSONObject definition = new JSONObject().put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
             .put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject()))
-            .put(PRIMARY_IDENTIFIER_KEY, Arrays.asList(EXAMPLE_PRIMARY_IDENTIFIER));
+            .put(PRIMARY_IDENTIFIER_KEY, Arrays.asList(EXAMPLE_PRIMARY_IDENTIFIER))
+            .put(ADDITIONAL_PROPERTIES_KEY, ADDITIONAL_PROPERTIES_VALUE);
 
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
             .withNoCause().withMessage("#: required key [" + DESCRIPTION_KEY + "] not found");
@@ -134,7 +140,8 @@ public class ValidatorTest {
     public void validateDefinition_invalidDefinitionNoProperties_shouldThrow() {
         final JSONObject definition = new JSONObject().put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
             .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION).put(PROPERTIES_KEY, new JSONObject())
-            .put(PRIMARY_IDENTIFIER_KEY, Arrays.asList(EXAMPLE_PRIMARY_IDENTIFIER));
+            .put(PRIMARY_IDENTIFIER_KEY, Arrays.asList(EXAMPLE_PRIMARY_IDENTIFIER))
+            .put(ADDITIONAL_PROPERTIES_KEY, ADDITIONAL_PROPERTIES_VALUE);
 
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
             .withNoCause().withMessage("#/properties: minimum size: [1], found: [0]");
@@ -143,7 +150,8 @@ public class ValidatorTest {
     @Test
     public void validateDefinition_invalidDefinitionNoPrimaryIdentifier_shouldThrow() {
         final JSONObject definition = new JSONObject().put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
-            .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION).put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject()));
+            .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION).put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject()))
+            .put(ADDITIONAL_PROPERTIES_KEY, ADDITIONAL_PROPERTIES_VALUE);
 
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
             .withNoCause().withMessage("#: required key [primaryIdentifier] not found");
@@ -173,7 +181,9 @@ public class ValidatorTest {
     public void validateDefinition_nonMatchingDocumentationUrl_shouldThrow(final String documentationUrl) {
         final JSONObject definition = new JSONObject().put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
             .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION).put(PRIMARY_IDENTIFIER_KEY, Arrays.asList(EXAMPLE_PRIMARY_IDENTIFIER))
-            .put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject())).put("documentationUrl", documentationUrl);
+            .put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject())).put("documentationUrl", documentationUrl)
+            .put(ADDITIONAL_PROPERTIES_KEY, ADDITIONAL_PROPERTIES_VALUE);
+
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
             .withMessageContaining("#/documentationUrl").withMessageContaining(documentationUrl);
     }
@@ -184,7 +194,9 @@ public class ValidatorTest {
     public void validateDefinition_matchingDocumentationUrl_shouldNotThrow(final String documentationUrl) {
         final JSONObject definition = new JSONObject().put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
             .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION).put(PRIMARY_IDENTIFIER_KEY, Arrays.asList(EXAMPLE_PRIMARY_IDENTIFIER))
-            .put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject())).put("documentationUrl", documentationUrl);
+            .put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject())).put("documentationUrl", documentationUrl)
+            .put(ADDITIONAL_PROPERTIES_KEY, ADDITIONAL_PROPERTIES_VALUE);
+
         validator.validateResourceDefinition(definition);
     }
 
@@ -193,7 +205,9 @@ public class ValidatorTest {
         final String documentationUrl = "https://much-too-loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong.com/";
         final JSONObject definition = new JSONObject().put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
             .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION).put(PRIMARY_IDENTIFIER_KEY, Arrays.asList(EXAMPLE_PRIMARY_IDENTIFIER))
-            .put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject())).put("documentationUrl", documentationUrl);
+            .put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject())).put("documentationUrl", documentationUrl)
+            .put(ADDITIONAL_PROPERTIES_KEY, ADDITIONAL_PROPERTIES_VALUE);
+
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
             .withMessageContaining("#/documentationUrl").withMessageContaining(Integer.toString(documentationUrl.length()));
     }
@@ -203,7 +217,9 @@ public class ValidatorTest {
     public void validateDefinition_nonMatchingSourceUrls_shouldThrow(final String sourceUrl) {
         final JSONObject definition = new JSONObject().put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
             .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION).put(PRIMARY_IDENTIFIER_KEY, Arrays.asList(EXAMPLE_PRIMARY_IDENTIFIER))
-            .put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject())).put("sourceUrl", sourceUrl);
+            .put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject())).put("sourceUrl", sourceUrl)
+            .put(ADDITIONAL_PROPERTIES_KEY, ADDITIONAL_PROPERTIES_VALUE);
+
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
             .withMessageContaining("#/sourceUrl").withMessageContaining(sourceUrl);
     }
@@ -214,7 +230,9 @@ public class ValidatorTest {
     public void validateDefinition_matchingSourceUrl_shouldNotThrow(final String sourceUrl) {
         final JSONObject definition = new JSONObject().put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
             .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION).put(PRIMARY_IDENTIFIER_KEY, Arrays.asList(EXAMPLE_PRIMARY_IDENTIFIER))
-            .put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject())).put("sourceUrl", sourceUrl);
+            .put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject())).put("sourceUrl", sourceUrl)
+            .put(ADDITIONAL_PROPERTIES_KEY, ADDITIONAL_PROPERTIES_VALUE);
+
         validator.validateResourceDefinition(definition);
     }
 
@@ -223,7 +241,9 @@ public class ValidatorTest {
         final String sourceUrl = "https://much-too-loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong.com/";
         final JSONObject definition = new JSONObject().put(TYPE_NAME_KEY, EXAMPLE_TYPE_NAME)
             .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION).put(PRIMARY_IDENTIFIER_KEY, Arrays.asList(EXAMPLE_PRIMARY_IDENTIFIER))
-            .put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject())).put("sourceUrl", sourceUrl);
+            .put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject())).put("sourceUrl", sourceUrl)
+            .put(ADDITIONAL_PROPERTIES_KEY, ADDITIONAL_PROPERTIES_VALUE);
+
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
             .withMessageContaining("#/sourceUrl").withMessageContaining(Integer.toString(sourceUrl.length()));
     }
