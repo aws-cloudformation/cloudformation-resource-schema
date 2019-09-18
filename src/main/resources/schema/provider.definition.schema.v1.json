@@ -219,6 +219,11 @@
     },
     "type": "object",
     "properties": {
+        "type": {
+            "$comment": "Resource Type",
+            "type": "string",
+            "const": "RESOURCE"
+        },
         "typeName": {
             "$comment": "Resource Type Identifier",
             "examples": [
