@@ -21,40 +21,89 @@ import java.util.List;
 import lombok.Getter;
 
 @Getter
+@SuppressWarnings("serial")
 public class ValidationException extends RuntimeException {
     private static final long serialVersionUID = 42L;
 
     private final List<ValidationException> causingExceptions;
     private final String keyword;
-    private final String schemaLocation;
+    private final String schemaPointer;
 
-    public ValidationException(final String message,
-                               final String keyword,
-                               final String schemaLocation) {
-        this(message, Collections.emptyList(), keyword, schemaLocation);
-    }
+    /**
+     * Error messages thrown for these keywords don't contain values
+     */
+    private static final List<String> SAFE_KEYWORDS = new ArrayList<String>(){{
+        // object keywords
+        add("required");
+        add("minProperties");
+        add("maxProperties");
+        add("dependencies");
+        add("additionalProperties");
+        // string keywords
+        add("minLength");
+        add("maxLength");
+        // array keywords
+        add("minItems");
+        add("maxItems");
+        add("uniqueItems");
+        add("items");
+        // misc keywords
+        add("type");
+        add("allOf");
+        add("anyOf");
+        add("oneOf");
+        add("contains");
+    }};
 
     public ValidationException(final org.everit.json.schema.ValidationException validationException) {
-        super(validationException.getMessage());
+        this(validationException.getMessage(), validationException);
+    }
+
+    public ValidationException(final String errorMessage, final org.everit.json.schema.ValidationException validationException) {
+        super(errorMessage);
         this.keyword = validationException.getKeyword();
-        this.schemaLocation = validationException.getSchemaLocation();
+        this.schemaPointer = validationException.getPointerToViolation();
 
         final List<ValidationException> causingExceptions = new ArrayList<>();
         if (validationException.getCausingExceptions() != null) {
             for (final org.everit.json.schema.ValidationException e : validationException.getCausingExceptions()) {
-                causingExceptions.add(new ValidationException(e));
+                causingExceptions.add(newScrubbedException(e));
             }
         }
         this.causingExceptions = Collections.unmodifiableList(causingExceptions);
     }
 
     public ValidationException(final String message,
+                               final String keyword,
+                               final String schemaPointer) {
+        this(message, Collections.emptyList(), keyword, schemaPointer);
+    }
+
+    public ValidationException(final String message,
                                final List<ValidationException> causingExceptions,
                                final String keyword,
-                               final String schemaLocation) {
+                               final String schemaPointer) {
         super(message);
         this.causingExceptions = Collections.unmodifiableList(causingExceptions);
         this.keyword = keyword;
-        this.schemaLocation = schemaLocation;
+        this.schemaPointer = schemaPointer;
+    }
+
+    /**
+     * In order to ensure sensitive properties aren't displayed, scrub any error messages that emit property values
+     */
+    public static ValidationException newScrubbedException(final org.everit.json.schema.ValidationException e) {
+        // A parent exception has multiple errors in the subSchema, and will just emit "{X} schema validations found"
+        final boolean isParentException = e.getKeyword() == null &&
+                e.getCausingExceptions() != null &&
+                !e.getCausingExceptions().isEmpty();
+        if (isParentException || SAFE_KEYWORDS.contains(e.getKeyword())) {
+            return new ValidationException(e);
+        } else {
+            final String errorMessage = String.format("%s: failed validation constraint for keyword [%s]",
+                    e.getPointerToViolation(), e.getKeyword());
+
+            return new ValidationException(errorMessage, e);
+        }
     }
 }

@@ -21,7 +21,9 @@ import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import com.amazonaws.cloudformation.resource.exceptions.ValidationException;
 
 import java.util.Arrays;
+import java.util.List;
 
+import org.assertj.core.util.Maps;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +33,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 public class ValidatorTest {
     private static final String TEST_SCHEMA_PATH = "/test-schema.json";
+    private static final String TEST_VALUE_SCHEMA_PATH = "/scrubbed-values-schema.json";
     private static final String TYPE_NAME_KEY = "typeName";
     private static final String PROPERTIES_KEY = "properties";
     private static final String DESCRIPTION_KEY = "description";
@@ -64,7 +67,8 @@ public class ValidatorTest {
 
         assertThat(e).hasNoCause().hasMessageContaining("propertyA");
         assertThat(e.getCausingExceptions()).isEmpty();
-        assertThat(e.getSchemaLocation()).isEqualTo("#");
+        assertThat(e.getSchemaPointer()).isEqualTo("#");
+        assertThat(e.getKeyword()).isEqualTo("required");
     }
 
     @Test
@@ -79,7 +83,8 @@ public class ValidatorTest {
 
         assertThat(e).hasNoCause().hasMessageContaining("propertyX");
         assertThat(e.getCausingExceptions()).isEmpty();
-        assertThat(e.getSchemaLocation()).isEqualTo("#");
+        assertThat(e.getSchemaPointer()).isEqualTo("#");
+        assertThat(e.getKeyword()).isEqualTo("additionalProperties");
     }
 
     @Test
@@ -94,7 +99,211 @@ public class ValidatorTest {
 
         assertThat(e.getCausingExceptions()).hasSize(3);
         assertThat(e).hasMessage("#: 3 schema violations found");
-        assertThat(e.getSchemaLocation()).isEqualTo("#");
+        assertThat(e.getSchemaPointer()).isEqualTo("#");
+        assertThat(e.getKeyword()).isNull();
+    }
+
+    /**
+     * All error messages thrown by SAFE_KEYWORDS from {link: ValidationException.class} should contain their original
+     * values, since they do not contain error messages:
+     * Integer Keywords: multipleOf, minimum, maximum, exclusiveMaximum, exclusiveMinimum
+     * String Keywords: pattern
+     * Enum
+     */
+    @Test
+    public void validateObject_invalidValue_shouldThrow_originalMessageShouldNotContainValue() {
+        final JSONObject object = new JSONObject()
+                .put("StringProperty", "DoesNotSatisfyPatternAndTooLong")
+                .put("StringProperty2", "tooShort")
+                .put("EnumProperty", "NotPartOfEnum")
+                .put("ConstProperty", "InCorrectConst")
+                .put("ArrayProperty", Arrays.asList(1, 1, 2, 3, 4, 5, 6, 7, 8)) // too many items
+                .put("ArrayProperty2", Arrays.asList(1)) // too few items
+                .put("IntProperty", 3) // too small and is not multiple of 5
+                .put("IntProperty2", 300) // too large
+                .put("NumberProperty", 3) // too small
+                .put("NumberProperty2", 300) // too large
+                .put("BooleanProperty", "true") // incorrect type
+                .put("ObjectProperty", new JSONObject().put("SomeRandom", "SomeValue")) //too few properties
+                .put("ObjectProperty2", new JSONObject() // too many properties
+                        .put("Key1", "val1").put("key2", "val2").put("key3", "val3"))
+                .put("MapProperty", new JSONObject().put("def", "Value")); // not matching patternProperties
+
+        final ValidationException e = catchThrowableOfType(
+                () -> validator.validateObject(object,
+                        new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_VALUE_SCHEMA_PATH)))),
+                ValidationException.class);
+
+        assertThat(e).hasMessage("#: 17 schema violations found");
+        assertThat(e.getSchemaPointer()).isEqualTo("#");
+        assertThat(e.getCausingExceptions()).hasSize(14);
+
+
+        // StringProperty is too long and does not match pattern
+        final ValidationException stringEx = getExceptionAtPointer(e, "#/StringProperty");
+        assertThat(stringEx).hasMessage("#/StringProperty: 2 schema violations found");
+        assertThat(stringEx.getCausingExceptions()).hasSize(2);
+        assertThat(stringEx.getKeyword()).isNull();
+
+        final ValidationException stringExMaxLength = getExceptionByKeyword(stringEx, "maxLength", "#/StringProperty");
+        assertThat(stringExMaxLength.getCausingExceptions()).isEmpty();
+        assertThat(stringExMaxLength).hasMessage("#/StringProperty: expected maxLength: 20, actual: 31");
+
+        final ValidationException stringExPattern = getExceptionByKeyword(stringEx, "pattern", "#/StringProperty");
+        assertThat(stringExPattern.getCausingExceptions()).isEmpty();
+        assertThat(stringExPattern).hasMessage("#/StringProperty: failed validation constraint for keyword [pattern]");
+
+        // StringProperty2 is too short
+        final ValidationException stringEx2 = getExceptionAtPointer(e, "#/StringProperty2");
+        assertThat(stringEx2).hasMessage("#/StringProperty2: expected minLength: 10, actual: 8");
+        assertThat(stringEx2.getCausingExceptions()).isEmpty();
+        assertThat(stringEx2.getKeyword()).isEqualTo("minLength");
+
+        // EnumProperty is not part of enum
+        final ValidationException enumAllOfEx = getExceptionAtPointer(e, "#/EnumProperty");
+        assertThat(enumAllOfEx.getCausingExceptions()).hasSize(1);
+        assertThat(enumAllOfEx).hasMessage("#/EnumProperty: #: only 1 subschema matches out of 2");
+        assertThat(enumAllOfEx.getKeyword()).isEqualTo("allOf");
+
+        final ValidationException enumEx = enumAllOfEx.getCausingExceptions().get(0);
+        assertThat(enumEx.getCausingExceptions()).isEmpty();
+        assertThat(enumEx).hasMessage("#/EnumProperty: failed validation constraint for keyword [enum]");
+
+        // ConstProperty does not match value
+        final ValidationException constAllOfEx = getExceptionAtPointer(e, "#/ConstProperty");
+        assertThat(constAllOfEx.getCausingExceptions()).hasSize(1);
+        assertThat(constAllOfEx).hasMessage("#/ConstProperty: #: only 1 subschema matches out of 2");
+        assertThat(constAllOfEx.getKeyword()).isEqualTo("allOf");
+
+        final ValidationException constEx = constAllOfEx.getCausingExceptions().get(0);
+        assertThat(constEx.getCausingExceptions()).isEmpty();
+        assertThat(constEx).hasMessage("#/ConstProperty: failed validation constraint for keyword [const]");
+        assertThat(constEx.getKeyword()).isEqualTo("const");
+
+        // ArrayProperty has too many items and items are not unique
+        final ValidationException arrEx = getExceptionAtPointer(e, "#/ArrayProperty");
+        assertThat(arrEx).hasMessage("#/ArrayProperty: 2 schema violations found");
+        assertThat(arrEx.getCausingExceptions()).hasSize(2);
+        assertThat(arrEx.getKeyword()).isNull();
+
+        final ValidationException arrExMaxItems = getExceptionByKeyword(arrEx, "maxItems", "#/ArrayProperty");
+        assertThat(arrExMaxItems.getCausingExceptions()).isEmpty();
+        assertThat(arrExMaxItems).hasMessage("#/ArrayProperty: expected maximum item count: 5, found: 9");
+
+        final ValidationException arrExUniqueItems = getExceptionByKeyword(arrEx, "uniqueItems", "#/ArrayProperty");
+        assertThat(arrExUniqueItems.getCausingExceptions()).isEmpty();
+        assertThat(arrExUniqueItems).hasMessage("#/ArrayProperty: array items are not unique");
+
+        // ArrayProperty2 has too few items
+        final ValidationException arrEx2 = getExceptionAtPointer(e, "#/ArrayProperty2");
+        assertThat(arrEx2).hasMessage("#/ArrayProperty2: expected minimum item count: 2, found: 1");
+        assertThat(arrEx2.getCausingExceptions()).isEmpty();
+        assertThat(arrEx2.getKeyword()).isEqualTo("minItems");
+
+        // IntProperty is too small and is not multiple of 5
+        final ValidationException intEx = getExceptionAtPointer(e, "#/IntProperty");
+        assertThat(intEx).hasMessage("#/IntProperty: 2 schema violations found");
+        assertThat(intEx.getCausingExceptions()).hasSize(2);
+
+        final ValidationException intExMin = getExceptionByKeyword(intEx, "minimum", "#/IntProperty");
+        assertThat(intExMin.getCausingExceptions()).isEmpty();
+        assertThat(intExMin).hasMessage("#/IntProperty: failed validation constraint for keyword [minimum]");
+
+        final ValidationException intExMultiple = getExceptionByKeyword(intEx, "multipleOf", "#/IntProperty");
+        assertThat(intExMultiple.getCausingExceptions()).isEmpty();
+        assertThat(intExMultiple).hasMessage("#/IntProperty: failed validation constraint for keyword [multipleOf]");
+
+        // IntProperty2 is too large
+        final ValidationException intEx2 = getExceptionAtPointer(e, "#/IntProperty2");
+        assertThat(intEx2).hasMessage("#/IntProperty2: failed validation constraint for keyword [maximum]");
+        assertThat(intEx2.getCausingExceptions()).isEmpty();
+        assertThat(intEx2.getKeyword()).isEqualTo("maximum");
+
+        // NumberProperty is too small
+        final ValidationException numEx = getExceptionAtPointer(e, "#/NumberProperty");
+        assertThat(numEx).hasMessage("#/NumberProperty: failed validation constraint for keyword [exclusiveMinimum]");
+        assertThat(numEx.getCausingExceptions()).isEmpty();
+        assertThat(numEx.getKeyword()).isEqualTo("exclusiveMinimum");
+
+        // IntProperty2 is too large
+        final ValidationException numEx2 = getExceptionAtPointer(e, "#/NumberProperty2");
+        assertThat(numEx2).hasMessage("#/NumberProperty2: failed validation constraint for keyword [exclusiveMaximum]");
+        assertThat(numEx2.getCausingExceptions()).isEmpty();
+        assertThat(numEx2.getKeyword()).isEqualTo("exclusiveMaximum");
+
+        // BooleanProperty is wrong type
+        final ValidationException boolEx = getExceptionAtPointer(e, "#/BooleanProperty");
+        assertThat(boolEx).hasMessage("#/BooleanProperty: expected type: Boolean, found: String");
+        assertThat(boolEx.getCausingExceptions()).isEmpty();
+        assertThat(boolEx.getKeyword()).isEqualTo("type");
+
+        // ObjectProperty has too few properties
+        final ValidationException objEx = getExceptionAtPointer(e, "#/ObjectProperty");
+        assertThat(objEx).hasMessage("#/ObjectProperty: minimum size: [2], found: [1]");
+        assertThat(objEx.getCausingExceptions()).isEmpty();
+        assertThat(objEx.getKeyword()).isEqualTo("minProperties");
+
+        // ObjectProperty2 has too many properties
+        final ValidationException objEx2 = getExceptionAtPointer(e, "#/ObjectProperty2");
+        assertThat(objEx2).hasMessage("#/ObjectProperty2: maximum size: [2], found: [3]");
+        assertThat(objEx2.getCausingExceptions()).isEmpty();
+        assertThat(objEx2.getKeyword()).isEqualTo("maxProperties");
+
+        // MapProperty does not match patternProperties (fails for additionalProperties)
+        final ValidationException mapEx = getExceptionAtPointer(e, "#/MapProperty");
+        assertThat(mapEx).hasMessage("#/MapProperty: extraneous key [def] is not permitted");
+        assertThat(mapEx.getCausingExceptions()).isEmpty();
+        assertThat(mapEx.getKeyword()).isEqualTo("additionalProperties");
+    }
+
+    private void assertException(final ValidationException e, final String message, final int numCausingExceptions) {
+        assertThat(e).hasMessage(message);
+        assertThat(e.getCausingExceptions()).hasSize(numCausingExceptions);
+    }
+
+    private ValidationException getExceptionAtPointer(final ValidationException e, final String pointer) {
+        return e.getCausingExceptions().stream().filter(ce -> pointer.equals(ce.getSchemaPointer()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException(String.format("No violations found for pointer: %s", pointer)));
+    }
+
+    private ValidationException getExceptionByKeyword(final ValidationException e, final String keyword, final String pointer) {
+        return e.getCausingExceptions().stream().filter(ce -> keyword.equals(ce.getKeyword()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException(String.format("No violations found for keyword [%s] at pointer [%s]", keyword, pointer)));
+    }
+//
+//    private boolean doesValidationExceptionMatch(final String keyword, final String schemaPointer, final String message, final int causingExceptionsSize, final ValidationException ex) {
+//        return keyword.equals(ex.getKeyword())
+//    }
+
+    /**
+     * The following keywords should be scrubbed of error messages because they contain the values:
+     * Integer Keywords: multipleOf, minimum, maximum, exclusiveMaximum, exclusiveMinimum
+     * String Keywords: pattern
+     * Enum
+     */
+    @Test
+    public void validateObject_invalidValue_shouldThrow_messageShouldBeScrubbed() {
+        final JSONObject object = new JSONObject()
+                .put("StringProperty", "DoesNotSatisfyPattern")
+                .put("EnumProperty", "NotPartOfEnum")
+                .put("ConstProperty", "InCorrectConst")
+                .put("ArrayProperty", Arrays.asList(1, 1, 2, 3, 4, 5, 6, 7, 8))
+                .put("IntProperty", 3)
+                .put("NumberProperty", 3)
+                .put("BooleanProperty", "true")
+                .put("ObjectProperty", Maps.<String, Object>newHashMap("SomeRandom", "SomeValue"))
+                .put("MapProperty", Maps.<String, Object>newHashMap("def", "SomeValue"));
+
+        final ValidationException e = catchThrowableOfType(
+                () -> validator.validateObject(object,
+                        new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_VALUE_SCHEMA_PATH)))),
+                ValidationException.class);
+
+        assertThat(e.getCausingExceptions()).hasSize(3);
+        assertThat(e).hasMessage("#: 3 schema violations found");
+        assertThat(e.getSchemaPointer()).isEqualTo("#");
     }
 
     @Test
@@ -136,8 +345,10 @@ public class ValidatorTest {
             .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION).put(PROPERTIES_KEY, new JSONObject())
             .put(PRIMARY_IDENTIFIER_KEY, Arrays.asList(EXAMPLE_PRIMARY_IDENTIFIER));
 
-        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
-            .withNoCause().withMessage("#/properties: minimum size: [1], found: [0]");
+
+        ValidationException e = catchThrowableOfType(() -> validator.validateResourceDefinition(definition), ValidationException.class);
+
+        assertThat(e).hasNoCause().hasMessage("#/properties: minimum size: [1], found: [0]");
     }
 
     @Test

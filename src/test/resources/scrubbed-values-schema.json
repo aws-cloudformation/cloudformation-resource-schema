@@ -1,0 +1,94 @@
+{
+  "typeName": "AWS::Test::TestModel",
+  "description": "A test schema for unit tests.",
+  "sourceUrl": "my-repo.git",
+  "definitions": {
+    "numberType": {
+      "type": "number",
+      "exclusiveMinimum": 10,
+      "exclusiveMaximum": 20
+    },
+    "integerType": {
+      "type": "integer",
+      "minimum": 10,
+      "maximum": 100,
+      "multipleOf": 5
+    },
+    "arrayType": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "minItems": 2,
+      "maxItems": 5,
+      "uniqueItems": true
+    },
+    "stringType": {
+      "type": "string",
+      "pattern": "Short",
+      "minLength": 10,
+      "maxLength": 20
+    },
+    "objectType": {
+      "type": "object",
+      "minProperties": 2,
+      "maxProperties": 2
+    }
+  },
+  "properties": {
+    "StringProperty": {
+      "$ref": "#/definitions/stringType"
+    },
+    "StringProperty2": {
+      "$ref": "#/definitions/stringType"
+    },
+    "EnumProperty": {
+      "type": "string",
+      "enum": ["ABC"]
+    },
+    "ConstProperty": {
+      "type": "string",
+      "const": "ABC"
+    },
+    "ArrayProperty": {
+      "$ref": "#/definitions/arrayType"
+    },
+    "ArrayProperty2": {
+      "$ref": "#/definitions/arrayType"
+    },
+    "IntProperty": {
+      "$ref": "#/definitions/integerType"
+    },
+    "IntProperty2": {
+      "$ref": "#/definitions/integerType"
+    },
+    "NumberProperty": {
+      "$ref": "#/definitions/numberType"
+    },
+    "NumberProperty2": {
+      "$ref": "#/definitions/numberType"
+    },
+    "BooleanProperty": {
+      "type": "boolean"
+    },
+    "ObjectProperty": {
+      "$ref": "#/definitions/objectType"
+    },
+    "ObjectProperty2": {
+      "$ref": "#/definitions/objectType"
+    },
+    "MapProperty": {
+      "type": "object",
+      "patternProperties": {
+        "abc": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "primaryIdentifier": [
+    "/properties/StringProperty"
+  ],
+  "additionalProperties": false
+}
