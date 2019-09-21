@@ -38,7 +38,9 @@
             "minProperties": 2,
             "maxProperties": 2,
             "dependencies": {
-                "dep": ["otherKey"]
+                "dep": [
+                    "otherKey"
+                ]
             }
         }
     },
