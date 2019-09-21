@@ -27,6 +27,7 @@ public class ValidationException extends RuntimeException {
     /**
      * Error messages thrown for these keywords don't contain values
      */
+    @SuppressWarnings("serial")
     private static final List<String> SAFE_KEYWORDS = new ArrayList<String>() {
         {
             // object keywords
