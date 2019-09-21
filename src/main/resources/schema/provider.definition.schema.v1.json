@@ -21,7 +21,7 @@
                     "additionalItems": false
                 }
             },
-            "additionalItems": false,
+            "additionalProperties": false,
             "required": [
                 "permissions"
             ]
