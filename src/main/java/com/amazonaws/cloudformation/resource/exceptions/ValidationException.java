@@ -29,26 +29,14 @@ public class ValidationException extends RuntimeException {
      * Error messages thrown for these keywords don't contain values
      */
     private static final List<String> SAFE_KEYWORDS = Arrays.asList(
-            // object keywords
-            "required",
-            "minProperties",
-            "maxProperties",
-            "dependencies",
-            "additionalProperties",
-            // string keywords
-            "minLength",
-            "maxLength",
-            // array keywords
-            "minItems",
-            "maxItems",
-            "uniqueItems",
-            "contains",
-            // misc keywords
-            "type",
-            "allOf",
-            "anyOf",
-            "oneOf"
-    );
+        // object keywords
+        "required", "minProperties", "maxProperties", "dependencies", "additionalProperties",
+        // string keywords
+        "minLength", "maxLength",
+        // array keywords
+        "minItems", "maxItems", "uniqueItems", "contains",
+        // misc keywords
+        "type", "allOf", "anyOf", "oneOf");
 
     private final List<ValidationException> causingExceptions;
     private final String keyword;
@@ -106,5 +94,22 @@ public class ValidationException extends RuntimeException {
 
             return new ValidationException(errorMessage, e);
         }
+    }
+
+    public static String buildFullExceptionMessage(final ValidationException e) {
+        return buildFullExceptionMessageHelper(e).trim();
+    }
+
+    private static String buildFullExceptionMessageHelper(final ValidationException e) {
+        StringBuilder builder = new StringBuilder();
+        final boolean isParentException = e.getKeyword() == null && e.getCausingExceptions() != null
+            && !e.getCausingExceptions().isEmpty();
+        if (!isParentException) {
+            builder.append(e.getMessage() + "\n");
+        }
+        for (ValidationException cause : e.getCausingExceptions()) {
+            builder.append(buildFullExceptionMessageHelper(cause));
+        }
+        return builder.toString();
     }
 }

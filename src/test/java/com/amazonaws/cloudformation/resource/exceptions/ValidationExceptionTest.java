@@ -27,5 +27,4 @@ public class ValidationExceptionTest {
         assertThat(e.getCausingExceptions().size()).isEqualTo(0);
         assertThat(e.getMessage()).isEqualTo("some error");
     }
-
 }

@@ -21,6 +21,8 @@ import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import com.amazonaws.cloudformation.resource.exceptions.ValidationException;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -99,6 +101,54 @@ public class ValidatorTest {
         assertThat(e).hasMessage("#: 3 schema violations found");
         assertThat(e.getSchemaPointer()).isEqualTo("#");
         assertThat(e.getKeyword()).isNull();
+    }
+
+    @Test
+    public void validateObject_buildFullExceptionMessage() {
+        final JSONObject object = new JSONObject().put("StringProperty", "DoesNotSatisfyPatternAndTooLong")
+            .put("StringProperty2", "tooShort").put("EnumProperty", "NotPartOfEnum").put("ConstProperty", "InCorrectConst")
+            .put("ArrayProperty", Arrays.asList(1, 1, 2, 3, 4, 5, 6, 7, 8)) // too many items
+            .put("ArrayProperty2", Arrays.asList(1)) // too few items and does not contain 7
+            .put("IntProperty", 3) // too small and is not multiple of 5
+            .put("IntProperty2", 300) // too large
+            .put("NumberProperty", 3) // too small
+            .put("NumberProperty2", 300) // too large
+            .put("BooleanProperty", "true") // incorrect type
+            .put("ObjectProperty", new JSONObject().put("SomeRandom", "SomeValue")) // too few properties
+            .put("ObjectProperty2", new JSONObject() // too many properties
+                .put("Key1", "val1").put("key2", "val2").put("key3", "val3"))
+            .put("MapProperty", new JSONObject().put("def", "Value")); // not matching patternProperties
+
+        final ValidationException e = catchThrowableOfType(
+            () -> validator.validateObject(object,
+                new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_VALUE_SCHEMA_PATH)))),
+            ValidationException.class);
+
+        final String resultMessage = ValidationException.buildFullExceptionMessage(e);
+        assertThat(resultMessage).doesNotEndWith("\n");
+
+        final Set<String> expectedMessages = new HashSet<>(Arrays.asList("#: property [RandomProperty] is required",
+            "#/ObjectProperty: minimum size: [2], found: [1]", "#/ArrayProperty: expected maximum item count: 5, found: 9",
+            "#/ArrayProperty: array items are not unique", "#/StringProperty2: expected minLength: 10, actual: 8",
+            "#/NumberProperty2: failed validation constraint for keyword [exclusiveMaximum]",
+            "#/ConstProperty: #: only 1 subschema matches out of 2",
+            "#/ConstProperty: failed validation constraint for keyword [const]",
+            "#/ArrayProperty2: expected minimum item count: 2, found: 1",
+            "#/ArrayProperty2: expected at least one array item to match 'contains' schema",
+            "#/BooleanProperty: expected type: Boolean, found: String", "#/MapProperty: #: only 0 subschema matches out of 3",
+            "#/MapProperty: extraneous key [def] is not permitted", "#/MapProperty: #: 0 subschemas matched instead of one",
+            "#/MapProperty: expected type: String, found: JSONObject",
+            "#/MapProperty: #: no subschema matched out of the total 1 subschemas",
+            "#/MapProperty: expected type: String, found: JSONObject", "#/StringProperty: expected maxLength: 20, actual: 31",
+            "#/StringProperty: failed validation constraint for keyword [pattern]",
+            "#/ObjectProperty2: maximum size: [2], found: [3]", "#/EnumProperty: #: only 1 subschema matches out of 2",
+            "#/EnumProperty: failed validation constraint for keyword [enum]",
+            "#/IntProperty: failed validation constraint for keyword [minimum]",
+            "#/IntProperty: failed validation constraint for keyword [multipleOf]",
+            "#/IntProperty2: failed validation constraint for keyword [maximum]",
+            "#/NumberProperty: failed validation constraint for keyword [exclusiveMinimum]"));
+        Set<String> resultMessages = new HashSet<>(Arrays.asList(resultMessage.split("\n")));
+        assertThat(resultMessages).isEqualTo(expectedMessages);
     }
 
     /**
