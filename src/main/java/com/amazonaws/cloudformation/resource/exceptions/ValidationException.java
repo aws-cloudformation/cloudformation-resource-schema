@@ -42,25 +42,6 @@ public class ValidationException extends RuntimeException {
     private final String keyword;
     private final String schemaPointer;
 
-    public ValidationException(final org.everit.json.schema.ValidationException validationException) {
-        this(validationException.getMessage(), validationException);
-    }
-
-    public ValidationException(final String errorMessage,
-                               final org.everit.json.schema.ValidationException validationException) {
-        super(errorMessage);
-        this.keyword = validationException.getKeyword();
-        this.schemaPointer = validationException.getPointerToViolation();
-
-        final List<ValidationException> causingExceptions = new ArrayList<>();
-        if (validationException.getCausingExceptions() != null) {
-            for (final org.everit.json.schema.ValidationException e : validationException.getCausingExceptions()) {
-                causingExceptions.add(newScrubbedException(e));
-            }
-        }
-        this.causingExceptions = Collections.unmodifiableList(causingExceptions);
-    }
-
     public ValidationException(final String message,
                                final String keyword,
                                final String schemaPointer) {
@@ -75,6 +56,31 @@ public class ValidationException extends RuntimeException {
         this.causingExceptions = Collections.unmodifiableList(causingExceptions);
         this.keyword = keyword;
         this.schemaPointer = schemaPointer;
+    }
+
+    /**
+     * Marked private -- must use {@link #newScrubbedException}
+     */
+    private ValidationException(final org.everit.json.schema.ValidationException validationException) {
+        this(validationException.getMessage(), validationException);
+    }
+
+    /**
+     * Marked private -- must use {@link #newScrubbedException}
+     */
+    private ValidationException(final String errorMessage,
+                                final org.everit.json.schema.ValidationException validationException) {
+        super(errorMessage);
+        this.keyword = validationException.getKeyword();
+        this.schemaPointer = validationException.getPointerToViolation();
+
+        final List<ValidationException> causingExceptions = new ArrayList<>();
+        if (validationException.getCausingExceptions() != null) {
+            for (final org.everit.json.schema.ValidationException e : validationException.getCausingExceptions()) {
+                causingExceptions.add(newScrubbedException(e));
+            }
+        }
+        this.causingExceptions = Collections.unmodifiableList(causingExceptions);
     }
 
     /**
@@ -96,6 +102,9 @@ public class ValidationException extends RuntimeException {
         }
     }
 
+    /**
+     * build an exception message containing all nested exceptions
+     */
     public static String buildFullExceptionMessage(final ValidationException e) {
         return buildFullExceptionMessageHelper(e).trim();
     }

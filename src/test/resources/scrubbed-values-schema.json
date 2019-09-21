@@ -17,70 +17,58 @@
         "arrayType": {
             "type": "array",
             "items": {
-                "type": "integer"
+                "type": "string"
             },
             "minItems": 2,
-            "maxItems": 5,
+            "maxItems": 2,
             "contains": {
-                "type": "integer",
-                "minimum": 5
+                "type": "string",
+                "minLength": 2
             },
             "uniqueItems": true
         },
         "stringType": {
             "type": "string",
-            "pattern": "Short",
+            "pattern": "Too",
             "minLength": 10,
-            "maxLength": 20
+            "maxLength": 15
         },
         "objectType": {
             "type": "object",
             "minProperties": 2,
-            "maxProperties": 2
+            "maxProperties": 2,
+            "dependencies": {
+                "dep": ["otherKey"]
+            }
         }
     },
     "properties": {
         "StringProperty": {
             "$ref": "#/definitions/stringType"
         },
-        "StringProperty2": {
-            "$ref": "#/definitions/stringType"
-        },
-        "EnumProperty": {
+        "enumProperty": {
             "type": "string",
             "enum": [
                 "ABC"
             ]
         },
-        "ConstProperty": {
+        "constProperty": {
             "type": "string",
             "const": "ABC"
         },
         "ArrayProperty": {
             "$ref": "#/definitions/arrayType"
         },
-        "ArrayProperty2": {
-            "$ref": "#/definitions/arrayType"
-        },
         "IntProperty": {
             "$ref": "#/definitions/integerType"
         },
-        "IntProperty2": {
-            "$ref": "#/definitions/integerType"
-        },
         "NumberProperty": {
-            "$ref": "#/definitions/numberType"
-        },
-        "NumberProperty2": {
             "$ref": "#/definitions/numberType"
         },
         "BooleanProperty": {
             "type": "boolean"
         },
         "ObjectProperty": {
-            "$ref": "#/definitions/objectType"
-        },
-        "ObjectProperty2": {
             "$ref": "#/definitions/objectType"
         },
         "MapProperty": {
@@ -90,24 +78,29 @@
                     "type": "string"
                 }
             },
-            "anyOf": [
-                {
-                    "type": "string"
-                }
-            ],
-            "oneOf": [
-                {
-                    "type": "string"
-                }
-            ],
             "additionalProperties": false
         },
-        "RandomProperty": {}
-    },
-    "dependencies": {
-        "MapProperty": [
-            "RandomProperty"
-        ]
+        "anyOfProperty": {
+            "anyOf": [
+                {
+                    "type": "integer"
+                }
+            ]
+        },
+        "oneOfProperty": {
+            "oneOf": [
+                {
+                    "type": "integer"
+                }
+            ]
+        },
+        "allOfProperty": {
+            "allOf": [
+                {
+                    "type": "integer"
+                }
+            ]
+        }
     },
     "primaryIdentifier": [
         "/properties/StringProperty"
