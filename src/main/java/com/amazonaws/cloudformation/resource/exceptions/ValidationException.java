@@ -15,6 +15,7 @@
 package com.amazonaws.cloudformation.resource.exceptions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -27,30 +28,27 @@ public class ValidationException extends RuntimeException {
     /**
      * Error messages thrown for these keywords don't contain values
      */
-    @SuppressWarnings("serial")
-    private static final List<String> SAFE_KEYWORDS = new ArrayList<String>() {
-        {
+    private static final List<String> SAFE_KEYWORDS = Arrays.asList(
             // object keywords
-            add("required");
-            add("minProperties");
-            add("maxProperties");
-            add("dependencies");
-            add("additionalProperties");
+            "required",
+            "minProperties",
+            "maxProperties",
+            "dependencies",
+            "additionalProperties",
             // string keywords
-            add("minLength");
-            add("maxLength");
+            "minLength",
+            "maxLength",
             // array keywords
-            add("minItems");
-            add("maxItems");
-            add("uniqueItems");
-            add("contains");
+            "minItems",
+            "maxItems",
+            "uniqueItems",
+            "contains",
             // misc keywords
-            add("type");
-            add("allOf");
-            add("anyOf");
-            add("oneOf");
-        }
-    };
+            "type",
+            "allOf",
+            "anyOf",
+            "oneOf"
+    );
 
     private final List<ValidationException> causingExceptions;
     private final String keyword;
