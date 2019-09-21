@@ -21,9 +21,7 @@ import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import com.amazonaws.cloudformation.resource.exceptions.ValidationException;
 
 import java.util.Arrays;
-import java.util.List;
 
-import org.assertj.core.util.Maps;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.junit.jupiter.api.BeforeEach;
@@ -104,40 +102,44 @@ public class ValidatorTest {
     }
 
     /**
-     * All error messages thrown by SAFE_KEYWORDS from {link: ValidationException.class} should contain their original
-     * values, since they do not contain error messages:
-     * Integer Keywords: multipleOf, minimum, maximum, exclusiveMaximum, exclusiveMinimum
-     * String Keywords: pattern
-     * Enum
+     * All error messages thrown by
+     * {@link com.amazonaws.cloudformation.resource.exceptions.ValidationException#SAFE_KEYWORDS}
+     * should contain their original values, since they do not contain error
+     * messages. All others should be scrubbed: Integer Keywords: multipleOf,
+     * minimum, maximum, exclusiveMaximum, exclusiveMinimum String Keywords: pattern
+     * Enum Const
      */
     @Test
     public void validateObject_invalidValue_shouldThrow_originalMessageShouldNotContainValue() {
-        final JSONObject object = new JSONObject()
-                .put("StringProperty", "DoesNotSatisfyPatternAndTooLong")
-                .put("StringProperty2", "tooShort")
-                .put("EnumProperty", "NotPartOfEnum")
-                .put("ConstProperty", "InCorrectConst")
-                .put("ArrayProperty", Arrays.asList(1, 1, 2, 3, 4, 5, 6, 7, 8)) // too many items
-                .put("ArrayProperty2", Arrays.asList(1)) // too few items
-                .put("IntProperty", 3) // too small and is not multiple of 5
-                .put("IntProperty2", 300) // too large
-                .put("NumberProperty", 3) // too small
-                .put("NumberProperty2", 300) // too large
-                .put("BooleanProperty", "true") // incorrect type
-                .put("ObjectProperty", new JSONObject().put("SomeRandom", "SomeValue")) //too few properties
-                .put("ObjectProperty2", new JSONObject() // too many properties
-                        .put("Key1", "val1").put("key2", "val2").put("key3", "val3"))
-                .put("MapProperty", new JSONObject().put("def", "Value")); // not matching patternProperties
+        final JSONObject object = new JSONObject().put("StringProperty", "DoesNotSatisfyPatternAndTooLong")
+            .put("StringProperty2", "tooShort").put("EnumProperty", "NotPartOfEnum").put("ConstProperty", "InCorrectConst")
+            .put("ArrayProperty", Arrays.asList(1, 1, 2, 3, 4, 5, 6, 7, 8)) // too many items
+            .put("ArrayProperty2", Arrays.asList(1)) // too few items and does not contain 7
+            .put("IntProperty", 3) // too small and is not multiple of 5
+            .put("IntProperty2", 300) // too large
+            .put("NumberProperty", 3) // too small
+            .put("NumberProperty2", 300) // too large
+            .put("BooleanProperty", "true") // incorrect type
+            .put("ObjectProperty", new JSONObject().put("SomeRandom", "SomeValue")) // too few properties
+            .put("ObjectProperty2", new JSONObject() // too many properties
+                .put("Key1", "val1").put("key2", "val2").put("key3", "val3"))
+            .put("MapProperty", new JSONObject().put("def", "Value")); // not matching patternProperties
 
         final ValidationException e = catchThrowableOfType(
-                () -> validator.validateObject(object,
-                        new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_VALUE_SCHEMA_PATH)))),
-                ValidationException.class);
+            () -> validator.validateObject(object,
+                new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_VALUE_SCHEMA_PATH)))),
+            ValidationException.class);
 
-        assertThat(e).hasMessage("#: 17 schema violations found");
+        assertThat(e).hasMessage("#: 21 schema violations found");
         assertThat(e.getSchemaPointer()).isEqualTo("#");
-        assertThat(e.getCausingExceptions()).hasSize(14);
+        assertThat(e.getCausingExceptions()).hasSize(15);
+        assertThat(e.getKeyword()).isNull();
 
+        // RandomProperty is required through dependencies
+        final ValidationException dependenciesEx = getExceptionAtPointer(e, "#");
+        assertThat(dependenciesEx).hasMessage("#: property [RandomProperty] is required");
+        assertThat(dependenciesEx.getCausingExceptions()).isEmpty();
+        assertThat(dependenciesEx.getKeyword()).isEqualTo("dependencies");
 
         // StringProperty is too long and does not match pattern
         final ValidationException stringEx = getExceptionAtPointer(e, "#/StringProperty");
@@ -194,11 +196,19 @@ public class ValidatorTest {
         assertThat(arrExUniqueItems.getCausingExceptions()).isEmpty();
         assertThat(arrExUniqueItems).hasMessage("#/ArrayProperty: array items are not unique");
 
-        // ArrayProperty2 has too few items
+        // ArrayProperty2 has too few items and does not contain a minimum of 5
         final ValidationException arrEx2 = getExceptionAtPointer(e, "#/ArrayProperty2");
-        assertThat(arrEx2).hasMessage("#/ArrayProperty2: expected minimum item count: 2, found: 1");
-        assertThat(arrEx2.getCausingExceptions()).isEmpty();
-        assertThat(arrEx2.getKeyword()).isEqualTo("minItems");
+        assertThat(arrEx2).hasMessage("#/ArrayProperty2: 2 schema violations found");
+        assertThat(arrEx2.getCausingExceptions()).hasSize(2);
+        assertThat(arrEx2.getKeyword()).isNull();
+
+        final ValidationException arrEx2MinItems = getExceptionByKeyword(arrEx2, "minItems", "#/ArrayProperty2");
+        assertThat(arrEx2MinItems).hasMessage("#/ArrayProperty2: expected minimum item count: 2, found: 1");
+        assertThat(arrEx2MinItems.getCausingExceptions()).isEmpty();
+
+        final ValidationException arrEx2Contains = getExceptionByKeyword(arrEx2, "contains", "#/ArrayProperty2");
+        assertThat(arrEx2Contains).hasMessage("#/ArrayProperty2: expected at least one array item to match 'contains' schema");
+        assertThat(arrEx2Contains.getCausingExceptions()).isEmpty();
 
         // IntProperty is too small and is not multiple of 5
         final ValidationException intEx = getExceptionAtPointer(e, "#/IntProperty");
@@ -249,61 +259,36 @@ public class ValidatorTest {
         assertThat(objEx2.getCausingExceptions()).isEmpty();
         assertThat(objEx2.getKeyword()).isEqualTo("maxProperties");
 
-        // MapProperty does not match patternProperties (fails for additionalProperties)
+        // MapProperty does not match patternProperties (fails for
+        // additionalProperties), and fails oneOf and anyOf
         final ValidationException mapEx = getExceptionAtPointer(e, "#/MapProperty");
-        assertThat(mapEx).hasMessage("#/MapProperty: extraneous key [def] is not permitted");
-        assertThat(mapEx.getCausingExceptions()).isEmpty();
-        assertThat(mapEx.getKeyword()).isEqualTo("additionalProperties");
-    }
+        assertThat(mapEx).hasMessage("#/MapProperty: #: only 0 subschema matches out of 3");
+        assertThat(mapEx.getCausingExceptions()).hasSize(3);
+        assertThat(mapEx.getKeyword()).isEqualTo("allOf");
 
-    private void assertException(final ValidationException e, final String message, final int numCausingExceptions) {
-        assertThat(e).hasMessage(message);
-        assertThat(e.getCausingExceptions()).hasSize(numCausingExceptions);
+        final ValidationException mapExPatternProp = getExceptionByKeyword(mapEx, "additionalProperties", "#/MapProperty");
+        assertThat(mapExPatternProp).hasMessage("#/MapProperty: extraneous key [def] is not permitted");
+        assertThat(mapExPatternProp.getCausingExceptions()).isEmpty();
+
+        // TODO: looks like the allOf, oneOf, and anyOf error messages get a bit weird.
+        // Issue #38
+        final ValidationException mapExOneOf = getExceptionByKeyword(mapEx, "oneOf", "#/MapProperty");
+        assertThat(mapExOneOf).hasMessage("#/MapProperty: #: 0 subschemas matched instead of one");
+        assertThat(mapExOneOf.getCausingExceptions()).hasSize(1);
+
+        final ValidationException mapExAnyOf = getExceptionByKeyword(mapEx, "anyOf", "#/MapProperty");
+        assertThat(mapExAnyOf).hasMessage("#/MapProperty: #: no subschema matched out of the total 1 subschemas");
+        assertThat(mapExAnyOf.getCausingExceptions()).hasSize(1);
     }
 
     private ValidationException getExceptionAtPointer(final ValidationException e, final String pointer) {
-        return e.getCausingExceptions().stream().filter(ce -> pointer.equals(ce.getSchemaPointer()))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException(String.format("No violations found for pointer: %s", pointer)));
+        return e.getCausingExceptions().stream().filter(ce -> pointer.equals(ce.getSchemaPointer())).findFirst()
+            .orElseThrow(() -> new RuntimeException(String.format("No violations found for pointer: %s", pointer)));
     }
 
     private ValidationException getExceptionByKeyword(final ValidationException e, final String keyword, final String pointer) {
-        return e.getCausingExceptions().stream().filter(ce -> keyword.equals(ce.getKeyword()))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException(String.format("No violations found for keyword [%s] at pointer [%s]", keyword, pointer)));
-    }
-//
-//    private boolean doesValidationExceptionMatch(final String keyword, final String schemaPointer, final String message, final int causingExceptionsSize, final ValidationException ex) {
-//        return keyword.equals(ex.getKeyword())
-//    }
-
-    /**
-     * The following keywords should be scrubbed of error messages because they contain the values:
-     * Integer Keywords: multipleOf, minimum, maximum, exclusiveMaximum, exclusiveMinimum
-     * String Keywords: pattern
-     * Enum
-     */
-    @Test
-    public void validateObject_invalidValue_shouldThrow_messageShouldBeScrubbed() {
-        final JSONObject object = new JSONObject()
-                .put("StringProperty", "DoesNotSatisfyPattern")
-                .put("EnumProperty", "NotPartOfEnum")
-                .put("ConstProperty", "InCorrectConst")
-                .put("ArrayProperty", Arrays.asList(1, 1, 2, 3, 4, 5, 6, 7, 8))
-                .put("IntProperty", 3)
-                .put("NumberProperty", 3)
-                .put("BooleanProperty", "true")
-                .put("ObjectProperty", Maps.<String, Object>newHashMap("SomeRandom", "SomeValue"))
-                .put("MapProperty", Maps.<String, Object>newHashMap("def", "SomeValue"));
-
-        final ValidationException e = catchThrowableOfType(
-                () -> validator.validateObject(object,
-                        new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_VALUE_SCHEMA_PATH)))),
-                ValidationException.class);
-
-        assertThat(e.getCausingExceptions()).hasSize(3);
-        assertThat(e).hasMessage("#: 3 schema violations found");
-        assertThat(e.getSchemaPointer()).isEqualTo("#");
+        return e.getCausingExceptions().stream().filter(ce -> keyword.equals(ce.getKeyword())).findFirst().orElseThrow(
+            () -> new RuntimeException(String.format("No violations found for keyword [%s] at pointer [%s]", keyword, pointer)));
     }
 
     @Test
@@ -345,8 +330,8 @@ public class ValidatorTest {
             .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION).put(PROPERTIES_KEY, new JSONObject())
             .put(PRIMARY_IDENTIFIER_KEY, Arrays.asList(EXAMPLE_PRIMARY_IDENTIFIER));
 
-
-        ValidationException e = catchThrowableOfType(() -> validator.validateResourceDefinition(definition), ValidationException.class);
+        ValidationException e = catchThrowableOfType(() -> validator.validateResourceDefinition(definition),
+            ValidationException.class);
 
         assertThat(e).hasNoCause().hasMessage("#/properties: minimum size: [1], found: [0]");
     }
@@ -386,7 +371,7 @@ public class ValidatorTest {
             .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION).put(PRIMARY_IDENTIFIER_KEY, Arrays.asList(EXAMPLE_PRIMARY_IDENTIFIER))
             .put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject())).put("documentationUrl", documentationUrl);
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
-            .withMessageContaining("#/documentationUrl").withMessageContaining(documentationUrl);
+            .withMessageContaining("#/documentationUrl").withMessageNotContaining(documentationUrl);
     }
 
     @ParameterizedTest
@@ -416,7 +401,7 @@ public class ValidatorTest {
             .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION).put(PRIMARY_IDENTIFIER_KEY, Arrays.asList(EXAMPLE_PRIMARY_IDENTIFIER))
             .put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject())).put("sourceUrl", sourceUrl);
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
-            .withMessageContaining("#/sourceUrl").withMessageContaining(sourceUrl);
+            .withMessageContaining("#/sourceUrl").withMessageNotContaining((sourceUrl));
     }
 
     @ParameterizedTest
