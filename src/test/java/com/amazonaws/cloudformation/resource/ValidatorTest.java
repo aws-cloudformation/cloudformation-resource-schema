@@ -310,7 +310,7 @@ public class ValidatorTest {
             .put(PRIMARY_IDENTIFIER_KEY, Arrays.asList(EXAMPLE_PRIMARY_IDENTIFIER));
 
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
-                .withNoCause().withMessage("#/properties: minimum size: [1], found: [0]");
+            .withNoCause().withMessage("#/properties: minimum size: [1], found: [0]");
     }
 
     @Test
