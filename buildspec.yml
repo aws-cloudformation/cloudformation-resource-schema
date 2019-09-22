@@ -8,5 +8,6 @@ phases:
       - pip install pre-commit
   build:
     commands:
-      - pre-commit run --all-files
-      - mvn clean verify --no-transfer-progress
+      - pre-commit run --all-files --verbose
+    finally:
+      - git diff
