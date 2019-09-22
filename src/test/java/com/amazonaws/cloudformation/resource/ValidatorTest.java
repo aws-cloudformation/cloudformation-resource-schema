@@ -309,10 +309,8 @@ public class ValidatorTest {
             .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION).put(PROPERTIES_KEY, new JSONObject())
             .put(PRIMARY_IDENTIFIER_KEY, Arrays.asList(EXAMPLE_PRIMARY_IDENTIFIER));
 
-        ValidationException e = catchThrowableOfType(() -> validator.validateResourceDefinition(definition),
-            ValidationException.class);
-
-        assertThat(e).hasNoCause().hasMessage("#/properties: minimum size: [1], found: [0]");
+        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
+                .withNoCause().withMessage("#/properties: minimum size: [1], found: [0]");
     }
 
     @Test
