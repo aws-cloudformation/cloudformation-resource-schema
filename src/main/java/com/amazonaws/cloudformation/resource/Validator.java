@@ -53,7 +53,7 @@ public class Validator implements SchemaValidator {
             try {
                 schema.validate(modelObject); // throws a ValidationException if this object is invalid
             } catch (final org.everit.json.schema.ValidationException e) {
-                throw new ValidationException(e);
+                throw ValidationException.newScrubbedException(e);
             }
         } catch (final URISyntaxException e) {
             throw new RuntimeException("Invalid URI format for JSON schema.");

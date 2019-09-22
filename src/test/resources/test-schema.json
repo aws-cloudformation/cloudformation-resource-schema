@@ -20,7 +20,7 @@
         }
     },
     "required": [
-        "propertyA"
+        "propertyB"
     ],
     "createOnlyProperties": [
         "/properties/propertyA",

@@ -21,16 +21,19 @@ import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import com.amazonaws.cloudformation.resource.exceptions.ValidationException;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 public class ValidatorTest {
     private static final String TEST_SCHEMA_PATH = "/test-schema.json";
+    private static final String TEST_VALUE_SCHEMA_PATH = "/scrubbed-values-schema.json";
     private static final String TYPE_NAME_KEY = "typeName";
     private static final String PROPERTIES_KEY = "properties";
     private static final String DESCRIPTION_KEY = "description";
@@ -55,22 +58,25 @@ public class ValidatorTest {
 
     @Test
     public void validateObject_invalidObjectMissingRequiredProperties_shouldThrow() {
-        final JSONObject object = new JSONObject().put("propertyB", Arrays.asList(1, 2, 3));
+        final String propVal = "abc";
+        final JSONObject object = new JSONObject().put("propertyA", propVal);
 
         final ValidationException e = catchThrowableOfType(
             () -> validator.validateObject(object,
                 new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)))),
             ValidationException.class);
 
-        assertThat(e).hasNoCause().hasMessageContaining("propertyA");
+        assertThat(e).hasNoCause().hasMessageContaining("propertyB").hasMessageNotContaining(propVal);
         assertThat(e.getCausingExceptions()).isEmpty();
-        assertThat(e.getSchemaLocation()).isEqualTo("#");
+        assertThat(e.getSchemaPointer()).isEqualTo("#");
+        assertThat(e.getKeyword()).isEqualTo("required");
     }
 
     @Test
     public void validateObject_invalidObjectAdditionalProperties_shouldThrow() {
+        final String propValue = "notpartofschema";
         final JSONObject object = new JSONObject().put("propertyA", "abc").put("propertyB", Arrays.asList(1, 2, 3))
-            .put("propertyX", "notpartofschema");
+            .put("propertyX", propValue);
 
         final ValidationException e = catchThrowableOfType(
             () -> validator.validateObject(object,
@@ -78,14 +84,175 @@ public class ValidatorTest {
             ValidationException.class);
 
         assertThat(e).hasNoCause().hasMessageContaining("propertyX");
+        assertThat(e).hasMessageNotContaining(propValue);
         assertThat(e.getCausingExceptions()).isEmpty();
-        assertThat(e.getSchemaLocation()).isEqualTo("#");
+        assertThat(e.getSchemaPointer()).isEqualTo("#");
+        assertThat(e.getKeyword()).isEqualTo("additionalProperties");
     }
 
     @Test
-    public void validateObject_invalidObjectMultiple_shouldThrow() {
+    public void validateObject_invalidType_messageShouldNotContainValue() {
+        final JSONObject object = new JSONObject().put("BooleanProperty", "true");
+
+        final ValidationException e = catchThrowableOfType(
+            () -> validator.validateObject(object,
+                new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_VALUE_SCHEMA_PATH)))),
+            ValidationException.class);
+
+        assertThat(e).hasMessageNotContaining("true");
+        assertThat(e.getCausingExceptions()).isEmpty();
+        assertThat(e.getKeyword()).isEqualTo("type");
+    }
+
+    @ParameterizedTest
+    @CsvSource({ "WaaaaaaaayTooLong,maxLength", "TooShort,minLength", "NoPatternMatch,pattern" })
+    public void validateObject_invalidStringValue_messageShouldNotContainValue(final String value, final String keyword) {
+        final JSONObject object = new JSONObject().put("StringProperty", value);
+
+        final ValidationException e = catchThrowableOfType(
+            () -> validator.validateObject(object,
+                new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_VALUE_SCHEMA_PATH)))),
+            ValidationException.class);
+
+        assertThat(e.getSchemaPointer()).isEqualTo("#/StringProperty");
+        assertThat(e.getKeyword()).isEqualTo(keyword);
+        assertThat(e.getMessage()).doesNotContain(value);
+        assertThat(e.getCausingExceptions().isEmpty());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "enum", "const" })
+    public void validateObject_invalidEnumValue_messageShouldNotContainValue(final String keyword) {
+        final String propName = keyword + "Property";
+        final String propVal = "NotPartOfEnum";
+        final JSONObject object = new JSONObject().put(propName, propVal);
+
+        final ValidationException e = catchThrowableOfType(
+            () -> validator.validateObject(object,
+                new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_VALUE_SCHEMA_PATH)))),
+            ValidationException.class);
+
+        final String pointer = "#/" + propName;
+        assertThat(e.getSchemaPointer()).isEqualTo(pointer);
+        assertThat(e.getKeyword()).isEqualTo("allOf");
+        assertThat(e).hasMessageNotContaining(propVal);
+        assertThat(e.getCausingExceptions()).hasSize(1);
+
+        final ValidationException enumEx = e.getCausingExceptions().get(0);
+        assertThat(enumEx.getSchemaPointer()).isEqualTo(pointer);
+        assertThat(enumEx).hasMessageNotContaining(propVal);
+        assertThat(enumEx.getKeyword()).isEqualTo(keyword);
+        assertThat(enumEx.getCausingExceptions()).isEmpty();
+    }
+
+    @ParameterizedTest
+    @CsvSource({ "test-test,uniqueItems", "test,minItems", "test-test2-test3,maxItems", "Y-X,contains" })
+    public void validateObject_invalidArrayValue_messageShouldNotContainValue(final String listAsString, final String keyword) {
+        final List<String> values = Arrays.asList(listAsString.split("-"));
+        final JSONObject object = new JSONObject().put("ArrayProperty", values);
+
+        final ValidationException e = catchThrowableOfType(
+            () -> validator.validateObject(object,
+                new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_VALUE_SCHEMA_PATH)))),
+            ValidationException.class);
+
+        assertThat(e.getKeyword()).isEqualTo(keyword);
+        assertThat(e.getSchemaPointer()).isEqualTo("#/ArrayProperty");
+        assertThat(e.getCausingExceptions()).isEmpty();
+
+        values.forEach(v -> assertThat(e).hasMessageNotContaining(v));
+    }
+
+    @ParameterizedTest
+    @CsvSource({ "5,IntProperty,minimum", "300,IntProperty,maximum", "23,IntProperty,multipleOf",
+        "5,NumberProperty,exclusiveMinimum", "300,NumberProperty,exclusiveMaximum" })
+    public void validateObject_invalidNumValue_messageShouldNotContainValue(final String numAsString,
+                                                                            final String propName,
+                                                                            final String keyword) {
+        final JSONObject object = new JSONObject().put(propName, Integer.valueOf(numAsString));
+
+        final ValidationException e = catchThrowableOfType(
+            () -> validator.validateObject(object,
+                new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_VALUE_SCHEMA_PATH)))),
+            ValidationException.class);
+
+        assertThat(e.getKeyword()).isEqualTo(keyword);
+        assertThat(e.getSchemaPointer()).isEqualTo("#/" + propName);
+        assertThat(e).hasMessageNotContaining(numAsString);
+        assertThat(e.getCausingExceptions().isEmpty());
+    }
+
+    @ParameterizedTest
+    @CsvSource({ "test,minProperties", "test-test1-test2,maxProperties", "test-dep,dependencies" })
+    public void validateObject_invalidSubObject_messageShouldNotContainValue(final String keysAsString, final String keyword) {
+        final String val = "testValue";
+        final JSONObject subSchema = new JSONObject();
+
+        final List<String> keys = Arrays.asList(keysAsString.split("-"));
+        keys.forEach(k -> subSchema.put(k, val));
+
+        final JSONObject object = new JSONObject().put("ObjectProperty", subSchema);
+
+        final ValidationException e = catchThrowableOfType(
+            () -> validator.validateObject(object,
+                new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_VALUE_SCHEMA_PATH)))),
+            ValidationException.class);
+
+        assertThat(e.getKeyword()).isEqualTo(keyword);
+        assertThat(e.getSchemaPointer()).isEqualTo("#/ObjectProperty");
+        assertThat(e).hasMessageNotContaining(val);
+        assertThat(e.getCausingExceptions().isEmpty());
+    }
+
+    @ParameterizedTest
+    @CsvSource({ "test,minProperties", "test-test1-test2,maxProperties", "test-dep,dependencies" })
+    public void validateObject_invalidPatternProperties_messageShouldNotContainValue(final String keysAsString,
+                                                                                     final String keyword) {
+        final String val = "Value";
+        final JSONObject object = new JSONObject().put("MapProperty", new JSONObject().put("def", "val"));
+
+        final ValidationException e = catchThrowableOfType(
+            () -> validator.validateObject(object,
+                new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_VALUE_SCHEMA_PATH)))),
+            ValidationException.class);
+
+        assertThat(e.getSchemaPointer()).isEqualTo("#/MapProperty");
+        assertThat(e.getKeyword()).isEqualTo("additionalProperties");
+        assertThat(e).hasMessageNotContaining(val);
+        assertThat(e.getCausingExceptions()).isEmpty();
+
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "anyOf", "allOf", "oneOf" })
+    public void validateObject_invalidCombiner_messageShouldNotContainValue(final String keyword) {
+        final String propName = keyword + "Property";
+        final String propVal = "NotAnInteger";
+        final JSONObject object = new JSONObject().put(propName, propVal);
+
+        final ValidationException e = catchThrowableOfType(
+            () -> validator.validateObject(object,
+                new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_VALUE_SCHEMA_PATH)))),
+            ValidationException.class);
+
+        final String pointer = "#/" + propName;
+        assertThat(e.getSchemaPointer()).isEqualTo(pointer);
+        assertThat(e.getKeyword()).isEqualTo(keyword);
+        assertThat(e).hasMessageNotContaining(propVal);
+        assertThat(e.getCausingExceptions()).hasSize(1);
+
+        final ValidationException enumEx = e.getCausingExceptions().get(0);
+        assertThat(enumEx.getSchemaPointer()).isEqualTo(pointer);
+        assertThat(enumEx).hasMessageNotContaining(propVal);
+        assertThat(enumEx.getKeyword()).isEqualTo("type");
+        assertThat(enumEx.getCausingExceptions()).isEmpty();
+    }
+
+    @Test
+    public void validateObject_invalidObjectMultiple_messageShouldNotContainValue() {
+        final String propValue = "notpartofschema";
         final JSONObject object = new JSONObject().put("propertyA", 123).put("propertyB", Arrays.asList(1, 2, 3))
-            .put("propertyX", "notpartofschema").put("propertyY", "notpartofschema");
+            .put("propertyX", propValue).put("propertyY", propValue);
 
         final ValidationException e = catchThrowableOfType(
             () -> validator.validateObject(object,
@@ -94,7 +261,13 @@ public class ValidatorTest {
 
         assertThat(e.getCausingExceptions()).hasSize(3);
         assertThat(e).hasMessage("#: 3 schema violations found");
-        assertThat(e.getSchemaLocation()).isEqualTo("#");
+        assertThat(e.getSchemaPointer()).isEqualTo("#");
+        assertThat(e.getKeyword()).isNull();
+
+        e.getCausingExceptions().forEach(ce -> {
+            assertThat(ce).hasMessageNotContaining(propValue);
+            assertThat(ce.getCausingExceptions()).isEmpty();
+        });
     }
 
     @Test
@@ -175,7 +348,7 @@ public class ValidatorTest {
             .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION).put(PRIMARY_IDENTIFIER_KEY, Arrays.asList(EXAMPLE_PRIMARY_IDENTIFIER))
             .put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject())).put("documentationUrl", documentationUrl);
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
-            .withMessageContaining("#/documentationUrl").withMessageContaining(documentationUrl);
+            .withMessageContaining("#/documentationUrl").withMessageNotContaining(documentationUrl);
     }
 
     @ParameterizedTest
@@ -205,7 +378,7 @@ public class ValidatorTest {
             .put(DESCRIPTION_KEY, EXAMPLE_DESCRIPTION).put(PRIMARY_IDENTIFIER_KEY, Arrays.asList(EXAMPLE_PRIMARY_IDENTIFIER))
             .put(PROPERTIES_KEY, new JSONObject().put("property", new JSONObject())).put("sourceUrl", sourceUrl);
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
-            .withMessageContaining("#/sourceUrl").withMessageContaining(sourceUrl);
+            .withMessageContaining("#/sourceUrl").withMessageNotContaining((sourceUrl));
     }
 
     @ParameterizedTest
