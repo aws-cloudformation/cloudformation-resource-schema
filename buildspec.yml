@@ -1,9 +1,13 @@
 version: 0.2
 phases:
+  install:
+    runtime-versions:
+      java: openjdk8
   pre_build:
     commands:
       - pip install pre-commit
   build:
     commands:
-      - pre-commit run --all-files
-      - mvn clean verify
+      - pre-commit run --all-files --verbose
+    finally:
+      - git diff
