@@ -42,6 +42,15 @@ public class ValidationExceptionTest {
     }
 
     @Test
+    public void buildFullExceptionMessage_isNullSafe() {
+        ValidationException e = new ValidationException(null, null, null, null);
+
+        final String message = ValidationException.buildFullExceptionMessage(e);
+
+        assertThat(message).isEmpty();
+    }
+
+    @Test
     public void buildFullExceptionMessage_multiple() {
         ValidationException e1 = new ValidationException("First error", "key1", "#/properties");
         ValidationException e2 = new ValidationException("Second error", "key2", "#/properties");

@@ -53,7 +53,8 @@ public class ValidationException extends RuntimeException {
                                final String keyword,
                                final String schemaPointer) {
         super(message);
-        this.causingExceptions = Collections.unmodifiableList(causingExceptions);
+        this.causingExceptions = Collections
+            .unmodifiableList(causingExceptions == null ? Collections.emptyList() : causingExceptions);
         this.keyword = keyword;
         this.schemaPointer = schemaPointer;
     }
@@ -113,11 +114,13 @@ public class ValidationException extends RuntimeException {
         StringBuilder builder = new StringBuilder();
         final boolean isParentException = e.getKeyword() == null && e.getCausingExceptions() != null
             && !e.getCausingExceptions().isEmpty();
-        if (!isParentException) {
+        if (!isParentException && e.getMessage() != null) {
             builder.append(e.getMessage() + "\n");
         }
-        for (ValidationException cause : e.getCausingExceptions()) {
-            builder.append(buildFullExceptionMessageHelper(cause));
+        if (e.getCausingExceptions() != null) {
+            for (ValidationException cause : e.getCausingExceptions()) {
+                builder.append(buildFullExceptionMessageHelper(cause));
+            }
         }
         return builder.toString();
     }
