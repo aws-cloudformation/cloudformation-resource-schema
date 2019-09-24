@@ -19,7 +19,7 @@ repos:
   hooks:
   - id: mvn
     name: Run Java unit tests
-    entry: mvn clean verify
+    entry: mvn clean verify --no-transfer-progress
     language: system
     pass_filenames: false
     always_run: true

@@ -1,0 +1,111 @@
+{
+    "typeName": "AWS::Test::TestModel",
+    "description": "A test schema for unit tests.",
+    "sourceUrl": "my-repo.git",
+    "definitions": {
+        "numberType": {
+            "type": "number",
+            "exclusiveMinimum": 10,
+            "exclusiveMaximum": 20
+        },
+        "integerType": {
+            "type": "integer",
+            "minimum": 10,
+            "maximum": 100,
+            "multipleOf": 5
+        },
+        "arrayType": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "minItems": 2,
+            "maxItems": 2,
+            "contains": {
+                "type": "string",
+                "minLength": 2
+            },
+            "uniqueItems": true
+        },
+        "stringType": {
+            "type": "string",
+            "pattern": "Too",
+            "minLength": 10,
+            "maxLength": 15
+        },
+        "objectType": {
+            "type": "object",
+            "minProperties": 2,
+            "maxProperties": 2,
+            "dependencies": {
+                "dep": [
+                    "otherKey"
+                ]
+            }
+        }
+    },
+    "properties": {
+        "StringProperty": {
+            "$ref": "#/definitions/stringType"
+        },
+        "enumProperty": {
+            "type": "string",
+            "enum": [
+                "ABC"
+            ]
+        },
+        "constProperty": {
+            "type": "string",
+            "const": "ABC"
+        },
+        "ArrayProperty": {
+            "$ref": "#/definitions/arrayType"
+        },
+        "IntProperty": {
+            "$ref": "#/definitions/integerType"
+        },
+        "NumberProperty": {
+            "$ref": "#/definitions/numberType"
+        },
+        "BooleanProperty": {
+            "type": "boolean"
+        },
+        "ObjectProperty": {
+            "$ref": "#/definitions/objectType"
+        },
+        "MapProperty": {
+            "type": "object",
+            "patternProperties": {
+                "abc": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "anyOfProperty": {
+            "anyOf": [
+                {
+                    "type": "integer"
+                }
+            ]
+        },
+        "oneOfProperty": {
+            "oneOf": [
+                {
+                    "type": "integer"
+                }
+            ]
+        },
+        "allOfProperty": {
+            "allOf": [
+                {
+                    "type": "integer"
+                }
+            ]
+        }
+    },
+    "primaryIdentifier": [
+        "/properties/StringProperty"
+    ],
+    "additionalProperties": false
+}
