@@ -372,7 +372,8 @@
         "typeName",
         "properties",
         "description",
-        "primaryIdentifier"
+        "primaryIdentifier",
+        "additionalProperties"
     ],
     "additionalProperties": false
 }

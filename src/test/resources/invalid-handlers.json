@@ -18,5 +18,6 @@
         "read": {
             "description": "test"
         }
-    }
+    },
+    "additionalProperties": false
 }

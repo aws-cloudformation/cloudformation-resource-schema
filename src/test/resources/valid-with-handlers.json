@@ -33,5 +33,6 @@
                 "test:permission"
             ]
         }
-    }
+    },
+    "additionalProperties": false
 }
