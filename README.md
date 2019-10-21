@@ -116,7 +116,18 @@ We have taken an opinion on certain aspects of the core JSON Schema and introduc
 
 ### New Schema-Level Properties
 
-* **`insertionOrder`**: array types can define a boolean `insertionOrder`, which specifies whether the order in which elements are specified should be honored when processing a diff between two sets of properties.  If `insertionOrder` is true, then a change in order of the elements will constitute a diff.  In other words, together with the `uniqueItems` property, a property can be defined as a List, Set, or MultiSet.  The default for `insertionOrder` is ``true`.
+#### insertionOrder
+Array types can define a boolean `insertionOrder`, which specifies whether the order in which elements are specified should be honored when processing a diff between two sets of properties.  If `insertionOrder` is true, then a change in order of the elements will constitute a diff.  The default for `insertionOrder` is true.
+
+Together with the `uniqueItems` property (which is native to JSON Schema), complex array types can be defined, as in the following table:
+
+| insertionOrder | uniqueItems    | result   |
+| ---------------- | ---------------- | ---------- |
+| true           | false          | list     |
+| false          | false          | multiset    |
+| true           | true           | ordered set    |
+| false          | true           | set      |
+
 
 ### Constraints
 
