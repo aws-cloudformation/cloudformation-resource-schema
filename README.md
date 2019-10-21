@@ -114,10 +114,14 @@ We have taken an opinion on certain aspects of the core JSON Schema and introduc
 * **`readOnly`**: the readOnly field as defined in JSON Schema does not align with our determination that this is actually a restriction with semantic meaning. A property may be readOnly when specified for a particular resource (for example it's `Arn`), but when that same property is _referenced_ (using `$ref` tokens) from a dependency, the dependency must be allowed to specify an input for that property, and as such, it is no longer `readOnly` in that context. The AWS CloudFormation Resource Schema uses the concept of `readOnlyProperties` for this mechanic.
 * **`writeOnly`**: see above
 
+### New Schema-Level Properties
+
+* **`insertionOrder`**: array types can define a boolean `insertionOrder`, which specifies whether the order in which elements are specified should be honored when processing a diff between two sets of properties.  If `insertionOrder` is true, then a change in order of the elements will constitute a diff.  In other words, together with the `uniqueItems` property, a property can be defined as a List, Set, or MultiSet.  The default for `insertionOrder` is ``true`.
+
 ### Constraints
 
 * **`$id`**: an `$id` property is not valid for a resource property.
-* **`$schema`**: an `$schema` property is not valid for a resource property.
+* **`$schema`**: a `$schema` property is not valid for a resource property.
 * **`if`, `then`, `else`, `not`**: these imperative constructs can lead to confusion both in authoring a resource definition, and for customers authoring a resource description against your schema. Also this construct is not widely supported by validation tools and is disallowed here.
 * **`propertyNames`**: use of `propertyNames` implies a set of properties without a defined shape and is disallowed. To constrain property names, use `patternProperties` statements with defined shapes.
 * **`additionalProperties`** use of `additionalProperties` is not valid for a resource property. Use `patternProperties` instead to define the shape and allowed values of extraneous keys.

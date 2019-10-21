@@ -78,14 +78,6 @@
                             "type": "boolean",
                             "default": false
                         },
-                        "readOnly": {
-                            "description": "A list of properties that are able to be found in a Read request but unable to be specified by the customer",
-                            "$ref": "https://json-schema.org/draft-07/schema#/definitions/stringArray"
-                        },
-                        "writeOnly": {
-                            "description": "A list of properties (typically sensitive) that are able to be specified by the customer but unable to be returned in a Read request",
-                            "$ref": "https://json-schema.org/draft-07/schema#/definitions/stringArray"
-                        },
                         "$ref": {
                             "$ref": "https://json-schema.org/draft-07/schema#/properties/$ref"
                         },
