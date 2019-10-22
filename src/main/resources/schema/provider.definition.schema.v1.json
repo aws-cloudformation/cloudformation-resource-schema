@@ -76,7 +76,7 @@
                         "insertionOrder": {
                             "description": "When set to true, this flag indicates that the order of insertion of the array will be honored, and that changing the order of the array would indicate a diff",
                             "type": "boolean",
-                            "default": false
+                            "default": true
                         },
                         "$ref": {
                             "$ref": "https://json-schema.org/draft-07/schema#/properties/$ref"
