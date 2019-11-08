@@ -15,9 +15,7 @@
                 "test:permission"
             ]
         },
-        "read": {
-            "description": "test"
-        }
+        "read": {}
     },
     "additionalProperties": false
 }
