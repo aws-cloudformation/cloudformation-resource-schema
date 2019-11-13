@@ -17,7 +17,8 @@
                 "Body": {
                     "type": "string"
                 }
-            }
+            },
+            "additionalProperties": false
         }
     },
     "properties": {
@@ -99,5 +100,6 @@
                 "initech:ListReports"
             ]
         }
-    }
+    },
+    "additionalProperties": false
 }

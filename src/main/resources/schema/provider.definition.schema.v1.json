@@ -62,6 +62,19 @@
                         ]
                     }
                 }
+            },
+            "if": {
+                "$comment": "All properties of a resource must be expressed in the schema - arbitrary inputs are not allowed",
+                "properties": {
+                    "type": {
+                        "const": "object"
+                    }
+                }
+            },
+            "then": {
+                "required": [
+                    "additionalProperties"
+                ]
             }
         },
         "properties": {
@@ -70,7 +83,7 @@
                     "$ref": "#/definitions/validations"
                 },
                 {
-                    "$comment": "The following subset of draft-07 property references is supported for resource definitions. Nested properties are disallowed and should be specified as a $ref to a definitions block.",
+                    "$comment": "The following subset of draft-07 property references is supported for resource definitions.",
                     "type": "object",
                     "properties": {
                         "insertionOrder": {

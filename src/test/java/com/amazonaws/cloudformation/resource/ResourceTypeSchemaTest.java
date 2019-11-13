@@ -29,7 +29,8 @@ public class ResourceTypeSchemaTest {
     private static final String TEST_SCHEMA_PATH = "/test-schema.json";
     private static final String EMPTY_SCHEMA_PATH = "/empty-schema.json";
     private static final String MINIMAL_SCHEMA_PATH = "/minimal-schema.json";
-    private static final String NO_ADDITIONAL_PROPERTIES_SCHEMA_PATH = "/no-additional-properties-schema.json";
+    private static final String NO_ADDITIONAL_PROPERTIES_TOP_LEVEL_PATH = "/no-additional-properties-top-level.json";
+    private static final String NO_ADDITIONAL_PROPERTIES_PROP_LEVEL_PATH = "/no-additional-properties-prop-level.json";
 
     @Test
     public void getProperties() {
@@ -107,11 +108,21 @@ public class ResourceTypeSchemaTest {
     }
 
     @Test
-    public void invalidSchema_noAdditionalProperties_shouldThrow() {
-        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(NO_ADDITIONAL_PROPERTIES_SCHEMA_PATH)));
+    public void invalidSchema_noAdditionalPropertiesTopLevel_shouldThrow() {
+        JSONObject o = new JSONObject(new JSONTokener(this.getClass()
+            .getResourceAsStream(NO_ADDITIONAL_PROPERTIES_TOP_LEVEL_PATH)));
 
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> ResourceTypeSchema.load(o)).withNoCause()
             .withMessage("#: required key [additionalProperties] not found");
+    }
+
+    @Test
+    public void invalidSchema_noAdditionalPropertiesPropLevel_shouldThrow() {
+        JSONObject o = new JSONObject(new JSONTokener(this.getClass()
+            .getResourceAsStream(NO_ADDITIONAL_PROPERTIES_PROP_LEVEL_PATH)));
+
+        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> ResourceTypeSchema.load(o)).withNoCause()
+            .withMessage("#/properties/propertyA: #: only 1 subschema matches out of 2");
     }
 
     @Test

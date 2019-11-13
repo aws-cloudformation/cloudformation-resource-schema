@@ -17,6 +17,9 @@
         },
         "propertyD": {
             "type": "boolean"
+        },
+        "propertyE": {
+            "additionalProperties": false
         }
     },
     "required": [
