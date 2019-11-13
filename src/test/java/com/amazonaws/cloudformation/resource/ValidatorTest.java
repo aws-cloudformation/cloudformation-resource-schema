@@ -119,7 +119,7 @@ public class ValidatorTest {
         assertThat(e.getSchemaPointer()).isEqualTo("#/StringProperty");
         assertThat(e.getKeyword()).isEqualTo(keyword);
         assertThat(e.getMessage()).doesNotContain(value);
-        assertThat(e.getCausingExceptions().isEmpty());
+        assertThat(e.getCausingExceptions()).isEmpty();
     }
 
     @ParameterizedTest
@@ -181,7 +181,7 @@ public class ValidatorTest {
         assertThat(e.getKeyword()).isEqualTo(keyword);
         assertThat(e.getSchemaPointer()).isEqualTo("#/" + propName);
         assertThat(e).hasMessageNotContaining(numAsString);
-        assertThat(e.getCausingExceptions().isEmpty());
+        assertThat(e.getCausingExceptions()).isEmpty();
     }
 
     @ParameterizedTest
@@ -203,7 +203,7 @@ public class ValidatorTest {
         assertThat(e.getKeyword()).isEqualTo(keyword);
         assertThat(e.getSchemaPointer()).isEqualTo("#/ObjectProperty");
         assertThat(e).hasMessageNotContaining(val);
-        assertThat(e.getCausingExceptions().isEmpty());
+        assertThat(e.getCausingExceptions()).isEmpty();
     }
 
     @ParameterizedTest
@@ -337,7 +337,7 @@ public class ValidatorTest {
             .getResourceAsStream("/invalid-handlers.json")));
 
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
-            .withNoCause().withMessage("#/handlers/read: #: only 1 subschema matches out of 2");
+            .withNoCause().withMessage("#/handlers/read: required key [permissions] not found");
     }
 
     @Test
