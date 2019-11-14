@@ -384,4 +384,11 @@ public class ValidatorTest {
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
             .withMessageContaining("#/sourceUrl").withMessageContaining(Integer.toString(sourceUrl.length()));
     }
+
+    @Test
+    public void validateDefinition_schemaKeyword_shouldBeAllowed() {
+        final JSONObject definition = baseSchema().put("$schema", "http://json-schema.org/draft-07/schema#");
+
+        validator.validateResourceDefinition(definition);
+    }
 }
