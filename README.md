@@ -4,13 +4,13 @@ This document describes the [Resource Provider Definition Schema](https://github
 
 ## Examples
 
-Numerous [examples](https://github.com/aws-cloudformation/aws-cloudformation-resource-schema/tree/master/src/data/examples/resource) exist in this repository to help you understand various shape and semantic definition models you can apply to your own resource definitions.
+Numerous [examples](https://github.com/aws-cloudformation/aws-cloudformation-resource-schema/tree/master/src/main/resources/examples/resource) exist in this repository to help you understand various shape and semantic definition models you can apply to your own resource definitions.
 
 ## Defining Resources
 
 ### Overview
 
-The _meta-schema_ which controls and validates your resource type definition is called the [Resource Provider Definition Schema](https://github.com/aws-cloudformation/aws-cloudformation-rpdk/blob/master/src/rpdk/data/schema/provider.definition.schema.v1.json). It is fully compliant with [draft-07](https://json-schema.org/draft-07/json-schema-release-notes.html) of [JSON Schema](https://json-schema.org/) and many IDEs including [IntelliJ](https://www.jetbrains.com/idea/), [PyCharm](https://www.jetbrains.com/pycharm/) and [Visual Studio Code](https://code.visualstudio.com/) come with built-in or plugin-based support for code-completion and syntax validation while editing documents for JSON Schema compliance. Comprehensive [documentation](https://json-schema.org/understanding-json-schema/reference/) for JSON Schema exists and can answer many questions around correct usage.
+The _meta-schema_ which controls and validates your resource type definition is called the [Resource Provider Definition Schema](https://github.com/aws-cloudformation/aws-cloudformation-resource-schema/blob/master/src/main/resources/schema/provider.definition.schema.v1.json). It is fully compliant with [draft-07](https://json-schema.org/draft-07/json-schema-release-notes.html) of [JSON Schema](https://json-schema.org/) and many IDEs including [IntelliJ](https://www.jetbrains.com/idea/), [PyCharm](https://www.jetbrains.com/pycharm/) and [Visual Studio Code](https://code.visualstudio.com/) come with built-in or plugin-based support for code-completion and syntax validation while editing documents for JSON Schema compliance. Comprehensive [documentation](https://json-schema.org/understanding-json-schema/reference/) for JSON Schema exists and can answer many questions around correct usage.
 
 To get started, you will author a _specification_ for your resource type in a JSON document, which must be compliant with this _meta-schema_. To make authoring resource _specifications_ simpler, we have constrained the scope of the full JSON Schema standard to apply opinions around how certain validations can be expressed and encourage consistent modelling for all resource schemas. These opinions are codified in the _meta-schema_ and described in this document.
 
@@ -114,10 +114,25 @@ We have taken an opinion on certain aspects of the core JSON Schema and introduc
 * **`readOnly`**: the readOnly field as defined in JSON Schema does not align with our determination that this is actually a restriction with semantic meaning. A property may be readOnly when specified for a particular resource (for example it's `Arn`), but when that same property is _referenced_ (using `$ref` tokens) from a dependency, the dependency must be allowed to specify an input for that property, and as such, it is no longer `readOnly` in that context. The AWS CloudFormation Resource Schema uses the concept of `readOnlyProperties` for this mechanic.
 * **`writeOnly`**: see above
 
+### New Schema-Level Properties
+
+#### insertionOrder
+Array types can define a boolean `insertionOrder`, which specifies whether the order in which elements are specified should be honored when processing a diff between two sets of properties.  If `insertionOrder` is true, then a change in order of the elements will constitute a diff.  The default for `insertionOrder` is true.
+
+Together with the `uniqueItems` property (which is native to JSON Schema), complex array types can be defined, as in the following table:
+
+| insertionOrder | uniqueItems    | result   |
+| ---------------- | ---------------- | ---------- |
+| true           | false          | list     |
+| false          | false          | multiset    |
+| true           | true           | ordered set    |
+| false          | true           | set      |
+
+
 ### Constraints
 
 * **`$id`**: an `$id` property is not valid for a resource property.
-* **`$schema`**: an `$schema` property is not valid for a resource property.
+* **`$schema`**: a `$schema` property is not valid for a resource property.
 * **`if`, `then`, `else`, `not`**: these imperative constructs can lead to confusion both in authoring a resource definition, and for customers authoring a resource description against your schema. Also this construct is not widely supported by validation tools and is disallowed here.
 * **`propertyNames`**: use of `propertyNames` implies a set of properties without a defined shape and is disallowed. To constrain property names, use `patternProperties` statements with defined shapes.
 * **`additionalProperties`** use of `additionalProperties` is not valid for a resource property. Use `patternProperties` instead to define the shape and allowed values of extraneous keys.
