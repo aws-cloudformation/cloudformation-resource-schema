@@ -12,13 +12,11 @@
 * express or implied. See the License for the specific language governing
 * permissions and limitations under the License.
 */
-package com.amazonaws.cloudformation.resource;
+package software.amazon.cloudformation.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
-
-import com.amazonaws.cloudformation.resource.exceptions.ValidationException;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,6 +29,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import software.amazon.cloudformation.resource.exceptions.ValidationException;
 
 public class ValidatorTest {
     private static final String TEST_SCHEMA_PATH = "/test-schema.json";
