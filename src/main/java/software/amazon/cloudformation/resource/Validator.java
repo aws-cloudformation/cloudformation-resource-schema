@@ -12,9 +12,7 @@
 * express or implied. See the License for the specific language governing
 * permissions and limitations under the License.
 */
-package com.amazonaws.cloudformation.resource;
-
-import com.amazonaws.cloudformation.resource.exceptions.ValidationException;
+package software.amazon.cloudformation.resource;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -25,6 +23,8 @@ import org.everit.json.schema.Schema;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+
+import software.amazon.cloudformation.resource.exceptions.ValidationException;
 
 public class Validator implements SchemaValidator {
 
