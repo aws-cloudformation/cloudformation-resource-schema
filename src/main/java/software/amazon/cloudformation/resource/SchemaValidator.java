@@ -12,11 +12,11 @@
 * express or implied. See the License for the specific language governing
 * permissions and limitations under the License.
 */
-package com.amazonaws.cloudformation.resource;
-
-import com.amazonaws.cloudformation.resource.exceptions.ValidationException;
+package software.amazon.cloudformation.resource;
 
 import org.json.JSONObject;
+
+import software.amazon.cloudformation.resource.exceptions.ValidationException;
 
 public interface SchemaValidator {
 
