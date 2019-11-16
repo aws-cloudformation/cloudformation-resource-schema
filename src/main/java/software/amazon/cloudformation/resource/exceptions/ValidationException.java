@@ -85,8 +85,11 @@ public class ValidationException extends RuntimeException {
     }
 
     /**
-     * In order to ensure sensitive properties aren't displayed, scrub any error
+     * /** In order to ensure sensitive properties aren't displayed, scrub any error
      * messages that emit property values
+     *
+     * @param e The exception to redact
+     * @return a redacted {@link ValidationException}
      */
     public static ValidationException newScrubbedException(final org.everit.json.schema.ValidationException e) {
         // A parent exception has multiple errors in the subSchema, and will just emit
@@ -104,7 +107,10 @@ public class ValidationException extends RuntimeException {
     }
 
     /**
-     * build an exception message containing all nested exceptions
+     * Build an exception message containing all nested exceptions
+     *
+     * @param e the exception to construct a message from
+     * @return a standard exception message from a {@link ValidationException} tree
      */
     public static String buildFullExceptionMessage(final ValidationException e) {
         return buildFullExceptionMessageHelper(e).trim();
