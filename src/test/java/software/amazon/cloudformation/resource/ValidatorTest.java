@@ -387,7 +387,7 @@ public class ValidatorTest {
 
     @Test
     public void validateDefinition_schemaKeyword_shouldBeAllowed() {
-        final JSONObject definition = baseSchema().put("$schema", "http://json-schema.org/draft-07/schema#");
+        final JSONObject definition = baseSchema().put("$schema", "https://json-schema.org/draft-07/schema#");
 
         validator.validateResourceDefinition(definition);
     }
