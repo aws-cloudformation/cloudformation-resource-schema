@@ -3,6 +3,10 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>software.amazon.cloudformation</groupId>
     <artifactId>aws-cloudformation-resource-schema</artifactId>
+    <name>AWS CloudFormation Resource Schema Validator</name>
+    <description>This library contains the metaschema for CloudFormation resource types and validation tools.</description>
+    <url>ttps://github.com/aws-cloudformation/aws-cloudformation-resource-schema</url>
+
     <version>2.0.0</version>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -12,9 +16,18 @@
         <maven-javadoc-plugin.version>3.1.1</maven-javadoc-plugin.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
     </properties>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://aws.amazon.com/apache2.0</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
     <developers>
         <developer>
-            <id>amazonwebservices</id>
+            <id>aws-cloudformation-developers</id>
             <organization>Amazon Web Services</organization>
             <organizationUrl>https://aws.amazon.com</organizationUrl>
             <roles>
