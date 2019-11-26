@@ -323,6 +323,34 @@ public class ValidatorTest {
             .withNoCause().withMessage("#/handlers/read: required key [permissions] not found");
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = { 1, 4321 })
+    public void validateDefinition_invalidTimeout_shouldThrow(final int timeout) {
+        // modifying the valid-with-handlers.json to add invalid timeout
+        final JSONObject definition = new JSONObject(new JSONTokener(this.getClass()
+                .getResourceAsStream("/valid-with-handlers.json")));
+
+        final JSONObject createDefinition = definition.getJSONObject("handlers").getJSONObject("create");
+        createDefinition.put("timeoutInMinutes", timeout);
+
+        final String keyword = timeout == 1 ? "minimum" : "maximum";
+
+        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
+                .withNoCause().withMessage(String.format("#/handlers/create/timeoutInMinutes: failed validation constraint for keyword [%s]", keyword));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 2, 100, 4320 })
+    public void validateDefinition_withTimeout_shouldNotThrow(final int timeout) {
+        final JSONObject definition = new JSONObject(new JSONTokener(this.getClass()
+                .getResourceAsStream("/valid-with-handlers.json")));
+
+        final JSONObject createDefinition = definition.getJSONObject("handlers").getJSONObject("create");
+        createDefinition.put("timeoutInMinutes", timeout);
+
+        validator.validateResourceDefinition(definition);
+    }
+
     @Test
     public void validateDefinition_validHandlerSection_shouldNotThrow() {
         final JSONObject definition = new JSONObject(new JSONTokener(this.getClass()
