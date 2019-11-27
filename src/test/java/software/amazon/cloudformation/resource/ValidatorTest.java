@@ -324,11 +324,11 @@ public class ValidatorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { 1, 4321 })
+    @ValueSource(ints = { 1, 721 })
     public void validateDefinition_invalidTimeout_shouldThrow(final int timeout) {
         // modifying the valid-with-handlers.json to add invalid timeout
         final JSONObject definition = new JSONObject(new JSONTokener(this.getClass()
-                .getResourceAsStream("/valid-with-handlers.json")));
+            .getResourceAsStream("/valid-with-handlers.json")));
 
         final JSONObject createDefinition = definition.getJSONObject("handlers").getJSONObject("create");
         createDefinition.put("timeoutInMinutes", timeout);
@@ -336,19 +336,46 @@ public class ValidatorTest {
         final String keyword = timeout == 1 ? "minimum" : "maximum";
 
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
-                .withNoCause().withMessage(String.format("#/handlers/create/timeoutInMinutes: failed validation constraint for keyword [%s]", keyword));
+            .withNoCause().withMessage(
+                String.format("#/handlers/create/timeoutInMinutes: failed validation constraint for keyword [%s]", keyword));
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { 2, 100, 4320 })
+    @ValueSource(ints = { 2, 120, 720 })
     public void validateDefinition_withTimeout_shouldNotThrow(final int timeout) {
         final JSONObject definition = new JSONObject(new JSONTokener(this.getClass()
-                .getResourceAsStream("/valid-with-handlers.json")));
+            .getResourceAsStream("/valid-with-handlers.json")));
 
         final JSONObject createDefinition = definition.getJSONObject("handlers").getJSONObject("create");
         createDefinition.put("timeoutInMinutes", timeout);
 
         validator.validateResourceDefinition(definition);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "create", "update", "delete" })
+    public void validateDefinition_timeoutAllowed_shouldNotThrow(final String handlerType) {
+        final JSONObject definition = new JSONObject(new JSONTokener(this.getClass()
+            .getResourceAsStream("/valid-with-handlers.json")));
+
+        final JSONObject handlerDefinition = definition.getJSONObject("handlers").getJSONObject(handlerType);
+        handlerDefinition.put("timeoutInMinutes", 30);
+
+        validator.validateResourceDefinition(definition);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "read", "list" })
+    public void validateDefinition_noTimeoutAllowed_shouldThrow(final String handlerType) {
+        final JSONObject definition = new JSONObject(new JSONTokener(this.getClass()
+            .getResourceAsStream("/valid-with-handlers.json")));
+
+        final JSONObject handlerDefinition = definition.getJSONObject("handlers").getJSONObject(handlerType);
+        handlerDefinition.put("timeoutInMinutes", 30);
+
+        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
+            .withNoCause()
+            .withMessage(String.format("#/handlers/%s: extraneous key [timeoutInMinutes] is not permitted", handlerType));
     }
 
     @Test
