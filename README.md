@@ -77,7 +77,7 @@ Relationships between resources can be expressed through the use of the `$ref` k
 
 The following example shows a property relationship between an `AWS::EC2::Subnet.VpcId` and an `AWS::EC2::VPC.Name`. The schema for the 'remote' type (`AWS::EC2::VPC`) is used to validate the content of the 'local' type (`AWS::EC2::Subnet`) and can be inferred as a dependency from the local to the remote type.
 
-Setting the $id property to a remote location will make validation framework to pull dependencies expressed using relative `$ref` URIs from the remote hosts. In this example, `VpcId` property will be verified against the schema for `AWS::EC2::VPC.Name` hosted at `https://schema.cloudformation.us-east-1.amazonaws.com/aws-ec2-vpc.json`  
+Setting the $id property to a remote location will make validation framework to pull dependencies expressed using relative `$ref` URIs from the remote hosts. In this example, `VpcId` property will be verified against the schema for `AWS::EC2::VPC.Name` hosted at `https://schema.cloudformation.us-east-1.amazonaws.com/aws-ec2-vpc.json`
 
 ```
 {
