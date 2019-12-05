@@ -331,6 +331,14 @@ public class ValidatorTest {
         validator.validateResourceDefinition(definition);
     }
 
+    @Test
+    public void validateDefinition_validRelativeRef_shouldNotThrow() {
+        final JSONObject definition = new JSONObject(new JSONTokener(this.getClass()
+            .getResourceAsStream("/valid-with-relative-ref.json")));
+
+        validator.validateResourceDefinition(definition);
+    }
+
     @ParameterizedTest
     @ValueSource(strings = { "ftp://example.com", "http://example.com", "git://example.com", "https://", })
     public void validateDefinition_nonMatchingDocumentationUrl_shouldThrow(final String documentationUrl) {
@@ -391,4 +399,13 @@ public class ValidatorTest {
 
         validator.validateResourceDefinition(definition);
     }
+
+    @Test
+    public void validateDefinition_idKeyword_shouldBeAllowed() {
+        final JSONObject definition = baseSchema().put("$id",
+            "https://schema.cloudformation.us-east-1.amazonaws.com/aws-ec2-instance.json#");
+
+        validator.validateResourceDefinition(definition);
+    }
+
 }

@@ -1,0 +1,14 @@
+{
+    "$id": "https://schema.cloudformation.us-east-1.amazonaws.com/valid-with-relative-ref.json#",
+    "typeName": "AWS::Test::WithExternalRefs",
+    "description": "A test schema for unit tests.",
+    "properties": {
+        "StringProperty": {
+            "$ref": "aws-ecs-taskdefinition.json#/properties/blah"
+        }
+    },
+    "additionalProperties": false,
+    "primaryIdentifier": [
+        "/properties/StringProperty"
+    ]
+}
