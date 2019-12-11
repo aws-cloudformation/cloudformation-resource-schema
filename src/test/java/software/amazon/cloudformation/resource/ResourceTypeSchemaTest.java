@@ -30,6 +30,7 @@ public class ResourceTypeSchemaTest {
     private static final String EMPTY_SCHEMA_PATH = "/empty-schema.json";
     private static final String MINIMAL_SCHEMA_PATH = "/minimal-schema.json";
     private static final String NO_ADDITIONAL_PROPERTIES_SCHEMA_PATH = "/no-additional-properties-schema.json";
+    private static final String WRITEONLY_MODEL_PATH = "/write-only-model.json";
 
     @Test
     public void getProperties() {
@@ -95,7 +96,7 @@ public class ResourceTypeSchemaTest {
         final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
 
         List<String> result = schema.getWriteOnlyPropertiesAsStrings();
-        assertThat(result).containsExactly("/properties/propertyC");
+        assertThat(result).containsExactly("/properties/propertyC", "/properties/propertyE/nestedProperty");
     }
 
     @Test
@@ -130,5 +131,36 @@ public class ResourceTypeSchemaTest {
         assertThat(schema.getAdditionalIdentifiersAsStrings()).isEmpty();
         assertThat(schema.getReadOnlyPropertiesAsStrings()).isEmpty();
         assertThat(schema.getWriteOnlyPropertiesAsStrings()).isEmpty();
+    }
+
+    @Test
+    public void removeWriteOnlyProperties_hasWriteOnlyProperties_shouldRemove() {
+        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
+        ResourceTypeSchema schema = ResourceTypeSchema.load(o);
+        JSONObject resourceModel = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(WRITEONLY_MODEL_PATH)));
+
+        schema.removeWriteOnlyProperties(resourceModel);
+
+        // check that model doesn't contain the writeOnly properties
+        assertThat(schema.hasWriteOnlyProperties(resourceModel)).isFalse();
+        // ensure that other non writeOnlyProperty is not removed
+        assertThat(resourceModel.has("propertyB")).isTrue();
+    }
+
+    @Test
+    public void hasWriteOnlyProperties_noWriteOnlyProperties_shouldReturnFalse() {
+        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
+        ResourceTypeSchema schema = ResourceTypeSchema.load(o);
+
+        assertThat(schema.hasWriteOnlyProperties(new JSONObject())).isFalse();
+    }
+
+    @Test
+    void hasWriteOnlyProperties_writeOnlyProperties_shouldReturnTrue() {
+        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
+        ResourceTypeSchema schema = ResourceTypeSchema.load(o);
+        JSONObject resourceModel = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(WRITEONLY_MODEL_PATH)));
+
+        assertThat(schema.hasWriteOnlyProperties(resourceModel)).isTrue();
     }
 }

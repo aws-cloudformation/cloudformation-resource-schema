@@ -15,6 +15,7 @@
 package software.amazon.cloudformation.resource;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +24,9 @@ import java.util.stream.Collectors;
 
 import lombok.Getter;
 
+import org.apache.commons.lang3.RegExUtils;
 import org.everit.json.schema.JSONPointer;
+import org.everit.json.schema.JSONPointerException;
 import org.everit.json.schema.ObjectSchema;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
@@ -144,5 +147,49 @@ public class ResourceTypeSchema extends ObjectSchema {
     @Override
     public Map<String, Object> getUnprocessedProperties() {
         return Collections.unmodifiableMap(this.unprocessedProperties);
+    }
+
+    public boolean hasWriteOnlyProperties(final JSONObject resourceModel) {
+        return this.getWriteOnlyPropertiesAsStrings().stream()
+            .anyMatch(writeOnlyProperty -> hasProperty(RegExUtils.removeFirst(writeOnlyProperty, "/properties"), resourceModel));
+    }
+
+    public boolean hasProperty(final String property, final JSONObject resourceModel) {
+        return hasProperty(new JSONPointer(property), resourceModel);
+    }
+
+    public boolean hasProperty(final JSONPointer property, final JSONObject resourceModel) {
+        try {
+            return property.queryFrom(resourceModel) != null;
+        } catch (JSONPointerException e) {
+            return false;
+        }
+    }
+
+    public void removeWriteOnlyProperties(final JSONObject resourceModel) {
+        this.getWriteOnlyPropertiesAsStrings().stream()
+            .forEach(writeOnlyProp -> removeProperty(new JSONPointer(RegExUtils.removeFirst(writeOnlyProp, "/properties")),
+                resourceModel));
+    }
+
+    public static void removeProperty(final JSONPointer property, final JSONObject resourceModel) {
+        String refParts = property.toString();
+        // split pointer into tokens, removing first delimiter
+        List<String> refTokens = Arrays.asList(RegExUtils.removeFirst(refParts, "/").split("/"));
+        final String key = refTokens.get(refTokens.size() - 1);
+        try {
+            // if size is more than one, fetch parent object/array of key to remove so that
+            // we can remove
+            if (refTokens.size() > 1) {
+                // use sublist to specify to point at the parent object
+                final JSONPointer parentObjectPointer = new JSONPointer(refTokens.subList(0, refTokens.size() - 1));
+                final JSONObject parentObject = (JSONObject) parentObjectPointer.queryFrom(resourceModel);
+                parentObject.remove(key);
+            } else {
+                resourceModel.remove(key);
+            }
+        } catch (JSONPointerException | NumberFormatException e) {
+            // do nothing, as this indicates the model does not have a value for the pointer
+        }
     }
 }
