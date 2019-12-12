@@ -1,12 +1,15 @@
 {
-  "propertyB": [
-    1,
-    22,
-    3
-  ],
-  "propertyC": "writeOnly",
-  "propertyE": {
-    "nestedProperty": "something write only",
-    "writeOnlyArray": ["writeOnly", "notWriteOnly"]
-  }
+    "propertyB": [
+        1,
+        22,
+        3
+    ],
+    "propertyC": "writeOnly",
+    "propertyE": {
+        "nestedProperty": "something write only",
+        "writeOnlyArray": [
+            "writeOnly",
+            "notWriteOnly"
+        ]
+    }
 }
