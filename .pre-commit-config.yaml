@@ -1,6 +1,6 @@
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v2.0.0
+  rev: v2.4.0
   hooks:
   - id: check-case-conflict
   - id: detect-private-key
@@ -15,11 +15,17 @@ repos:
     - --indent=4
     - --no-sort-keys
   - id: check-merge-conflict
+  - id: check-yaml
 - repo: local
   hooks:
   - id: mvn
     name: Run Java unit tests
-    entry: mvn clean verify --no-transfer-progress
+    # from Maven 3.6.1+, should use `--no-transfer-progress` instead of Slf4jMavenTransferListener
+    entry: >
+      mvn
+      -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+      -B
+      clean verify
     language: system
     pass_filenames: false
     always_run: true
