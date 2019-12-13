@@ -18,6 +18,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -406,6 +408,14 @@ public class ValidatorTest {
             "https://schema.cloudformation.us-east-1.amazonaws.com/aws-ec2-instance.json#");
 
         validator.validateResourceDefinition(definition);
+    }
+
+    @Test
+    public void validateExample_exampleResource_shouldBeValid() throws IOException {
+        try (InputStream stream = this.getClass().getResourceAsStream("/examples/resource/initech.tps.report.v1.json")) {
+            final JSONObject example = new JSONObject(new JSONTokener(stream));
+            validator.validateResourceDefinition(example);
+        }
     }
 
 }
