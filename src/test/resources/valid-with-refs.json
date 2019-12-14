@@ -1,0 +1,22 @@
+{
+  "$id": "https://schema.cloudformation.us-east-1.amazonaws.com/resource-definition-with-refs.json",
+  "$schema": "https://schema.cloudformation.us-east-1.amazonaws.com/provider.definition.schema.v1.json",
+  "typeName": "CFN::Test::Resource",
+  "description": "Simple resource definition with ref pointers to definitions in a remote schema",
+  "sourceUrl": "https://mycorp.com/my-repo.git",
+  "properties": {
+    "Time": {
+      "$ref": "./common.types.v1.json#/definitions/iso8601UTC"
+    },
+    "propertyB": {
+      "type": "array",
+      "items": {
+        "$ref": "./common.types.v1.json#/definitions/ipv4Address"
+      }
+    }
+  },
+  "primaryIdentifier": [
+    "/properties/Time"
+  ],
+  "additionalProperties": false
+}
