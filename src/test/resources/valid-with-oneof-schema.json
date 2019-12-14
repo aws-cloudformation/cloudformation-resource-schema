@@ -1,0 +1,32 @@
+{
+    "typeName": "AWS::Test::TestModel",
+    "description": "A test schema for unit tests.",
+    "sourceUrl": "https://mycorp.com/my-repo.git",
+    "properties": {
+        "id": {
+            "type": "string"
+        },
+        "propertyA": {
+            "type": "string"
+        },
+        "propertyB": {
+            "type": "string"
+        }
+    },
+    "oneOf": [
+        {
+            "required": [
+                "propertyA"
+            ]
+        },
+        {
+            "required": [
+                "propertyB"
+            ]
+        }
+    ],
+    "primaryIdentifier": [
+        "/properties/id"
+    ],
+    "additionalProperties": false
+}

@@ -16,12 +16,12 @@ package software.amazon.cloudformation.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static software.amazon.cloudformation.resource.ValidatorTest.loadJSON;
 
 import java.util.List;
 
 import org.everit.json.schema.PublicJSONPointer;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.junit.jupiter.api.Test;
 
 import software.amazon.cloudformation.resource.exceptions.ValidationException;
@@ -29,13 +29,14 @@ import software.amazon.cloudformation.resource.exceptions.ValidationException;
 public class ResourceTypeSchemaTest {
     private static final String TEST_SCHEMA_PATH = "/test-schema.json";
     private static final String EMPTY_SCHEMA_PATH = "/empty-schema.json";
+    private static final String SCHEMA_WITH_ONEOF = "/valid-with-oneof-schema.json";
     private static final String MINIMAL_SCHEMA_PATH = "/minimal-schema.json";
     private static final String NO_ADDITIONAL_PROPERTIES_SCHEMA_PATH = "/no-additional-properties-schema.json";
     private static final String WRITEONLY_MODEL_PATH = "/write-only-model.json";
 
     @Test
     public void getProperties() {
-        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
+        JSONObject o = loadJSON(TEST_SCHEMA_PATH);
         final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
 
         assertThat(schema.getDescription()).isEqualTo("A test schema for unit tests.");
@@ -46,7 +47,7 @@ public class ResourceTypeSchemaTest {
 
     @Test
     public void getCreateOnlyProperties() {
-        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
+        JSONObject o = loadJSON(TEST_SCHEMA_PATH);
         final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
 
         List<String> result = schema.getCreateOnlyPropertiesAsStrings();
@@ -56,7 +57,7 @@ public class ResourceTypeSchemaTest {
 
     @Test
     public void getDeprecatedProperties() {
-        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
+        JSONObject o = loadJSON(TEST_SCHEMA_PATH);
         final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
 
         List<String> result = schema.getDeprecatedPropertiesAsStrings();
@@ -65,7 +66,7 @@ public class ResourceTypeSchemaTest {
 
     @Test
     public void getPrimaryIdentifier() {
-        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
+        JSONObject o = loadJSON(TEST_SCHEMA_PATH);
         final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
 
         List<String> result = schema.getPrimaryIdentifierAsStrings();
@@ -74,7 +75,7 @@ public class ResourceTypeSchemaTest {
 
     @Test
     public void getAdditionalIdentifiers() {
-        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
+        JSONObject o = loadJSON(TEST_SCHEMA_PATH);
         final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
 
         List<List<String>> result = schema.getAdditionalIdentifiersAsStrings();
@@ -84,7 +85,7 @@ public class ResourceTypeSchemaTest {
 
     @Test
     public void getReadOnlyProperties() {
-        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
+        JSONObject o = loadJSON(TEST_SCHEMA_PATH);
         final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
 
         List<String> result = schema.getReadOnlyPropertiesAsStrings();
@@ -93,7 +94,7 @@ public class ResourceTypeSchemaTest {
 
     @Test
     public void getWriteOnlyProperties() {
-        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
+        JSONObject o = loadJSON(TEST_SCHEMA_PATH);
         final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
 
         List<String> result = schema.getWriteOnlyPropertiesAsStrings();
@@ -102,7 +103,7 @@ public class ResourceTypeSchemaTest {
 
     @Test
     public void invalidSchema_shouldThrow() {
-        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(EMPTY_SCHEMA_PATH)));
+        JSONObject o = loadJSON(EMPTY_SCHEMA_PATH);
 
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> ResourceTypeSchema.load(o)).withNoCause()
             .withMessage("#/properties: minimum size: [1], found: [0]");
@@ -110,7 +111,7 @@ public class ResourceTypeSchemaTest {
 
     @Test
     public void invalidSchema_noAdditionalProperties_shouldThrow() {
-        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(NO_ADDITIONAL_PROPERTIES_SCHEMA_PATH)));
+        JSONObject o = loadJSON(NO_ADDITIONAL_PROPERTIES_SCHEMA_PATH);
 
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> ResourceTypeSchema.load(o)).withNoCause()
             .withMessage("#: required key [additionalProperties] not found");
@@ -118,7 +119,7 @@ public class ResourceTypeSchemaTest {
 
     @Test
     public void minimalSchema_hasNoSemantics() {
-        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(MINIMAL_SCHEMA_PATH)));
+        JSONObject o = loadJSON(MINIMAL_SCHEMA_PATH);
         final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
 
         assertThat(schema.getDescription()).isEqualTo("A test schema for unit tests.");
@@ -136,9 +137,9 @@ public class ResourceTypeSchemaTest {
 
     @Test
     public void removeWriteOnlyProperties_hasWriteOnlyProperties_shouldRemove() {
-        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
+        JSONObject o = loadJSON(TEST_SCHEMA_PATH);
         ResourceTypeSchema schema = ResourceTypeSchema.load(o);
-        JSONObject resourceModel = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(WRITEONLY_MODEL_PATH)));
+        JSONObject resourceModel = loadJSON(WRITEONLY_MODEL_PATH);
 
         schema.removeWriteOnlyProperties(resourceModel);
 
@@ -151,4 +152,46 @@ public class ResourceTypeSchemaTest {
         // ensure that other non writeOnlyProperty is not removed
         assertThat(resourceModel.has("propertyB")).isTrue();
     }
+
+    @Test
+    public void validSchema_withOneOf_shouldSucceed() {
+        JSONObject resource = loadJSON("/valid-with-oneof-schema.json");
+        final ResourceTypeSchema schema = ResourceTypeSchema.load(resource);
+    }
+
+    /**
+     * validate a valid model against a schema containing conditionals, like "oneOf"
+     */
+    @Test
+    public void schemaWithOneOf_validateCorrectModel_shouldSucceed() {
+        JSONObject resourceDefinition = loadJSON(SCHEMA_WITH_ONEOF);
+        ResourceTypeSchema schema = ResourceTypeSchema.load(resourceDefinition);
+
+        // SCHEMA_WITH_ONEOF requires either propertyA or propertyB
+        // both models below should validate successfully
+        final JSONObject modelWithPropA = getEmptyModel().put("propertyA", "property a, not b");
+        final JSONObject modelWithPropB = getEmptyModel().put("propertyB", "property b, not a");
+
+        schema.validate(modelWithPropA);
+        schema.validate(modelWithPropB);
+    }
+
+    /**
+     * validate an invalid model against a schema containing conditionals ("oneOf")
+     */
+    @Test
+    public void schemaWithOneOf_validateIncorrectModel_shouldThrow() {
+        JSONObject resourceDefinition = loadJSON(SCHEMA_WITH_ONEOF);
+        ResourceTypeSchema schema = ResourceTypeSchema.load(resourceDefinition);
+
+        final JSONObject modelWithNeitherAnorB = getEmptyModel();
+
+        assertThatExceptionOfType(org.everit.json.schema.ValidationException.class).isThrownBy(
+            () -> schema.validate(modelWithNeitherAnorB));
+    }
+
+    static JSONObject getEmptyModel() {
+        return new JSONObject().put("id", "required.identifier");
+    }
+
 }
