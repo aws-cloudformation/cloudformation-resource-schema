@@ -106,7 +106,7 @@ public class Validator implements SchemaValidator {
      * returns Schema.Builder with pre-loaded JSON draft-07 meta-schema and resource definition meta-schema
      * (resource.definition.schema.v1.json). Resulting Schema.Builder can be used to build a schema that
      * can be used to validate parts of CloudFormation template.
-     * 
+     *
      * @param resourceDefinition - actual resource definition (not resource definition schema)
      * @return
      */
@@ -124,7 +124,7 @@ public class Validator implements SchemaValidator {
 
     /**
      * Convenience method - creates a SchemaLoaderBuilder with cached JSON draft-07 meta-schema
-     * 
+     *
      * @param schemaObject
      * @return
      */
@@ -145,7 +145,7 @@ public class Validator implements SchemaValidator {
      * the cached version will be used. No calls to remote URLs will be made.
      * Validator caches JSON schema (/resources/schema) and Resource Definition Schema
      * (/resources/provider.definition.schema.v1.json)
-     * 
+     *
      * @param loaderBuilder
      * @param schema meta-schema JSONObject to be cached. Must have a valid $id property
      */
