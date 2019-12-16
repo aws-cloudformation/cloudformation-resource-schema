@@ -30,8 +30,7 @@ public class ValidationException extends RuntimeException {
      */
     private static final List<String> SAFE_KEYWORDS = Arrays.asList(
         // object keywords
-        "required", "minProperties", "maxProperties", "dependencies",
-        "additionalProperties",
+        "required", "minProperties", "maxProperties", "dependencies", "additionalProperties",
         // string keywords
         "minLength", "maxLength",
         // array keywords
@@ -50,15 +49,12 @@ public class ValidationException extends RuntimeException {
     }
 
     public ValidationException(final String message,
-                               final List<
-                                   ValidationException> causingExceptions,
+                               final List<ValidationException> causingExceptions,
                                final String keyword,
                                final String schemaPointer) {
         super(message);
         this.causingExceptions = Collections
-            .unmodifiableList(causingExceptions == null
-                ? Collections.emptyList()
-                : causingExceptions);
+            .unmodifiableList(causingExceptions == null ? Collections.emptyList() : causingExceptions);
         this.keyword = keyword;
         this.schemaPointer = schemaPointer;
     }
@@ -81,13 +77,11 @@ public class ValidationException extends RuntimeException {
 
         final List<ValidationException> causingExceptions = new ArrayList<>();
         if (validationException.getCausingExceptions() != null) {
-            for (final org.everit.json.schema.ValidationException e : validationException
-                .getCausingExceptions()) {
+            for (final org.everit.json.schema.ValidationException e : validationException.getCausingExceptions()) {
                 causingExceptions.add(newScrubbedException(e));
             }
         }
-        this.causingExceptions = Collections
-            .unmodifiableList(causingExceptions);
+        this.causingExceptions = Collections.unmodifiableList(causingExceptions);
     }
 
     /**
@@ -97,18 +91,15 @@ public class ValidationException extends RuntimeException {
      * @param e The exception to redact
      * @return a redacted {@link ValidationException}
      */
-    public static ValidationException
-        newScrubbedException(final org.everit.json.schema.ValidationException e) {
+    public static ValidationException newScrubbedException(final org.everit.json.schema.ValidationException e) {
         // A parent exception has multiple errors in the subSchema, and will just emit
         // "{X} schema validations found"
-        final boolean isParentException = e.getKeyword() == null
-            && e.getCausingExceptions() != null
+        final boolean isParentException = e.getKeyword() == null && e.getCausingExceptions() != null
             && !e.getCausingExceptions().isEmpty();
         if (isParentException || SAFE_KEYWORDS.contains(e.getKeyword())) {
             return new ValidationException(e);
         } else {
-            final String errorMessage = String.format(
-                "%s: failed validation constraint for keyword [%s]",
+            final String errorMessage = String.format("%s: failed validation constraint for keyword [%s]",
                 e.getPointerToViolation(), e.getKeyword());
 
             return new ValidationException(errorMessage, e);
@@ -121,16 +112,13 @@ public class ValidationException extends RuntimeException {
      * @param e the exception to construct a message from
      * @return a standard exception message from a {@link ValidationException} tree
      */
-    public static String
-        buildFullExceptionMessage(final ValidationException e) {
+    public static String buildFullExceptionMessage(final ValidationException e) {
         return buildFullExceptionMessageHelper(e).trim();
     }
 
-    private static String
-        buildFullExceptionMessageHelper(final ValidationException e) {
+    private static String buildFullExceptionMessageHelper(final ValidationException e) {
         StringBuilder builder = new StringBuilder();
-        final boolean isParentException = e.getKeyword() == null
-            && e.getCausingExceptions() != null
+        final boolean isParentException = e.getKeyword() == null && e.getCausingExceptions() != null
             && !e.getCausingExceptions().isEmpty();
         if (!isParentException && e.getMessage() != null) {
             builder.append(e.getMessage() + "\n");

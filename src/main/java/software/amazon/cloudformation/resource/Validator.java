@@ -37,23 +37,17 @@ public class Validator implements SchemaValidator {
     @Builder
     public Validator() {
         // local copy of the draft-07 schema used to avoid remote reference calls
-        jsonSchemaObject = new JSONObject(new JSONTokener(this.getClass()
-            .getResourceAsStream(JSON_SCHEMA_PATH)));
-        definitionSchemaJsonObject = new JSONObject(new JSONTokener(this
-            .getClass().getResourceAsStream(METASCHEMA_PATH)));
+        jsonSchemaObject = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(JSON_SCHEMA_PATH)));
+        definitionSchemaJsonObject = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(METASCHEMA_PATH)));
     }
 
     @Override
-    public void validateObject(final JSONObject modelObject,
-                               final JSONObject definitionSchemaObject)
-        throws ValidationException {
+    public void validateObject(final JSONObject modelObject, final JSONObject definitionSchemaObject) throws ValidationException {
         try {
             final URI schemaURI = new URI(JSON_SCHEMA_ID);
-            final SchemaLoader loader = SchemaLoader.builder()
-                .schemaJson(definitionSchemaObject)
+            final SchemaLoader loader = SchemaLoader.builder().schemaJson(definitionSchemaObject)
                 // registers the local schema with the draft-07 url
-                .registerSchemaByURI(schemaURI, jsonSchemaObject)
-                .draftV7Support().build();
+                .registerSchemaByURI(schemaURI, jsonSchemaObject).draftV7Support().build();
             final Schema schema = loader.load().build();
 
             try {
@@ -73,8 +67,7 @@ public class Validator implements SchemaValidator {
      * @param definition JSON-encoded resource definition
      * @throws ValidationException Thrown for any schema validation errors
      */
-    public void validateResourceDefinition(final JSONObject definition)
-        throws ValidationException {
+    public void validateResourceDefinition(final JSONObject definition) throws ValidationException {
         validateObject(definition, definitionSchemaJsonObject);
     }
 
