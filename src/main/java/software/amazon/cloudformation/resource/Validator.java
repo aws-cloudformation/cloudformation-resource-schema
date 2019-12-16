@@ -36,7 +36,8 @@ public class Validator implements SchemaValidator {
 
     @Builder
     public Validator() {
-        // local copy of the draft-07 schema used to avoid remote reference calls
+        // local copy of the draft-07 schema used to avoid remote reference
+        // calls
         jsonSchemaObject = new JSONObject(new JSONTokener(this.getClass()
             .getResourceAsStream(JSON_SCHEMA_PATH)));
         definitionSchemaJsonObject = new JSONObject(new JSONTokener(this
@@ -57,7 +58,8 @@ public class Validator implements SchemaValidator {
             final Schema schema = loader.load().build();
 
             try {
-                schema.validate(modelObject); // throws a ValidationException if this object is invalid
+                // throws a ValidationException if this object is invalid
+                schema.validate(modelObject);
             } catch (final org.everit.json.schema.ValidationException e) {
                 throw ValidationException.newScrubbedException(e);
             }
@@ -67,8 +69,8 @@ public class Validator implements SchemaValidator {
     }
 
     /**
-     * Perform JSON Schema validation for the input resource definition against the
-     * resource provider definition schema
+     * Perform JSON Schema validation for the input resource definition against
+     * the resource provider definition schema
      *
      * @param definition JSON-encoded resource definition
      * @throws ValidationException Thrown for any schema validation errors
