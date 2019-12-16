@@ -145,7 +145,7 @@ public class ResourceTypeSchemaTest {
         // check that model doesn't contain the writeOnly properties
 
         assertThat(schema.getWriteOnlyPropertiesAsStrings().stream()
-            .anyMatch(writeOnlyProperty -> new PublicJSONPointer(writeOnlyProperty.replaceFirst("/properties", ""))
+            .anyMatch(writeOnlyProperty -> new PublicJSONPointer(writeOnlyProperty.replaceFirst("^/properties", ""))
                 .isInObject(resourceModel))).isFalse();
 
         // ensure that other non writeOnlyProperty is not removed

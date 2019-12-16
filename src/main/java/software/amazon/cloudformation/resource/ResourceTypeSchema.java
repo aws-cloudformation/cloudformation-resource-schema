@@ -149,9 +149,8 @@ public class ResourceTypeSchema extends ObjectSchema {
     }
 
     public void removeWriteOnlyProperties(final JSONObject resourceModel) {
-        this.getWriteOnlyPropertiesAsStrings().stream()
-            .forEach(writeOnlyProperty -> removeProperty(new PublicJSONPointer(writeOnlyProperty.replaceFirst("/properties", "")),
-                resourceModel));
+        this.getWriteOnlyPropertiesAsStrings().stream().forEach(writeOnlyProperty -> removeProperty(
+            new PublicJSONPointer(writeOnlyProperty.replaceFirst("^/properties", "")), resourceModel));
     }
 
     public static void removeProperty(final PublicJSONPointer property, final JSONObject resourceModel) {
