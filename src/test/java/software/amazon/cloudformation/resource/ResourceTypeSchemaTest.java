@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.List;
 
+import org.everit.json.schema.PublicJSONPointer;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.junit.jupiter.api.Test;
@@ -142,25 +143,12 @@ public class ResourceTypeSchemaTest {
         schema.removeWriteOnlyProperties(resourceModel);
 
         // check that model doesn't contain the writeOnly properties
-        assertThat(schema.hasWriteOnlyProperties(resourceModel)).isFalse();
+
+        assertThat(schema.getWriteOnlyPropertiesAsStrings().stream()
+            .anyMatch(writeOnlyProperty -> new PublicJSONPointer(writeOnlyProperty.replaceFirst("/properties", ""))
+                .isInObject(resourceModel))).isFalse();
+
         // ensure that other non writeOnlyProperty is not removed
         assertThat(resourceModel.has("propertyB")).isTrue();
-    }
-
-    @Test
-    public void hasWriteOnlyProperties_noWriteOnlyProperties_shouldReturnFalse() {
-        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
-        ResourceTypeSchema schema = ResourceTypeSchema.load(o);
-
-        assertThat(schema.hasWriteOnlyProperties(new JSONObject())).isFalse();
-    }
-
-    @Test
-    void hasWriteOnlyProperties_writeOnlyProperties_shouldReturnTrue() {
-        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
-        ResourceTypeSchema schema = ResourceTypeSchema.load(o);
-        JSONObject resourceModel = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(WRITEONLY_MODEL_PATH)));
-
-        assertThat(schema.hasWriteOnlyProperties(resourceModel)).isTrue();
     }
 }
