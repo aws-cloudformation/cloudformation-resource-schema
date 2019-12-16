@@ -16,6 +16,7 @@ package software.amazon.cloudformation.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static software.amazon.cloudformation.resource.ValidatorTest.loadJSON;
 
 import java.util.List;
 
@@ -130,5 +131,11 @@ public class ResourceTypeSchemaTest {
         assertThat(schema.getAdditionalIdentifiersAsStrings()).isEmpty();
         assertThat(schema.getReadOnlyPropertiesAsStrings()).isEmpty();
         assertThat(schema.getWriteOnlyPropertiesAsStrings()).isEmpty();
+    }
+
+    @Test
+    public void validSchema_withOneOf_shouldSucceed() {
+        JSONObject resource = loadJSON("/valid-with-oneof.json");
+        final ResourceTypeSchema schema = ResourceTypeSchema.load(resource);
     }
 }

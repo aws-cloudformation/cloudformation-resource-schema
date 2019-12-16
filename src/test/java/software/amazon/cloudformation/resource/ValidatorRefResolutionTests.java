@@ -86,7 +86,7 @@ public class ValidatorRefResolutionTests {
     public void validateTemplateAgainstResourceSchema_valid_shouldSucceed() {
 
         JSONObject resourceDefinition = loadJSON(RESOURCE_DEFINITION_PATH);
-        Schema schema = validator.loadResourceSchema(resourceDefinition);
+        Schema schema = validator.loadResourceDefinitionSchema(resourceDefinition);
 
         schema.validate(getSampleTemplate());
     }
@@ -98,7 +98,7 @@ public class ValidatorRefResolutionTests {
     @Test
     public void validateTemplateAgainsResourceSchema_invalid_shoudThrow() {
         JSONObject resourceDefinition = loadJSON(RESOURCE_DEFINITION_PATH);
-        Schema schema = validator.loadResourceSchema(resourceDefinition);
+        Schema schema = validator.loadResourceDefinitionSchema(resourceDefinition);
 
         final JSONObject template = getSampleTemplate();
         template.put("propertyB", "not.an.IP.address");

@@ -89,16 +89,16 @@ public class Validator implements SchemaValidator {
      * @throws ValidationException Thrown for any schema validation errors
      */
     public void validateResourceDefinition(final JSONObject definition) throws ValidationException {
-        validateObject(definition, definitionSchemaJsonObject);
         // validateObject cannot validate schema-specific attributes. For example if definition
         // contains "propertyA": { "$ref":"./some-non-existent-location.json#definitions/PropertyX"}
         // validateObject will succeed, because all it cares about is that "$ref" is a URI
         // In order to validate that $ref points at an existing location in an existing document
         // we have to "load" the schema
-        loadResourceSchema(definition);
+        loadResourceDefinitionSchema(definition);
     }
 
-    public Schema loadResourceSchema(final JSONObject resourceDefinition) {
+    public Schema loadResourceDefinitionSchema(final JSONObject resourceDefinition) {
+        validateObject(resourceDefinition, definitionSchemaJsonObject);
         return getResourceSchemaBuilder(resourceDefinition).build();
     }
 
