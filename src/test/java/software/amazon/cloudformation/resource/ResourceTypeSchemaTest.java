@@ -33,28 +33,34 @@ public class ResourceTypeSchemaTest {
 
     @Test
     public void getProperties() {
-        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
+        JSONObject o = new JSONObject(new JSONTokener(this.getClass()
+            .getResourceAsStream(TEST_SCHEMA_PATH)));
         final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
 
-        assertThat(schema.getDescription()).isEqualTo("A test schema for unit tests.");
-        assertThat(schema.getSourceUrl()).isEqualTo("https://mycorp.com/my-repo.git");
+        assertThat(schema.getDescription())
+            .isEqualTo("A test schema for unit tests.");
+        assertThat(schema.getSourceUrl())
+            .isEqualTo("https://mycorp.com/my-repo.git");
         assertThat(schema.getTypeName()).isEqualTo("AWS::Test::TestModel");
         assertThat(schema.getUnprocessedProperties()).isEmpty();
     }
 
     @Test
     public void getCreateOnlyProperties() {
-        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
+        JSONObject o = new JSONObject(new JSONTokener(this.getClass()
+            .getResourceAsStream(TEST_SCHEMA_PATH)));
         final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
 
         List<String> result = schema.getCreateOnlyPropertiesAsStrings();
 
-        assertThat(result).containsExactly("/properties/propertyA", "/properties/propertyD");
+        assertThat(result).containsExactly("/properties/propertyA",
+            "/properties/propertyD");
     }
 
     @Test
     public void getDeprecatedProperties() {
-        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
+        JSONObject o = new JSONObject(new JSONTokener(this.getClass()
+            .getResourceAsStream(TEST_SCHEMA_PATH)));
         final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
 
         List<String> result = schema.getDeprecatedPropertiesAsStrings();
@@ -63,7 +69,8 @@ public class ResourceTypeSchemaTest {
 
     @Test
     public void getPrimaryIdentifier() {
-        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
+        JSONObject o = new JSONObject(new JSONTokener(this.getClass()
+            .getResourceAsStream(TEST_SCHEMA_PATH)));
         final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
 
         List<String> result = schema.getPrimaryIdentifierAsStrings();
@@ -72,7 +79,8 @@ public class ResourceTypeSchemaTest {
 
     @Test
     public void getAdditionalIdentifiers() {
-        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
+        JSONObject o = new JSONObject(new JSONTokener(this.getClass()
+            .getResourceAsStream(TEST_SCHEMA_PATH)));
         final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
 
         List<List<String>> result = schema.getAdditionalIdentifiersAsStrings();
@@ -82,7 +90,8 @@ public class ResourceTypeSchemaTest {
 
     @Test
     public void getReadOnlyProperties() {
-        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
+        JSONObject o = new JSONObject(new JSONTokener(this.getClass()
+            .getResourceAsStream(TEST_SCHEMA_PATH)));
         final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
 
         List<String> result = schema.getReadOnlyPropertiesAsStrings();
@@ -91,7 +100,8 @@ public class ResourceTypeSchemaTest {
 
     @Test
     public void getWriteOnlyProperties() {
-        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH)));
+        JSONObject o = new JSONObject(new JSONTokener(this.getClass()
+            .getResourceAsStream(TEST_SCHEMA_PATH)));
         final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
 
         List<String> result = schema.getWriteOnlyPropertiesAsStrings();
@@ -100,33 +110,40 @@ public class ResourceTypeSchemaTest {
 
     @Test
     public void invalidSchema_shouldThrow() {
-        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(EMPTY_SCHEMA_PATH)));
+        JSONObject o = new JSONObject(new JSONTokener(this.getClass()
+            .getResourceAsStream(EMPTY_SCHEMA_PATH)));
 
-        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> ResourceTypeSchema.load(o)).withNoCause()
+        assertThatExceptionOfType(ValidationException.class)
+            .isThrownBy(() -> ResourceTypeSchema.load(o)).withNoCause()
             .withMessage("#/properties: minimum size: [1], found: [0]");
     }
 
     @Test
     public void invalidSchema_noAdditionalProperties_shouldThrow() {
-        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(NO_ADDITIONAL_PROPERTIES_SCHEMA_PATH)));
+        JSONObject o = new JSONObject(new JSONTokener(this.getClass()
+            .getResourceAsStream(NO_ADDITIONAL_PROPERTIES_SCHEMA_PATH)));
 
-        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> ResourceTypeSchema.load(o)).withNoCause()
+        assertThatExceptionOfType(ValidationException.class)
+            .isThrownBy(() -> ResourceTypeSchema.load(o)).withNoCause()
             .withMessage("#: required key [additionalProperties] not found");
     }
 
     @Test
     public void minimalSchema_hasNoSemantics() {
-        JSONObject o = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(MINIMAL_SCHEMA_PATH)));
+        JSONObject o = new JSONObject(new JSONTokener(this.getClass()
+            .getResourceAsStream(MINIMAL_SCHEMA_PATH)));
         final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
 
-        assertThat(schema.getDescription()).isEqualTo("A test schema for unit tests.");
+        assertThat(schema.getDescription())
+            .isEqualTo("A test schema for unit tests.");
         assertThat(schema.getSourceUrl()).isNull();
         assertThat(schema.getDocumentationUrl()).isNull();
         assertThat(schema.getTypeName()).isEqualTo("AWS::Test::TestModel");
         assertThat(schema.getUnprocessedProperties()).isEmpty();
         assertThat(schema.getCreateOnlyPropertiesAsStrings()).isEmpty();
         assertThat(schema.getDeprecatedPropertiesAsStrings()).isEmpty();
-        assertThat(schema.getPrimaryIdentifierAsStrings()).containsExactly("/properties/PropertyA");
+        assertThat(schema.getPrimaryIdentifierAsStrings())
+            .containsExactly("/properties/PropertyA");
         assertThat(schema.getAdditionalIdentifiersAsStrings()).isEmpty();
         assertThat(schema.getReadOnlyPropertiesAsStrings()).isEmpty();
         assertThat(schema.getWriteOnlyPropertiesAsStrings()).isEmpty();
