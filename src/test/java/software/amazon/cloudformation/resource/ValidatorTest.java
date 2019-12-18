@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.junit.jupiter.api.BeforeEach;
@@ -410,32 +409,6 @@ public class ValidatorTest {
             final JSONObject example = new JSONObject(new JSONTokener(stream));
             validator.validateResourceDefinition(example);
         }
-    }
-
-    /**
-     * trivial coverage test: cannot cache a schema if it has an invalid $id
-     */
-    @ParameterizedTest
-    @ValueSource(strings = { ":invalid/uri", "" })
-    public void registerMetaSchema_invalidRelativeRef_shouldThrow(String uri) {
-
-        JSONObject badSchema = loadJSON(RESOURCE_DEFINITION_SCHEMA_PATH);
-        badSchema.put("$id", uri);
-        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> {
-            validator.registerMetaSchema(SchemaLoader.builder(), badSchema);
-        });
-    }
-
-    /**
-     * trivial coverage test: cannot cache a schema if it has no $id
-     */
-    @Test
-    public void registerMetaSchema_nullId_shouldThrow() {
-        JSONObject badSchema = loadJSON(RESOURCE_DEFINITION_SCHEMA_PATH);
-        badSchema.remove("$id");
-        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> {
-            validator.registerMetaSchema(SchemaLoader.builder(), badSchema);
-        });
     }
 
     static JSONObject loadJSON(String path) {

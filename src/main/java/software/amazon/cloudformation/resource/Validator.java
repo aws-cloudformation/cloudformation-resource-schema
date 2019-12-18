@@ -24,7 +24,6 @@ import org.everit.json.schema.loader.SchemaClient;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.everit.json.schema.loader.SchemaLoader.SchemaLoaderBuilder;
 import org.everit.json.schema.loader.internal.DefaultSchemaClient;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -32,19 +31,26 @@ import software.amazon.cloudformation.resource.exceptions.ValidationException;
 
 public class Validator implements SchemaValidator {
 
-    private static final String ID_KEY = "$id";
+    private static final URI JSON_SCHEMA_URI_HTTPS = newURI("https://json-schema.org/draft-07/schema");
+    private static final URI JSON_SCHEMA_URI_HTTP = newURI("http://json-schema.org/draft-07/schema");
+    private static final URI RESOURCE_DEFINITION_SCHEMA_URI = newURI(
+        "https://schema.cloudformation.us-east-1.amazonaws.com/provider.definition.schema.v1.json");
+
     private static final String JSON_SCHEMA_PATH = "/schema/schema";
     private static final String RESOURCE_DEFINITION_SCHEMA_PATH = "/schema/provider.definition.schema.v1.json";
+
     /**
      * resource definition schema ("resource schema schema"). All resource schemas
      * are validated against this one and JSON schema draft v7 below.
      */
     private final JSONObject definitionSchemaJsonObject;
+
     /**
      * locally cached draft-07 JSON schema. All resource schemas are validated
      * against it
      */
     private final JSONObject jsonSchemaObject;
+
     /**
      * this is what SchemaLoader uses to download remote $refs. Not necessarily an
      * HTTP client, see the docs for details. We override the default SchemaClient
@@ -89,6 +95,8 @@ public class Validator implements SchemaValidator {
      * @throws ValidationException Thrown for any schema validation errors
      */
     public void validateResourceDefinition(final JSONObject definition) throws ValidationException {
+        // inject/replace $schema URI to ensure that provider definition schema is used
+        definition.put("$schema", RESOURCE_DEFINITION_SCHEMA_URI.toString());
         validateObject(definition, definitionSchemaJsonObject);
         // validateObject cannot validate schema-specific attributes. For example if definition
         // contains "propertyA": { "$ref":"./some-non-existent-location.json#definitions/PropertyX"}
@@ -112,7 +120,7 @@ public class Validator implements SchemaValidator {
      */
     public Schema.Builder<?> getResourceSchemaBuilder(final JSONObject resourceDefinition) {
         final SchemaLoaderBuilder loaderBuilder = getSchemaLoader(resourceDefinition);
-        registerMetaSchema(loaderBuilder, definitionSchemaJsonObject);
+        loaderBuilder.registerSchemaByURI(RESOURCE_DEFINITION_SCHEMA_URI, definitionSchemaJsonObject);
 
         final SchemaLoader loader = loaderBuilder.build();
         try {
@@ -134,38 +142,25 @@ public class Validator implements SchemaValidator {
             .schemaJson(schemaObject)
             .draftV7Support()
             .schemaClient(downloader);
-        // registers the local schema with the draft-07 url
-        registerMetaSchema(builder, jsonSchemaObject);
-        return builder;
-    }
 
-    /**
-     * Register a meta-schema with the SchemaLoaderBuilder. The meta-schema $id is used to generate schema URI
-     * This has the effect of caching the meta-schema. When SchemaLoaderBuilder is used to build the Schema object,
-     * the cached version will be used. No calls to remote URLs will be made.
-     * Validator caches JSON schema (/resources/schema) and Resource Definition Schema
-     * (/resources/provider.definition.schema.v1.json)
-     *
-     * @param loaderBuilder
-     * @param schema meta-schema JSONObject to be cached. Must have a valid $id property
-     */
-    void registerMetaSchema(final SchemaLoaderBuilder loaderBuilder, JSONObject schema) {
-        try {
-            String id = schema.getString(ID_KEY);
-            if (id.isEmpty()) {
-                throw new ValidationException("Invalid $id value", "$id", "[empty string]");
-            }
-            final URI uri = new URI(id);
-            loaderBuilder.registerSchemaByURI(uri, schema);
-        } catch (URISyntaxException e) {
-            throw new ValidationException("Invalid $id value", "$id", e);
-        } catch (JSONException e) {
-            // $id is missing or not a string
-            throw new ValidationException("Invalid $id value", "$id", e);
-        }
+        // registers the local schema with the draft-07 url
+        // registered twice because we've seen some confusion around this in the past
+        builder.registerSchemaByURI(JSON_SCHEMA_URI_HTTP, jsonSchemaObject);
+        builder.registerSchemaByURI(JSON_SCHEMA_URI_HTTPS, jsonSchemaObject);
+
+        return builder;
     }
 
     private static JSONObject loadResourceAsJSON(String path) {
         return new JSONObject(new JSONTokener(Validator.class.getResourceAsStream(path)));
+    }
+
+    /** wrapper around new URI that throws an unchecked exception */
+    static URI newURI(final String uri) {
+        try {
+            return new URI(uri);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(uri);
+        }
     }
 }

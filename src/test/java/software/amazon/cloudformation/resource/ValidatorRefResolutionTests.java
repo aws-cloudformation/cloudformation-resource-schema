@@ -32,9 +32,6 @@ import org.mockito.verification.VerificationMode;
 
 import software.amazon.cloudformation.resource.exceptions.ValidationException;
 
-/**
- *
- */
 @ExtendWith(MockitoExtension.class)
 public class ValidatorRefResolutionTests {
 
