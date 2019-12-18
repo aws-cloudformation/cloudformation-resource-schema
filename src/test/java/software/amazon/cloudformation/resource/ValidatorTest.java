@@ -35,7 +35,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import software.amazon.cloudformation.resource.exceptions.ValidationException;
 
 public class ValidatorTest {
-    private static final String RESOURCE_DEFINITION_SCHEMA_PATH = "/schema/provider.definition.schema.v1.json";
     private static final String TEST_SCHEMA_PATH = "/test-schema.json";
     private static final String TEST_VALUE_SCHEMA_PATH = "/scrubbed-values-schema.json";
     private static final String TYPE_NAME_KEY = "typeName";
@@ -366,7 +365,8 @@ public class ValidatorTest {
     public void validateDefinition_nonMatchingSourceUrls_shouldThrow(final String sourceUrl) {
         final JSONObject definition = baseSchema().put("sourceUrl", sourceUrl);
 
-        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
+        assertThatExceptionOfType(ValidationException.class).isThrownBy(() ->
+                validator.validateResourceDefinition(definition))
             .withMessageContaining("#/sourceUrl").withMessageNotContaining((sourceUrl));
     }
 
