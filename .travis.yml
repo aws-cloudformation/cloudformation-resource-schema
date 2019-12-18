@@ -3,7 +3,7 @@ dist: bionic
 jdk: openjdk11
 env:
   global:
-    - PYENV_VERSION=3.7.1
+    - PYENV_VERSION=3.7
 install:
   - pip3 install --user pre-commit
 script:
