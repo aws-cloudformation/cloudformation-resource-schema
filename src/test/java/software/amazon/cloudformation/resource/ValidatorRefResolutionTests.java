@@ -15,6 +15,7 @@
 package software.amazon.cloudformation.resource;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static software.amazon.cloudformation.resource.ValidatorTest.loadJSON;
@@ -26,9 +27,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.verification.VerificationMode;
 
 import software.amazon.cloudformation.resource.exceptions.ValidationException;
 
@@ -59,9 +58,8 @@ public class ValidatorRefResolutionTests {
         // valid-with-refs.json contains two refs pointing at locations inside
         // common.types.v1.json
         // Everit will attempt to download the remote schema once for each $ref - it
-        // doesn't cache
-        // remote schemas. Expect the downloader to be called twice
-        verify(downloader, twice()).get(expectedRefUrl);
+        // doesn't cache remote schemas. Expect the downloader to be called twice
+        verify(downloader, times(2)).get(expectedRefUrl);
     }
 
     /**
@@ -73,9 +71,8 @@ public class ValidatorRefResolutionTests {
 
         JSONObject badSchema = loadJSON("/invalid-bad-ref.json");
 
-        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> {
-            validator.validateResourceDefinition(badSchema);
-        });
+        assertThatExceptionOfType(ValidationException.class)
+            .isThrownBy(() -> validator.validateResourceDefinition(badSchema));
     }
 
     /** example of using Validator to validate a json data files */
@@ -100,7 +97,8 @@ public class ValidatorRefResolutionTests {
         final JSONObject template = getSampleTemplate();
         template.put("propertyB", "not.an.IP.address");
 
-        assertThatExceptionOfType(org.everit.json.schema.ValidationException.class).isThrownBy(() -> schema.validate(template));
+        assertThatExceptionOfType(org.everit.json.schema.ValidationException.class)
+            .isThrownBy(() -> schema.validate(template));
     }
 
     /**
@@ -111,13 +109,6 @@ public class ValidatorRefResolutionTests {
      * Time property.
      */
     private JSONObject getSampleTemplate() {
-        final JSONObject template = new JSONObject();
-        template.put("Time", "2019-12-12T10:10:22.212Z");
-        return template;
+        return new JSONObject().put("Time", "2019-12-12T10:10:22.212Z");
     }
-
-    private static VerificationMode twice() {
-        return Mockito.times(2);
-    }
-
 }
