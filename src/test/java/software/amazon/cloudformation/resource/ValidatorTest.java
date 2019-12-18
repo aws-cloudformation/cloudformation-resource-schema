@@ -365,8 +365,7 @@ public class ValidatorTest {
     public void validateDefinition_nonMatchingSourceUrls_shouldThrow(final String sourceUrl) {
         final JSONObject definition = baseSchema().put("sourceUrl", sourceUrl);
 
-        assertThatExceptionOfType(ValidationException.class).isThrownBy(() ->
-                validator.validateResourceDefinition(definition))
+        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
             .withMessageContaining("#/sourceUrl").withMessageNotContaining((sourceUrl));
     }
 
