@@ -17,6 +17,17 @@
         },
         "propertyD": {
             "type": "boolean"
+        },
+        "propertyE": {
+            "type": "object",
+            "properties": {
+                "nestedProperty": {
+                    "type": "string"
+                },
+                "writeOnlyArray": {
+                    "type": "string"
+                }
+            }
         }
     },
     "required": [
@@ -33,7 +44,8 @@
         "/properties/propertyB"
     ],
     "writeOnlyProperties": [
-        "/properties/propertyC"
+        "/properties/propertyC",
+        "/properties/propertyE/nestedProperty"
     ],
     "primaryIdentifier": [
         "/properties/propertyA"

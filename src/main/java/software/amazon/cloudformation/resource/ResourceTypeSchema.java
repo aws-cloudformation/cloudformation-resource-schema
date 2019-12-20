@@ -24,7 +24,9 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 
 import org.everit.json.schema.JSONPointer;
+import org.everit.json.schema.JSONPointerException;
 import org.everit.json.schema.ObjectSchema;
+import org.everit.json.schema.PublicJSONPointer;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -144,5 +146,29 @@ public class ResourceTypeSchema extends ObjectSchema {
     @Override
     public Map<String, Object> getUnprocessedProperties() {
         return Collections.unmodifiableMap(this.unprocessedProperties);
+    }
+
+    public void removeWriteOnlyProperties(final JSONObject resourceModel) {
+        this.getWriteOnlyPropertiesAsStrings().stream().forEach(writeOnlyProperty -> removeProperty(
+            new PublicJSONPointer(writeOnlyProperty.replaceFirst("^/properties", "")), resourceModel));
+    }
+
+    public static void removeProperty(final PublicJSONPointer property, final JSONObject resourceModel) {
+        List<String> refTokens = property.getRefTokens();
+        final String key = refTokens.get(refTokens.size() - 1);
+        try {
+            // if size is more than one, fetch parent object/array of key to remove so that
+            // we can remove
+            if (refTokens.size() > 1) {
+                // use sublist to specify to point at the parent object
+                final JSONPointer parentObjectPointer = new JSONPointer(refTokens.subList(0, refTokens.size() - 1));
+                final JSONObject parentObject = (JSONObject) parentObjectPointer.queryFrom(resourceModel);
+                parentObject.remove(key);
+            } else {
+                resourceModel.remove(key);
+            }
+        } catch (JSONPointerException | NumberFormatException e) {
+            // do nothing, as this indicates the model does not have a value for the pointer
+        }
     }
 }
