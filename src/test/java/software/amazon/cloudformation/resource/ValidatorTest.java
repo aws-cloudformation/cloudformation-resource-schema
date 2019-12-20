@@ -404,32 +404,32 @@ public class ValidatorTest {
 
     @Test
     public void validateDefinition_relativeTemplateUri_shouldBeAllowed() {
-        final JSONObject serviceLink = new JSONObject().put("templateUri", "/cloudformation/home").put("mappings",
+        final JSONObject resourceLink = new JSONObject().put("templateUri", "/cloudformation/home").put("mappings",
             new JSONObject());
-        final JSONObject definition = baseSchema().put("serviceLink", serviceLink);
+        final JSONObject definition = baseSchema().put("resourceLink", resourceLink);
 
         validator.validateResourceDefinition(definition);
     }
 
     @Test
     public void validateDefinition_httpsTemplateUri_shouldBeAllowed() {
-        final JSONObject serviceLink = new JSONObject()
+        final JSONObject resourceLink = new JSONObject()
             .put("templateUri", "https://eu-central-1.console.aws.amazon.com/cloudformation/home")
             .put("mappings", new JSONObject());
-        final JSONObject definition = baseSchema().put("serviceLink", serviceLink);
+        final JSONObject definition = baseSchema().put("resourceLink", resourceLink);
 
         validator.validateResourceDefinition(definition);
     }
 
     @Test
     public void validateDefinition_httpTemplateUri_shouldThrow() {
-        final JSONObject serviceLink = new JSONObject()
+        final JSONObject resourceLink = new JSONObject()
             .put("templateUri", "http://eu-central-1.console.aws.amazon.com/cloudformation/home")
             .put("mappings", new JSONObject());
-        final JSONObject definition = baseSchema().put("serviceLink", serviceLink);
+        final JSONObject definition = baseSchema().put("resourceLink", resourceLink);
 
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
-            .withMessageContaining("#/serviceLink/templateUri");
+            .withMessageContaining("#/resourceLink/templateUri");
     }
 
     @Test

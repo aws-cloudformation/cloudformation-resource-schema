@@ -100,7 +100,7 @@
             ]
         }
     },
-    "serviceLink": {
+    "resourceLink": {
         "$comment": "This is an example of a relative, AWS-internal service link. For external links, use an absolute URI.",
         "templateUri": "/tps/v2/home?region=${awsRegion}#Report:tpsCode=${TPSCode}",
         "mappings": {

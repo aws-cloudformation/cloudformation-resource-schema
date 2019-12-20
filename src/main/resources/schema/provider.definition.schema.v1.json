@@ -208,7 +208,7 @@
                 }
             ]
         },
-        "serviceLink": {
+        "resourceLink": {
             "type": "object",
             "properties": {
                 "$comment": {
@@ -394,9 +394,9 @@
         "oneOf": {
             "$ref": "#/definitions/schemaArray"
         },
-        "serviceLink": {
+        "resourceLink": {
             "description": "A template-able link to a resource instance. AWS-internal service links must be relative to the AWS console domain. External service links must be absolute, HTTPS URIs.",
-            "$ref": "#/definitions/serviceLink"
+            "$ref": "#/definitions/resourceLink"
         }
     },
     "required": [
