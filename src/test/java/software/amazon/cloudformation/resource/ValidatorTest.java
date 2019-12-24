@@ -336,8 +336,7 @@ public class ValidatorTest {
         final String keyword = timeout == 1 ? "minimum" : "maximum";
 
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
-            .withNoCause().withMessage(
-                String.format("#/handlers/create/timeoutInMinutes: failed validation constraint for keyword [%s]", keyword));
+            .withNoCause().withMessageContaining("#/handlers/create/timeoutInMinutes").withMessageContaining(keyword);
     }
 
     @ParameterizedTest
@@ -374,8 +373,8 @@ public class ValidatorTest {
         handlerDefinition.put("timeoutInMinutes", 30);
 
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
-            .withNoCause()
-            .withMessage(String.format("#/handlers/%s: extraneous key [timeoutInMinutes] is not permitted", handlerType));
+            .withNoCause().withMessageContaining(String.format("#/handlers/%s", handlerType))
+            .withMessageContaining("timeoutInMinutes");
     }
 
     @Test
