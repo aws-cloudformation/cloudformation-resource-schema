@@ -10,7 +10,7 @@
             "maxLength": 4096
         },
         "cudHandlerDefinition": {
-            "description": "Defines any execution operations which can be performed on this resource provider",
+            "description": "Defines create, update, and delete operations which can be performed on this resource provider",
             "type": "object",
             "properties": {
                 "permissions": {
@@ -30,7 +30,7 @@
             ]
         },
         "rlHandlerDefinition": {
-            "description": "Defines any execution operations which can be performed on this resource provider",
+            "description": "Defines read and list operations which can be performed on this resource provider",
             "type": "object",
             "properties": {
                 "permissions": {
