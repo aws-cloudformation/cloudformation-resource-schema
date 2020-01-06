@@ -49,6 +49,15 @@ public class ValidationException extends RuntimeException {
     }
 
     public ValidationException(final String message,
+                               final String schemaPointer,
+                               final Exception cause) {
+        super(message, cause);
+        this.causingExceptions = Collections.emptyList();
+        this.keyword = "";
+        this.schemaPointer = schemaPointer;
+    }
+
+    public ValidationException(final String message,
                                final List<ValidationException> causingExceptions,
                                final String keyword,
                                final String schemaPointer) {

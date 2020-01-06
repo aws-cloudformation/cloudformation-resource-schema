@@ -333,14 +333,6 @@ public class ValidatorTest {
         validator.validateResourceDefinition(definition);
     }
 
-    @Test
-    public void validateDefinition_validRelativeRef_shouldNotThrow() {
-        final JSONObject definition = new JSONObject(new JSONTokener(this.getClass()
-            .getResourceAsStream("/valid-with-relative-ref.json")));
-
-        validator.validateResourceDefinition(definition);
-    }
-
     @ParameterizedTest
     @ValueSource(strings = { "ftp://example.com", "http://example.com", "git://example.com", "https://", })
     public void validateDefinition_nonMatchingDocumentationUrl_shouldThrow(final String documentationUrl) {
@@ -418,4 +410,16 @@ public class ValidatorTest {
         }
     }
 
+    static JSONObject loadJSON(String path) {
+        try {
+            return new JSONObject(new JSONTokener(ValidatorTest.getResourceAsStream(path)));
+        } catch (Throwable ex) {
+            System.out.println("path: " + path);
+            throw ex;
+        }
+    }
+
+    static InputStream getResourceAsStream(String path) {
+        return ValidatorRefResolutionTests.class.getResourceAsStream(path);
+    }
 }

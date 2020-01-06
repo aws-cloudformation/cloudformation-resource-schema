@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft-07/schema#",
-    "$id": "provider.definition.schema.v1.json",
+    "$id": "https://schema.cloudformation.us-east-1.amazonaws.com/provider.definition.schema.v1.json",
     "title": "CloudFormation Resource Provider Definition MetaSchema",
     "description": "This schema validates a CloudFormation resource provider definition.",
     "definitions": {

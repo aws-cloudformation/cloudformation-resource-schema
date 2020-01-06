@@ -1,0 +1,21 @@
+{
+    "$id": "https://schema.cloudformation.us-east-1.amazonaws.com/resource-definition-with-refs.json",
+    "typeName": "CFN::Test::Resource",
+    "description": "propertyB definition uses a ref pointer to a non-existent remote schema location",
+    "sourceUrl": "https://mycorp.com/my-repo.git",
+    "properties": {
+        "Time": {
+            "$ref": "./common.types.v1.json#/definitions/iso8601UTC"
+        },
+        "propertyB": {
+            "type": "array",
+            "items": {
+                "$ref": "./common.types.v1.json#/definitions/badProperty"
+            }
+        }
+    },
+    "primaryIdentifier": [
+        "/properties/Time"
+    ],
+    "additionalProperties": false
+}

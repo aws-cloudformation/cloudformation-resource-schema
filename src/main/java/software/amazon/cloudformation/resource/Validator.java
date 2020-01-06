@@ -20,7 +20,10 @@ import java.net.URISyntaxException;
 import lombok.Builder;
 
 import org.everit.json.schema.Schema;
+import org.everit.json.schema.loader.SchemaClient;
 import org.everit.json.schema.loader.SchemaLoader;
+import org.everit.json.schema.loader.SchemaLoader.SchemaLoaderBuilder;
+import org.everit.json.schema.loader.internal.DefaultSchemaClient;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -28,35 +31,59 @@ import software.amazon.cloudformation.resource.exceptions.ValidationException;
 
 public class Validator implements SchemaValidator {
 
-    private static final String JSON_SCHEMA_ID = "https://json-schema.org/draft-07/schema";
+    private static final URI JSON_SCHEMA_URI_HTTPS = newURI("https://json-schema.org/draft-07/schema");
+    private static final URI JSON_SCHEMA_URI_HTTP = newURI("http://json-schema.org/draft-07/schema");
+    private static final URI RESOURCE_DEFINITION_SCHEMA_URI = newURI(
+        "https://schema.cloudformation.us-east-1.amazonaws.com/provider.definition.schema.v1.json");
+
     private static final String JSON_SCHEMA_PATH = "/schema/schema";
-    private static final String METASCHEMA_PATH = "/schema/provider.definition.schema.v1.json";
+    private static final String RESOURCE_DEFINITION_SCHEMA_PATH = "/schema/provider.definition.schema.v1.json";
+
+    /**
+     * resource definition schema ("resource schema schema"). All resource schemas
+     * are validated against this one and JSON schema draft v7 below.
+     */
     private final JSONObject definitionSchemaJsonObject;
+
+    /**
+     * locally cached draft-07 JSON schema. All resource schemas are validated
+     * against it
+     */
     private final JSONObject jsonSchemaObject;
+
+    /**
+     * this is what SchemaLoader uses to download remote $refs. Not necessarily an
+     * HTTP client, see the docs for details. We override the default SchemaClient
+     * client in unit tests to be able to control how remote refs are resolved.
+     */
+    private final SchemaClient downloader;
+
+    Validator(SchemaClient downloader) {
+        this(loadResourceAsJSON(JSON_SCHEMA_PATH), loadResourceAsJSON(RESOURCE_DEFINITION_SCHEMA_PATH), downloader);
+    }
+
+    private Validator(JSONObject jsonSchema,
+                      JSONObject definitionSchema,
+                      SchemaClient downloader) {
+        this.jsonSchemaObject = jsonSchema;
+        this.definitionSchemaJsonObject = definitionSchema;
+        this.downloader = downloader;
+    }
 
     @Builder
     public Validator() {
-        // local copy of the draft-07 schema used to avoid remote reference calls
-        jsonSchemaObject = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(JSON_SCHEMA_PATH)));
-        definitionSchemaJsonObject = new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(METASCHEMA_PATH)));
+        this(new DefaultSchemaClient());
     }
 
     @Override
     public void validateObject(final JSONObject modelObject, final JSONObject definitionSchemaObject) throws ValidationException {
-        try {
-            final URI schemaURI = new URI(JSON_SCHEMA_ID);
-            final SchemaLoader loader = SchemaLoader.builder().schemaJson(definitionSchemaObject)
-                // registers the local schema with the draft-07 url
-                .registerSchemaByURI(schemaURI, jsonSchemaObject).draftV7Support().build();
-            final Schema schema = loader.load().build();
+        final SchemaLoaderBuilder loader = getSchemaLoader(definitionSchemaObject);
 
-            try {
-                schema.validate(modelObject); // throws a ValidationException if this object is invalid
-            } catch (final org.everit.json.schema.ValidationException e) {
-                throw ValidationException.newScrubbedException(e);
-            }
-        } catch (final URISyntaxException e) {
-            throw new RuntimeException("Invalid URI format for JSON schema.");
+        try {
+            final Schema schema = loader.build().load().build();
+            schema.validate(modelObject); // throws a ValidationException if this object is invalid
+        } catch (final org.everit.json.schema.ValidationException e) {
+            throw ValidationException.newScrubbedException(e);
         }
     }
 
@@ -68,7 +95,72 @@ public class Validator implements SchemaValidator {
      * @throws ValidationException Thrown for any schema validation errors
      */
     public void validateResourceDefinition(final JSONObject definition) throws ValidationException {
+        // inject/replace $schema URI to ensure that provider definition schema is used
+        definition.put("$schema", RESOURCE_DEFINITION_SCHEMA_URI.toString());
         validateObject(definition, definitionSchemaJsonObject);
+        // validateObject cannot validate schema-specific attributes. For example if definition
+        // contains "propertyA": { "$ref":"./some-non-existent-location.json#definitions/PropertyX"}
+        // validateObject will succeed, because all it cares about is that "$ref" is a URI
+        // In order to validate that $ref points at an existing location in an existing document
+        // we have to "load" the schema
+        loadResourceSchema(definition);
     }
 
+    public Schema loadResourceSchema(final JSONObject resourceDefinition) {
+        return getResourceSchemaBuilder(resourceDefinition).build();
+    }
+
+    /**
+     * returns Schema.Builder with pre-loaded JSON draft-07 meta-schema and resource definition meta-schema
+     * (resource.definition.schema.v1.json). Resulting Schema.Builder can be used to build a schema that
+     * can be used to validate parts of CloudFormation template.
+     *
+     * @param resourceDefinition - actual resource definition (not resource definition schema)
+     * @return
+     */
+    public Schema.Builder<?> getResourceSchemaBuilder(final JSONObject resourceDefinition) {
+        final SchemaLoaderBuilder loaderBuilder = getSchemaLoader(resourceDefinition);
+        loaderBuilder.registerSchemaByURI(RESOURCE_DEFINITION_SCHEMA_URI, definitionSchemaJsonObject);
+
+        final SchemaLoader loader = loaderBuilder.build();
+        try {
+            return loader.load();
+        } catch (org.everit.json.schema.SchemaException e) {
+            throw new ValidationException(e.getMessage(), e.getSchemaLocation(), e);
+        }
+    }
+
+    /**
+     * Convenience method - creates a SchemaLoaderBuilder with cached JSON draft-07 meta-schema
+     *
+     * @param schemaObject
+     * @return
+     */
+    private SchemaLoaderBuilder getSchemaLoader(JSONObject schemaObject) {
+        final SchemaLoaderBuilder builder = SchemaLoader
+            .builder()
+            .schemaJson(schemaObject)
+            .draftV7Support()
+            .schemaClient(downloader);
+
+        // registers the local schema with the draft-07 url
+        // registered twice because we've seen some confusion around this in the past
+        builder.registerSchemaByURI(JSON_SCHEMA_URI_HTTP, jsonSchemaObject);
+        builder.registerSchemaByURI(JSON_SCHEMA_URI_HTTPS, jsonSchemaObject);
+
+        return builder;
+    }
+
+    private static JSONObject loadResourceAsJSON(String path) {
+        return new JSONObject(new JSONTokener(Validator.class.getResourceAsStream(path)));
+    }
+
+    /** wrapper around new URI that throws an unchecked exception */
+    static URI newURI(final String uri) {
+        try {
+            return new URI(uri);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(uri);
+        }
+    }
 }
