@@ -7,7 +7,7 @@
     <description>This library contains the metaschema for CloudFormation resource types and validation tools.</description>
     <url>ttps://github.com/aws-cloudformation/aws-cloudformation-resource-schema</url>
 
-    <version>2.0.1</version>
+    <version>2.0.2</version>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -40,7 +40,6 @@
         <connection>scm:git:https://github.com/aws-cloudformation/aws-cloudformation-resource-schema.git</connection>
         <developerConnection>scm:git:git@github.com:aws-cloudformation/aws-cloudformation-resource-schema.git</developerConnection>
         <url>https://github.com/aws-cloudformation/aws-cloudformation-resource-schema</url>
-        <tag>aws-cloudformation-resource-schema-2.0.1</tag>
     </scm>
     <dependencies>
         <!-- https://mvnrepository.com/artifact/com.github.everit-org.json-schema/org.everit.json.schema -->
