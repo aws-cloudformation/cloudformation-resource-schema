@@ -9,12 +9,16 @@
             "pattern": "^https://[0-9a-zA-Z]([-.\\w]*[0-9a-zA-Z])(:[0-9]*)*([?/#].*)?$",
             "maxLength": 4096
         },
-        "cudHandlerDefinition": {
-            "description": "Defines create, update, and delete operations which can be performed on this resource provider",
+        "handlerDefinition": {
+            "description": "Defines any execution operations which can be performed on this resource provider",
             "type": "object",
             "properties": {
                 "permissions": {
-                    "$ref": "#/definitions/permissionsDefinition"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "additionalItems": false
                 },
                 "timeoutInMinutes": {
                     "description": "Defines the timeout for the entire operation to be interpreted by the invoker of the handler.  The default is 120 (2 hours).",
@@ -28,26 +32,6 @@
             "required": [
                 "permissions"
             ]
-        },
-        "rlHandlerDefinition": {
-            "description": "Defines read and list operations which can be performed on this resource provider",
-            "type": "object",
-            "properties": {
-                "permissions": {
-                    "$ref": "#/definitions/permissionsDefinition"
-                }
-            },
-            "additionalProperties": false,
-            "required": [
-                "permissions"
-            ]
-        },
-        "permissionsDefinition": {
-            "type": "array",
-            "items": {
-                "type": "string"
-            },
-            "additionalItems": false
         },
         "jsonPointerArray": {
             "type": "array",
@@ -305,19 +289,19 @@
             "type": "object",
             "properties": {
                 "create": {
-                    "$ref": "#/definitions/cudHandlerDefinition"
+                    "$ref": "#/definitions/handlerDefinition"
                 },
                 "read": {
-                    "$ref": "#/definitions/rlHandlerDefinition"
+                    "$ref": "#/definitions/handlerDefinition"
                 },
                 "update": {
-                    "$ref": "#/definitions/cudHandlerDefinition"
+                    "$ref": "#/definitions/handlerDefinition"
                 },
                 "delete": {
-                    "$ref": "#/definitions/cudHandlerDefinition"
+                    "$ref": "#/definitions/handlerDefinition"
                 },
                 "list": {
-                    "$ref": "#/definitions/rlHandlerDefinition"
+                    "$ref": "#/definitions/handlerDefinition"
                 }
             },
             "additionalProperties": false

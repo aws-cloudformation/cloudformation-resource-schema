@@ -352,7 +352,7 @@ public class ValidatorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "create", "update", "delete" })
+    @ValueSource(strings = { "create", "update", "delete", "read", "list" })
     public void validateDefinition_timeoutAllowed_shouldNotThrow(final String handlerType) {
         final JSONObject definition = new JSONObject(new JSONTokener(this.getClass()
             .getResourceAsStream("/valid-with-handlers.json")));
@@ -361,20 +361,6 @@ public class ValidatorTest {
         handlerDefinition.put("timeoutInMinutes", 30);
 
         validator.validateResourceDefinition(definition);
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = { "read", "list" })
-    public void validateDefinition_noTimeoutAllowed_shouldThrow(final String handlerType) {
-        final JSONObject definition = new JSONObject(new JSONTokener(this.getClass()
-            .getResourceAsStream("/valid-with-handlers.json")));
-
-        final JSONObject handlerDefinition = definition.getJSONObject("handlers").getJSONObject(handlerType);
-        handlerDefinition.put("timeoutInMinutes", 30);
-
-        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
-            .withNoCause().withMessageContaining(String.format("#/handlers/%s", handlerType))
-            .withMessageContaining("timeoutInMinutes");
     }
 
     @Test

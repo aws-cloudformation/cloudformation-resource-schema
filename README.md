@@ -150,7 +150,7 @@ For each handler, you should define a list of API `permissions` required to perf
 
 ### timeoutInMinutes
 
-For create, update, and delete handlers, you may define a `timeoutInMinutes` property, which defines the *maximum* timeout of the operation.  This timeout is used by the invoker of the handler (such as CloudFormation) to stop listening and cancel the operation.  Note that the handler may of course decide to timeout and return a failure prior to this max timeout period.
+For each handler, you may define a `timeoutInMinutes` property, which defines the *maximum* timeout of the operation.  This timeout is used by the invoker of the handler (such as CloudFormation) to stop listening and cancel the operation.  Note that the handler may of course decide to timeout and return a failure prior to this max timeout period.  Currently, this value is only used for `Create`, `Update`, and `Delete` handlers, while `Read` and `List` handlers are expected to return synchronously within 30 seconds.
 
 ## License
 
