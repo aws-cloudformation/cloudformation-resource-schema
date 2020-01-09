@@ -121,6 +121,7 @@ We have taken an opinion on certain aspects of the core JSON Schema and introduc
 ### New Schema-Level Properties
 
 #### insertionOrder
+
 Array types can define a boolean `insertionOrder`, which specifies whether the order in which elements are specified should be honored when processing a diff between two sets of properties.  If `insertionOrder` is true, then a change in order of the elements will constitute a diff.  The default for `insertionOrder` is true.
 
 Together with the `uniqueItems` property (which is native to JSON Schema), complex array types can be defined, as in the following table:
@@ -142,6 +143,18 @@ Together with the `uniqueItems` property (which is native to JSON Schema), compl
 * **`additionalProperties`** use of `additionalProperties` is not valid for a resource property. Use `patternProperties` instead to define the shape and allowed values of extraneous keys.
 * **`properties` and `patternProperties`** it is not valid to use both properties and patternProperties together in the same shape, as a shape should not contain both defined and undefined values. In order to implement this, the set of undefined values should itself be a subshape.
 * **`items` and `additionalItems`** the `items` in an array may only have one schema and may not use a list of schemas, as an ordered tuple of different objects is confusing for both developers and customers. This should be expressed as key:value object pairs. Similarly, `additionalItems` is not allowed.
+
+## handlers
+
+The `handlers` section of the schema allows you to specify which CRUDL operations (create, read, update, delete, list) are available for your resource, as well as some additional metadata about each handler.
+
+### permissions
+
+For each handler, you should define a list of API `permissions` required to perform the operation.  Currently, this is used to generate IAM policy templates and is assumed to be AWS API permissions, but you may list 3rd party APIs here as well.
+
+### timeoutInMinutes
+
+For each handler, you may define a `timeoutInMinutes` property, which defines the *maximum* timeout of the operation.  This timeout is used by the invoker of the handler (such as CloudFormation) to stop listening and cancel the operation.  Note that the handler may of course decide to timeout and return a failure prior to this max timeout period.  Currently, this value is only used for `Create`, `Update`, and `Delete` handlers, while `Read` and `List` handlers are expected to return synchronously within 30 seconds.
 
 ## License
 
