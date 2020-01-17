@@ -214,6 +214,33 @@
                     "additionalProperties": false
                 }
             ]
+        },
+        "resourceLink": {
+            "type": "object",
+            "properties": {
+                "$comment": {
+                    "$ref": "https://json-schema.org/draft-07/schema#/properties/$comment"
+                },
+                "templateUri": {
+                    "type": "string",
+                    "pattern": "^(/|https:)"
+                },
+                "mappings": {
+                    "type": "object",
+                    "patternProperties": {
+                        "^[A-Za-z0-9]{1,64}$": {
+                            "type": "string",
+                            "format": "json-pointer"
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "templateUri",
+                "mappings"
+            ],
+            "additionalProperties": false
         }
     },
     "type": "object",
@@ -373,6 +400,10 @@
         },
         "oneOf": {
             "$ref": "#/definitions/schemaArray"
+        },
+        "resourceLink": {
+            "description": "A template-able link to a resource instance. AWS-internal service links must be relative to the AWS console domain. External service links must be absolute, HTTPS URIs.",
+            "$ref": "#/definitions/resourceLink"
         }
     },
     "required": [

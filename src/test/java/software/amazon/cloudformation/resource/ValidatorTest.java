@@ -435,6 +435,36 @@ public class ValidatorTest {
     }
 
     @Test
+    public void validateDefinition_relativeTemplateUri_shouldBeAllowed() {
+        final JSONObject resourceLink = new JSONObject().put("templateUri", "/cloudformation/home").put("mappings",
+            new JSONObject());
+        final JSONObject definition = baseSchema().put("resourceLink", resourceLink);
+
+        validator.validateResourceDefinition(definition);
+    }
+
+    @Test
+    public void validateDefinition_httpsTemplateUri_shouldBeAllowed() {
+        final JSONObject resourceLink = new JSONObject()
+            .put("templateUri", "https://eu-central-1.console.aws.amazon.com/cloudformation/home")
+            .put("mappings", new JSONObject());
+        final JSONObject definition = baseSchema().put("resourceLink", resourceLink);
+
+        validator.validateResourceDefinition(definition);
+    }
+
+    @Test
+    public void validateDefinition_httpTemplateUri_shouldThrow() {
+        final JSONObject resourceLink = new JSONObject()
+            .put("templateUri", "http://eu-central-1.console.aws.amazon.com/cloudformation/home")
+            .put("mappings", new JSONObject());
+        final JSONObject definition = baseSchema().put("resourceLink", resourceLink);
+
+        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
+            .withMessageContaining("#/resourceLink/templateUri");
+    }
+
+    @Test
     public void validateDefinition_idKeyword_shouldBeAllowed() {
         final JSONObject definition = baseSchema().put("$id",
             "https://schema.cloudformation.us-east-1.amazonaws.com/aws-ec2-instance.json#");
