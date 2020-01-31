@@ -58,7 +58,7 @@ public class Validator implements SchemaValidator {
      */
     private final SchemaClient downloader;
 
-    Validator(SchemaClient downloader) {
+    public Validator(SchemaClient downloader) {
         this(loadResourceAsJSON(JSON_SCHEMA_PATH), loadResourceAsJSON(RESOURCE_DEFINITION_SCHEMA_PATH), downloader);
     }
 
