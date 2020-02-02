@@ -174,6 +174,10 @@ public class ResourceTypeSchema {
         }
     }
 
+    public boolean definesProperty(String field) {
+        return schema.definesProperty(field);
+    }
+
     public void validate(JSONObject json) {
         getSchema().validate(json);
     }
