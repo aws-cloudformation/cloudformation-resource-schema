@@ -31,10 +31,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import software.amazon.cloudformation.resource.exceptions.ValidationException;
 
+/**
+ *
+ */
 @ExtendWith(MockitoExtension.class)
 public class ValidatorRefResolutionTests {
 
-    public static final String RESOURCE_DEFINITION_PATH = "/valid-with-refs.json";
+    public static final String RESOURCE_DEFINITION_PATH = "/valid-with-refs-schema.json";
     private final static String COMMON_TYPES_PATH = "/common.types.v1.json";
     private final String expectedRefUrl = "https://schema.cloudformation.us-east-1.amazonaws.com/common.types.v1.json";
 
@@ -50,7 +53,7 @@ public class ValidatorRefResolutionTests {
     }
 
     @Test
-    public void loadResourceSchema_validRelativeRef_shouldSucceed() {
+    public void validateResourceDefinition_validRelativeRef_shouldSucceed() {
 
         JSONObject schema = loadJSON(RESOURCE_DEFINITION_PATH);
         validator.validateResourceDefinition(schema);
@@ -67,34 +70,37 @@ public class ValidatorRefResolutionTests {
      * remote meta-schema
      */
     @Test
-    public void loadResourceSchema_invalidRelativeRef_shouldThrow() {
+    public void validateResourceDefinition_invalidRelativeRef_shouldThrow() {
 
-        JSONObject badSchema = loadJSON("/invalid-bad-ref.json");
+        JSONObject badSchema = loadJSON("/invalid-bad-ref-schema.json");
 
         assertThatExceptionOfType(ValidationException.class)
             .isThrownBy(() -> validator.validateResourceDefinition(badSchema));
     }
 
-    /** example of using Validator to validate a json data files */
+    /** example of using ResourceTypeSchema to validate a model */
     @Test
-    public void validateTemplateAgainstResourceSchema_valid_shouldSucceed() {
+    public void validateModel_containsValidRefs_shouldSucceed() {
 
         JSONObject resourceDefinition = loadJSON(RESOURCE_DEFINITION_PATH);
-        Schema schema = validator.loadResourceSchema(resourceDefinition);
+        Schema rawSchema = validator.loadResourceDefinitionSchema(resourceDefinition);
+        ResourceTypeSchema schema = new ResourceTypeSchema(rawSchema);
 
-        schema.validate(getSampleTemplate());
+        schema.validate(getValidModelWithRefs());
     }
 
     /**
-     * template that contains an invalid value in one of its properties fails
+     * model that contains an invalid value in one of its properties fails
      * validation
      */
     @Test
-    public void validateTemplateAgainsResourceSchema_invalid_shoudThrow() {
+    public void validateModel_containsBadRef_shoudThrow() {
         JSONObject resourceDefinition = loadJSON(RESOURCE_DEFINITION_PATH);
-        Schema schema = validator.loadResourceSchema(resourceDefinition);
+        Schema rawSchema = validator.loadResourceDefinitionSchema(resourceDefinition);
+        ResourceTypeSchema schema = new ResourceTypeSchema(rawSchema);
 
-        final JSONObject template = getSampleTemplate();
+        final JSONObject template = getValidModelWithRefs();
+        // make the model invalid by adding a property containing a malformed IP address
         template.put("propertyB", "not.an.IP.address");
 
         assertThatExceptionOfType(org.everit.json.schema.ValidationException.class)
@@ -108,7 +114,7 @@ public class ValidatorRefResolutionTests {
      * required property getSampleTemplate constructs a JSON object with a single
      * Time property.
      */
-    private JSONObject getSampleTemplate() {
+    private JSONObject getValidModelWithRefs() {
         return new JSONObject().put("Time", "2019-12-12T10:10:22.212Z");
     }
 }

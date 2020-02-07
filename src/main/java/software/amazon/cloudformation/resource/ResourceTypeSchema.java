@@ -25,33 +25,36 @@ import lombok.Getter;
 
 import org.everit.json.schema.JSONPointer;
 import org.everit.json.schema.JSONPointerException;
-import org.everit.json.schema.ObjectSchema;
 import org.everit.json.schema.PublicJSONPointer;
-import org.everit.json.schema.loader.SchemaLoader;
+import org.everit.json.schema.Schema;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 import software.amazon.cloudformation.resource.exceptions.ValidationException;
 
 @Getter
-public class ResourceTypeSchema extends ObjectSchema {
+public class ResourceTypeSchema {
+
+    private static final Validator VALIDATOR = new Validator();
 
     private final Map<String, Object> unprocessedProperties = new HashMap<>();
 
     private final String sourceUrl;
     private final String documentationUrl;
     private final String typeName;
+    private final String schemaUrl; // $schema
+
     private final List<JSONPointer> createOnlyProperties = new ArrayList<>();
     private final List<JSONPointer> deprecatedProperties = new ArrayList<>();
     private final List<JSONPointer> primaryIdentifier = new ArrayList<>();
     private final List<List<JSONPointer>> additionalIdentifiers = new ArrayList<>();
     private final List<JSONPointer> readOnlyProperties = new ArrayList<>();
     private final List<JSONPointer> writeOnlyProperties = new ArrayList<>();
+    private final Schema schema;
 
-    public ResourceTypeSchema(final ObjectSchema.Builder builder) {
-        super(builder);
+    public ResourceTypeSchema(Schema schema) {
 
-        super.getUnprocessedProperties().forEach(this.unprocessedProperties::put);
+        this.schema = schema;
+        schema.getUnprocessedProperties().forEach(this.unprocessedProperties::put);
 
         this.sourceUrl = this.unprocessedProperties.containsKey("sourceUrl")
             ? this.unprocessedProperties.get("sourceUrl").toString()
@@ -66,6 +69,11 @@ public class ResourceTypeSchema extends ObjectSchema {
         // typeName is mandatory by schema
         this.typeName = this.unprocessedProperties.get("typeName").toString();
         this.unprocessedProperties.remove("typeName");
+
+        this.schemaUrl = this.unprocessedProperties.containsKey("$schema")
+            ? this.unprocessedProperties.get("$schema").toString()
+            : null;
+        this.unprocessedProperties.remove("$schema");
 
         this.unprocessedProperties.computeIfPresent("createOnlyProperties", (k, v) -> {
             ((ArrayList<?>) v).forEach(p -> this.createOnlyProperties.add(new JSONPointer(p.toString())));
@@ -102,19 +110,14 @@ public class ResourceTypeSchema extends ObjectSchema {
         });
     }
 
-    public static ResourceTypeSchema load(final JSONObject schemaJson) {
-        // first validate incoming resource schema against definition schema
-        Validator.builder().build().validateObject(schemaJson, new JSONObject(new JSONTokener(ResourceTypeSchema.class
-            .getResourceAsStream(SchemaValidator.DEFINITION_SCHEMA_PATH))));
+    public static ResourceTypeSchema load(final JSONObject resourceDefinition) {
 
-        // now extract identifiers from resource schema
-        final SchemaLoader loader = SchemaLoader.builder().schemaJson(schemaJson)
-            // registers the local schema with the draft-07 url
-            .draftV7Support().build();
+        Schema schema = VALIDATOR.loadResourceDefinitionSchema(resourceDefinition);
+        return new ResourceTypeSchema(schema);
+    }
 
-        final ObjectSchema.Builder builder = (ObjectSchema.Builder) loader.load();
-
-        return new ResourceTypeSchema(builder);
+    public String getDescription() {
+        return schema.getDescription();
     }
 
     public List<String> getCreateOnlyPropertiesAsStrings() throws ValidationException {
@@ -143,7 +146,6 @@ public class ResourceTypeSchema extends ObjectSchema {
         return this.writeOnlyProperties.stream().map(JSONPointer::toString).collect(Collectors.toList());
     }
 
-    @Override
     public Map<String, Object> getUnprocessedProperties() {
         return Collections.unmodifiableMap(this.unprocessedProperties);
     }
@@ -170,5 +172,13 @@ public class ResourceTypeSchema extends ObjectSchema {
         } catch (JSONPointerException | NumberFormatException e) {
             // do nothing, as this indicates the model does not have a value for the pointer
         }
+    }
+
+    public boolean definesProperty(String field) {
+        return schema.definesProperty(field);
+    }
+
+    public void validate(JSONObject json) {
+        getSchema().validate(json);
     }
 }
