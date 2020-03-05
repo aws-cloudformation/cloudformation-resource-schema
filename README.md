@@ -46,6 +46,12 @@ The following (truncated) example shows some of the semantic definitions for an 
 {
     "$id": "aws-s3-bucket.json",
     "typeName": "AWS::S3::Bucket",
+    "resourceLink": {
+        "templateUri": "/s3/home?region=${awsRegion}&bucket=${BucketName}",
+        "mappings": {
+            "BucketName": "/BucketName"
+        }
+    },
     "definitions": { ... },
     "properties": {
         "Arn": {
