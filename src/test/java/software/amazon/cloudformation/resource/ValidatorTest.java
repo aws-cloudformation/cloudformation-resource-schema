@@ -322,6 +322,45 @@ public class ValidatorTest {
             .withNoCause().withMessage("#/handlers/read: required key [permissions] not found");
     }
 
+    @Test
+    public void validateDefinition_validReplacementStrategy_shouldNotThrow() {
+        final JSONObject definition = loadJSON("/test-schema.json");
+
+        validator.validateResourceDefinition(definition);
+    }
+
+    @Test
+    public void validateDefinition_DuplicateReplacementStrategy_shouldThrow() {
+        List<String> invalidReplacementStrategy = Arrays.asList("create", "create");
+        final JSONObject definition = baseSchema().put("replacementStrategy", invalidReplacementStrategy);
+        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
+            .withMessageContaining("#/replacementStrategy");
+    }
+
+    @Test
+    public void validateDefinition_SingleReplacementStrategy_shouldThrow() {
+        List<String> invalidReplacementStrategy = Arrays.asList("create");
+        final JSONObject definition = baseSchema().put("replacementStrategy", invalidReplacementStrategy);
+        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
+            .withMessageContaining("#/replacementStrategy");
+    }
+
+    @Test
+    public void validateDefinition_MultipleReplacementStrategy_shouldThrow() {
+        List<String> invalidReplacementStrategy = Arrays.asList("create", "delete", "delete");
+        final JSONObject definition = baseSchema().put("replacementStrategy", invalidReplacementStrategy);
+        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
+            .withMessageContaining("#/replacementStrategy");
+    }
+
+    @Test
+    public void validateDefinition_InvalidReplacementStrategy_shouldThrow() {
+        List<String> invalidReplacementStrategy = Arrays.asList("create", "update");
+        final JSONObject definition = baseSchema().put("replacementStrategy", invalidReplacementStrategy);
+        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
+            .withMessageContaining("#/replacementStrategy");
+    }
+
     @ParameterizedTest
     @ValueSource(ints = { 1, 721 })
     public void validateDefinition_invalidTimeout_shouldThrow(final int timeout) {

@@ -71,6 +71,16 @@
                 }
             }
         },
+        "replacementStrategy": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "uniqueItems": true,
+            "items": {
+                "type": "string",
+                "enum": ["create", "delete"]
+            }
+        },
         "properties": {
             "allOf": [
                 {
@@ -291,6 +301,10 @@
                 "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/CHAP_Using.html"
             ],
             "$ref": "#/definitions/httpsUrl"
+        },
+        "replacementStrategy": {
+            "$comment": "",
+            "$ref": "#/definitions/replacementStrategy"
         },
         "additionalProperties": {
             "$comment": "All properties of a resource must be expressed in the schema - arbitrary inputs are not allowed",

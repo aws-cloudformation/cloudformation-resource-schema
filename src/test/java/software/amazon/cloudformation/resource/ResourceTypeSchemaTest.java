@@ -102,6 +102,16 @@ public class ResourceTypeSchemaTest {
     }
 
     @Test
+    public void getReplacementStrategy() {
+        JSONObject o = loadJSON(TEST_SCHEMA_PATH);
+        final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
+
+        List<String> result = schema.getReplacementStrategy();
+        assertThat(result).containsExactly("create", "delete");
+        assertThat(result).doesNotContainSequence("delete", "create");
+    }
+
+    @Test
     public void invalidSchema_shouldThrow() {
         JSONObject o = loadJSON(EMPTY_SCHEMA_PATH);
 
@@ -133,6 +143,7 @@ public class ResourceTypeSchemaTest {
         assertThat(schema.getAdditionalIdentifiersAsStrings()).isEmpty();
         assertThat(schema.getReadOnlyPropertiesAsStrings()).isEmpty();
         assertThat(schema.getWriteOnlyPropertiesAsStrings()).isEmpty();
+        assertThat(schema.getReplacementStrategy()).isEmpty();
     }
 
     @Test
