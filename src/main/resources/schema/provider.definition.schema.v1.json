@@ -78,7 +78,10 @@
             "uniqueItems": true,
             "items": {
                 "type": "string",
-                "enum": ["create", "delete"]
+                "enum": [
+                    "create",
+                    "delete"
+                ]
             }
         },
         "properties": {
