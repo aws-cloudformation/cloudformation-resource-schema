@@ -18,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static software.amazon.cloudformation.resource.ValidatorTest.loadJSON;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.everit.json.schema.PublicJSONPointer;
@@ -29,6 +30,7 @@ import software.amazon.cloudformation.resource.exceptions.ValidationException;
 public class ResourceTypeSchemaTest {
     private static final String TEST_SCHEMA_PATH = "/test-schema.json";
     private static final String EMPTY_SCHEMA_PATH = "/empty-schema.json";
+    private static final String SINGLETON_SCHEMA_PATH = "/singleton-test-schema.json";
     private static final String SCHEMA_WITH_ONEOF = "/valid-with-oneof-schema.json";
     private static final String MINIMAL_SCHEMA_PATH = "/minimal-schema.json";
     private static final String NO_ADDITIONAL_PROPERTIES_SCHEMA_PATH = "/no-additional-properties-schema.json";
@@ -42,6 +44,7 @@ public class ResourceTypeSchemaTest {
         assertThat(schema.getDescription()).isEqualTo("A test schema for unit tests.");
         assertThat(schema.getSourceUrl()).isEqualTo("https://mycorp.com/my-repo.git");
         assertThat(schema.getTypeName()).isEqualTo("AWS::Test::TestModel");
+
         assertThat(schema.getUnprocessedProperties()).isEmpty();
     }
 
@@ -112,6 +115,26 @@ public class ResourceTypeSchemaTest {
     }
 
     @Test
+    public void getSingletonReplacementStrategy() {
+        JSONObject o = loadJSON(SINGLETON_SCHEMA_PATH);
+        final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
+
+        List<String> result = schema.getReplacementStrategy();
+        assertThat(result).containsExactly("delete", "create");
+        assertThat(result).doesNotContainSequence("create", "delete");
+    }
+
+    @Test
+    public void getUnspecifiedReplacementStrategy() {
+        JSONObject o = loadJSON(MINIMAL_SCHEMA_PATH);
+        final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
+
+        List<String> result = schema.getReplacementStrategy();
+        assertThat(result).containsExactly("create", "delete");
+        assertThat(result).doesNotContainSequence("delete", "create");
+    }
+
+    @Test
     public void invalidSchema_shouldThrow() {
         JSONObject o = loadJSON(EMPTY_SCHEMA_PATH);
 
@@ -143,7 +166,7 @@ public class ResourceTypeSchemaTest {
         assertThat(schema.getAdditionalIdentifiersAsStrings()).isEmpty();
         assertThat(schema.getReadOnlyPropertiesAsStrings()).isEmpty();
         assertThat(schema.getWriteOnlyPropertiesAsStrings()).isEmpty();
-        assertThat(schema.getReplacementStrategy()).isEmpty();
+        assertThat(schema.getReplacementStrategy()).isEqualTo(Arrays.asList("create", "delete"));
     }
 
     @Test

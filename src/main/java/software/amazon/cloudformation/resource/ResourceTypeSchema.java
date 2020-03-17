@@ -76,10 +76,15 @@ public class ResourceTypeSchema {
             : null;
         this.unprocessedProperties.remove("$schema");
 
-        this.unprocessedProperties.computeIfPresent("replacementStrategy", (k, v) -> {
-            ((ArrayList<?>) v).forEach(p -> this.replacementStrategy.add(p.toString()));
-            return null;
-        });
+        if (this.unprocessedProperties.containsKey("replacementStrategy")) {
+            this.unprocessedProperties.computeIfPresent("replacementStrategy", (k, v) -> {
+                ((ArrayList<?>) v).forEach(p -> this.replacementStrategy.add(p.toString()));
+                return null;
+            });
+        } else {
+            this.replacementStrategy.add("create");
+            this.replacementStrategy.add("delete");
+        }
 
         this.unprocessedProperties.computeIfPresent("createOnlyProperties", (k, v) -> {
             ((ArrayList<?>) v).forEach(p -> this.createOnlyProperties.add(new JSONPointer(p.toString())));
