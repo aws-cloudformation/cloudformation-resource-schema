@@ -24,6 +24,7 @@ import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
@@ -31,7 +32,9 @@ import org.json.JSONTokener;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import software.amazon.cloudformation.resource.exceptions.ValidationException;
@@ -322,41 +325,18 @@ public class ValidatorTest {
             .withNoCause().withMessage("#/handlers/read: required key [permissions] not found");
     }
 
-    @Test
-    public void validateDefinition_validReplacementStrategy_shouldNotThrow() {
-        final JSONObject definition = loadJSON("/test-schema.json");
+    @ParameterizedTest
+    @MethodSource("generateValidReplacementStrategies")
+    public void validateDefinition_validReplacementStrategy_shouldNotThrow(final List<String> replacementStrategy) {
+        final JSONObject definition = baseSchema().put("replacementStrategy", replacementStrategy);
 
         validator.validateResourceDefinition(definition);
     }
 
-    @Test
-    public void validateDefinition_DuplicateReplacementStrategy_shouldThrow() {
-        List<String> invalidReplacementStrategy = Arrays.asList("create", "create");
-        final JSONObject definition = baseSchema().put("replacementStrategy", invalidReplacementStrategy);
-        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
-            .withMessageContaining("#/replacementStrategy");
-    }
-
-    @Test
-    public void validateDefinition_SingleReplacementStrategy_shouldThrow() {
-        List<String> invalidReplacementStrategy = Arrays.asList("create");
-        final JSONObject definition = baseSchema().put("replacementStrategy", invalidReplacementStrategy);
-        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
-            .withMessageContaining("#/replacementStrategy");
-    }
-
-    @Test
-    public void validateDefinition_MultipleReplacementStrategy_shouldThrow() {
-        List<String> invalidReplacementStrategy = Arrays.asList("create", "delete", "delete");
-        final JSONObject definition = baseSchema().put("replacementStrategy", invalidReplacementStrategy);
-        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
-            .withMessageContaining("#/replacementStrategy");
-    }
-
-    @Test
-    public void validateDefinition_InvalidReplacementStrategy_shouldThrow() {
-        List<String> invalidReplacementStrategy = Arrays.asList("create", "update");
-        final JSONObject definition = baseSchema().put("replacementStrategy", invalidReplacementStrategy);
+    @ParameterizedTest
+    @MethodSource("generateInValidReplacementStrategies")
+    public void validateDefinition_DuplicateReplacementStrategy_shouldThrow(final List<String> replacementStrategy) {
+        final JSONObject definition = baseSchema().put("replacementStrategy", replacementStrategy);
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
             .withMessageContaining("#/replacementStrategy");
     }
@@ -534,6 +514,20 @@ public class ValidatorTest {
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> {
             validator.registerMetaSchema(SchemaLoader.builder(), badSchema);
         });
+    }
+
+    private static Stream<Arguments> generateValidReplacementStrategies() {
+        return Stream.of(
+            Arguments.of(Arrays.asList("delete", "create")),
+            Arguments.of(Arrays.asList("create", "delete")));
+    }
+
+    private static Stream<Arguments> generateInValidReplacementStrategies() {
+        return Stream.of(
+            Arguments.of(Arrays.asList("delete", "create", "create")),
+            Arguments.of(Arrays.asList("create", "create")),
+            Arguments.of(Arrays.asList("delete")),
+            Arguments.of(Arrays.asList("delete", "update", "create")));
     }
 
     static JSONObject loadJSON(String path) {
