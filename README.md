@@ -35,6 +35,7 @@ Certain properties of a resource are _semantic_ and have special meaning when us
 * **`writeOnlyProperties`**: A property in the `writeOnlyProperties` cannot be returned in a **READ** or **LIST** request, and can be used to express things like passwords, secrets or other sensitive data.
 * **`createOnlyProperties`**: A property in the `createOnlyProperties` cannot be specified in an **UPDATE** request, and can only be specified in a **CREATE** request. Another way to think about this - these are properties which are 'write-once', such as the [`Engine`](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-rds-database-instance.html#cfn-rds-dbinstance-engine) property for an [`AWS::RDS::DBInstance`](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-rds-database-instance.html) and if you wish to change such a property on a live resource, you should replace that resource by creating a new instance of the resource and terminating the old one. This is the behaviour CloudFormation follows for all properties documented as _'Update Requires: Replacement'_. An attempt to supply these properties to an **UPDATE** request will produce a runtime error from the handler.
 * **`deprecatedProperties`**: A property in the `deprecatedProperties` is not guaranteed to be present in the response from a **READ** request. These fields will still be accepted as input to **CREATE** and **UPDATE** requests however they may be ignored, or converted to new API forms when outbound service calls are made.
+* **`replacementStrategy`**: Used for resource that needs replacement upon an update, where CloudFormation recreates the resource and generates a new physical ID. Must be either `[create, delete]` or `[delete, create]`. Default value is `[create, delete]`
 
 #### Application
 
@@ -149,6 +150,7 @@ Together with the `uniqueItems` property (which is native to JSON Schema), compl
 * **`additionalProperties`** use of `additionalProperties` is not valid for a resource property. Use `patternProperties` instead to define the shape and allowed values of extraneous keys.
 * **`properties` and `patternProperties`** it is not valid to use both properties and patternProperties together in the same shape, as a shape should not contain both defined and undefined values. In order to implement this, the set of undefined values should itself be a subshape.
 * **`items` and `additionalItems`** the `items` in an array may only have one schema and may not use a list of schemas, as an ordered tuple of different objects is confusing for both developers and customers. This should be expressed as key:value object pairs. Similarly, `additionalItems` is not allowed.
+* **`replacementStrategy`**: a `replacementStrategy` is not valid for a mutable resource that does not need replacement during an update.
 
 ## handlers
 
