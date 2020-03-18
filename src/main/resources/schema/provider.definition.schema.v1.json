@@ -73,6 +73,11 @@
         },
         "replacementStrategy": {
             "type": "array",
+            "description": "The valid replacement strategies are [create, delete] and [delete, create]. All other inputs are invalid.",
+            "default": [
+                "create",
+                "delete"
+            ],
             "minItems": 2,
             "maxItems": 2,
             "uniqueItems": true,
@@ -306,7 +311,7 @@
             "$ref": "#/definitions/httpsUrl"
         },
         "replacementStrategy": {
-            "$comment": "",
+            "$comment": "The order of replacement for an immutable resource update.",
             "$ref": "#/definitions/replacementStrategy"
         },
         "additionalProperties": {
