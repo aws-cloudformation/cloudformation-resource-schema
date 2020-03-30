@@ -327,7 +327,7 @@ public class ValidatorTest {
 
     @ParameterizedTest
     @MethodSource("generateValidReplacementStrategies")
-    public void validateDefinition_validReplacementStrategy_shouldNotThrow(final List<String> replacementStrategy) {
+    public void validateDefinition_validReplacementStrategy_shouldNotThrow(final String replacementStrategy) {
         final JSONObject definition = baseSchema().put("replacementStrategy", replacementStrategy);
 
         validator.validateResourceDefinition(definition);
@@ -335,7 +335,7 @@ public class ValidatorTest {
 
     @ParameterizedTest
     @MethodSource("generateInValidReplacementStrategies")
-    public void validateDefinition_DuplicateReplacementStrategy_shouldThrow(final List<String> replacementStrategy) {
+    public void validateDefinition_DuplicateReplacementStrategy_shouldThrow(final String replacementStrategy) {
         final JSONObject definition = baseSchema().put("replacementStrategy", replacementStrategy);
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
             .withMessageContaining("#/replacementStrategy");
@@ -518,16 +518,15 @@ public class ValidatorTest {
 
     private static Stream<Arguments> generateValidReplacementStrategies() {
         return Stream.of(
-            Arguments.of(Arrays.asList("delete", "create")),
-            Arguments.of(Arrays.asList("create", "delete")));
+            Arguments.of("create_then_delete"),
+            Arguments.of("delete_then_create"));
     }
 
     private static Stream<Arguments> generateInValidReplacementStrategies() {
         return Stream.of(
-            Arguments.of(Arrays.asList("delete", "create", "create")),
-            Arguments.of(Arrays.asList("create", "create")),
-            Arguments.of(Arrays.asList("delete")),
-            Arguments.of(Arrays.asList("delete", "update", "create")));
+            Arguments.of("delete"),
+            Arguments.of(""),
+            Arguments.of("random string"));
     }
 
     static JSONObject loadJSON(String path) {

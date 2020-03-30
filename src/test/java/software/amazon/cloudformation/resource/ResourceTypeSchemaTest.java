@@ -18,7 +18,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static software.amazon.cloudformation.resource.ValidatorTest.loadJSON;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.everit.json.schema.PublicJSONPointer;
@@ -44,7 +43,6 @@ public class ResourceTypeSchemaTest {
         assertThat(schema.getDescription()).isEqualTo("A test schema for unit tests.");
         assertThat(schema.getSourceUrl()).isEqualTo("https://mycorp.com/my-repo.git");
         assertThat(schema.getTypeName()).isEqualTo("AWS::Test::TestModel");
-
         assertThat(schema.getUnprocessedProperties()).isEmpty();
     }
 
@@ -109,9 +107,8 @@ public class ResourceTypeSchemaTest {
         JSONObject o = loadJSON(TEST_SCHEMA_PATH);
         final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
 
-        List<String> result = schema.getReplacementStrategy();
-        assertThat(result).containsExactly("create", "delete");
-        assertThat(result).doesNotContainSequence("delete", "create");
+        String replacementStrategy = schema.getReplacementStrategy();
+        assertThat(replacementStrategy).isEqualTo("create_then_delete");
     }
 
     @Test
@@ -119,9 +116,8 @@ public class ResourceTypeSchemaTest {
         JSONObject o = loadJSON(SINGLETON_SCHEMA_PATH);
         final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
 
-        List<String> result = schema.getReplacementStrategy();
-        assertThat(result).containsExactly("delete", "create");
-        assertThat(result).doesNotContainSequence("create", "delete");
+        String replacementStrategy = schema.getReplacementStrategy();
+        assertThat(replacementStrategy).isEqualTo("delete_then_create");
     }
 
     @Test
@@ -129,9 +125,8 @@ public class ResourceTypeSchemaTest {
         JSONObject o = loadJSON(MINIMAL_SCHEMA_PATH);
         final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
 
-        List<String> result = schema.getReplacementStrategy();
-        assertThat(result).containsExactly("create", "delete");
-        assertThat(result).doesNotContainSequence("delete", "create");
+        String replacementStrategy = schema.getReplacementStrategy();
+        assertThat(replacementStrategy).isEqualTo("create_then_delete");
     }
 
     @Test
@@ -166,7 +161,7 @@ public class ResourceTypeSchemaTest {
         assertThat(schema.getAdditionalIdentifiersAsStrings()).isEmpty();
         assertThat(schema.getReadOnlyPropertiesAsStrings()).isEmpty();
         assertThat(schema.getWriteOnlyPropertiesAsStrings()).isEmpty();
-        assertThat(schema.getReplacementStrategy()).isEqualTo(Arrays.asList("create", "delete"));
+        assertThat(schema.getReplacementStrategy()).isEqualTo("create_then_delete");
     }
 
     @Test

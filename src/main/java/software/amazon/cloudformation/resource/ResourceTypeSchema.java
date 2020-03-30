@@ -43,7 +43,7 @@ public class ResourceTypeSchema {
     private final String typeName;
     private final String schemaUrl; // $schema
 
-    private final List<String> replacementStrategy = new ArrayList<>();
+    private final String replacementStrategy;
     private final List<JSONPointer> createOnlyProperties = new ArrayList<>();
     private final List<JSONPointer> deprecatedProperties = new ArrayList<>();
     private final List<JSONPointer> primaryIdentifier = new ArrayList<>();
@@ -76,15 +76,10 @@ public class ResourceTypeSchema {
             : null;
         this.unprocessedProperties.remove("$schema");
 
-        if (this.unprocessedProperties.containsKey("replacementStrategy")) {
-            this.unprocessedProperties.computeIfPresent("replacementStrategy", (k, v) -> {
-                ((ArrayList<?>) v).forEach(p -> this.replacementStrategy.add(p.toString()));
-                return null;
-            });
-        } else {
-            this.replacementStrategy.add("create");
-            this.replacementStrategy.add("delete");
-        }
+        this.replacementStrategy = this.unprocessedProperties.containsKey("replacementStrategy")
+            ? this.unprocessedProperties.get("replacementStrategy").toString()
+            : "create_then_delete";
+        this.unprocessedProperties.remove("replacementStrategy");
 
         this.unprocessedProperties.computeIfPresent("createOnlyProperties", (k, v) -> {
             ((ArrayList<?>) v).forEach(p -> this.createOnlyProperties.add(new JSONPointer(p.toString())));
@@ -166,7 +161,7 @@ public class ResourceTypeSchema {
             new PublicJSONPointer(writeOnlyProperty.replaceFirst("^/properties", "")), resourceModel));
     }
 
-    public List<String> getReplacementStrategy() {
+    public String getReplacementStrategy() {
         return this.replacementStrategy;
     }
 
