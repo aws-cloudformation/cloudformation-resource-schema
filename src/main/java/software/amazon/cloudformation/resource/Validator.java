@@ -31,8 +31,6 @@ import org.json.JSONTokener;
 import software.amazon.cloudformation.resource.exceptions.ValidationException;
 
 public class Validator implements SchemaValidator {
-
-    private static final URI JSON_SCHEMA_URI_HTTPS = newURI("https://json-schema.org/draft-07/schema");
     private static final URI JSON_SCHEMA_URI_HTTP = newURI("http://json-schema.org/draft-07/schema");
     private static final URI RESOURCE_DEFINITION_SCHEMA_URI = newURI(
         "https://schema.cloudformation.us-east-1.amazonaws.com/provider.definition.schema.v1.json");
@@ -162,9 +160,7 @@ public class Validator implements SchemaValidator {
             .schemaClient(downloader);
 
         // registers the local schema with the draft-07 url
-        // draftV7 schema is registered twice because - once for HTTP and once for HTTPS URIs
         builder.registerSchemaByURI(JSON_SCHEMA_URI_HTTP, jsonSchemaObject);
-        builder.registerSchemaByURI(JSON_SCHEMA_URI_HTTPS, jsonSchemaObject);
 
         return builder;
     }
