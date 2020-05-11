@@ -334,6 +334,9 @@
                 },
                 "list": {
                     "$ref": "#/definitions/handlerDefinition"
+                },
+                "snapshot": {
+                    "$ref": "#/definitions/handlerDefinition"
                 }
             },
             "additionalProperties": false
