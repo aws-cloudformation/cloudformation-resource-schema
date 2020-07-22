@@ -323,7 +323,7 @@ public class ValidatorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { 1, 721 })
+    @ValueSource(ints = { 1, 2161 })
     public void validateDefinition_invalidTimeout_shouldThrow(final int timeout) {
         // modifying the valid-with-handlers.json to add invalid timeout
         final JSONObject definition = loadJSON(SCHEMA_WITH_HANDLERS_PATH);
@@ -338,7 +338,7 @@ public class ValidatorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { 2, 120, 720 })
+    @ValueSource(ints = { 2, 120, 720, 1440, 2160 })
     public void validateDefinition_withTimeout_shouldNotThrow(final int timeout) {
         final JSONObject definition = loadJSON(SCHEMA_WITH_HANDLERS_PATH);
 
