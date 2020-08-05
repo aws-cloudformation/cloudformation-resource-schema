@@ -23,8 +23,10 @@ import java.util.stream.Collectors;
 
 import lombok.Getter;
 
+import org.everit.json.schema.CombinedSchema;
 import org.everit.json.schema.JSONPointer;
 import org.everit.json.schema.JSONPointerException;
+import org.everit.json.schema.ObjectSchema;
 import org.everit.json.schema.PublicJSONPointer;
 import org.everit.json.schema.Schema;
 import org.json.JSONObject;
@@ -175,7 +177,14 @@ public class ResourceTypeSchema {
     }
 
     public boolean definesProperty(String field) {
-        return schema.definesProperty(field);
+        // when schema contains a combining property such as "oneOf",
+        // schema will be a CombinedSchema and only its ObjectSchema subschema should be checked
+        Schema schemaToCheck = schema instanceof CombinedSchema
+            ? ((CombinedSchema) schema).getSubschemas().stream()
+                .filter(subschema -> subschema instanceof ObjectSchema)
+                .findFirst().get()
+            : schema;
+        return schemaToCheck.definesProperty(field);
     }
 
     public void validate(JSONObject json) {

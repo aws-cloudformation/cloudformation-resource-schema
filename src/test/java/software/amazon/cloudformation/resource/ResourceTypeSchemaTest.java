@@ -154,6 +154,28 @@ public class ResourceTypeSchemaTest {
     }
 
     @Test
+    public void minimalSchema_definesProperty() {
+        JSONObject resourceDefinition = loadJSON(MINIMAL_SCHEMA_PATH);
+        ResourceTypeSchema schema = ResourceTypeSchema.load(resourceDefinition);
+
+        assertThat(schema.definesProperty("propertyA")).isTrue();
+        assertThat(schema.definesProperty("propertyNonExistent")).isFalse();
+    }
+
+    /**
+     * test definesProperty for when schema contains a combining property
+     * (keywords for combining schemas together, with options being "oneOf", "anyOf", and "allOf")
+     */
+    @Test
+    public void schemaWithCombiningProperty_definesProperty() {
+        JSONObject resourceDefinition = loadJSON(SCHEMA_WITH_ONEOF);
+        ResourceTypeSchema schema = ResourceTypeSchema.load(resourceDefinition);
+
+        assertThat(schema.definesProperty("propertyA")).isTrue();
+        assertThat(schema.definesProperty("propertyNonExistent")).isFalse();
+    }
+
+    @Test
     public void validSchema_withOneOf_shouldSucceed() {
         JSONObject resource = loadJSON("/valid-with-oneof-schema.json");
         final ResourceTypeSchema schema = ResourceTypeSchema.load(resource);
