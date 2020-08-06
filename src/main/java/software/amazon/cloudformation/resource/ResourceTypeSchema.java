@@ -177,8 +177,14 @@ public class ResourceTypeSchema {
     }
 
     public boolean definesProperty(String field) {
-        // when schema contains a combining property such as "oneOf",
-        // schema will be a CombinedSchema and only its ObjectSchema subschema should be checked
+        // when schema contains combining properties (options are "oneOf", "anyOf", and "allOf"),
+        // schema will be a CombinedSchema with
+        // - an allOf criterion
+        // - subschemas
+        // - an ObjectSchema that contains properties to be checked
+        // - other CombinedSchemas corresponding to the usages of combining properties.
+        // These CombinedSchemas should be ignored. Otherwise, JSON schema's definesProperty method
+        // will search for field as a property in the CombinedSchema, which is not desired.
         Schema schemaToCheck = schema instanceof CombinedSchema
             ? ((CombinedSchema) schema).getSubschemas().stream()
                 .filter(subschema -> subschema instanceof ObjectSchema)
