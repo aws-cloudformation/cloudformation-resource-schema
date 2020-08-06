@@ -177,7 +177,8 @@ public class ResourceTypeSchema {
     }
 
     public boolean definesProperty(String field) {
-        // when schema contains combining properties (options are "oneOf", "anyOf", and "allOf"),
+        // when schema contains combining properties
+        // (keywords for combining schemas together, with options being "oneOf", "anyOf", and "allOf"),
         // schema will be a CombinedSchema with
         // - an allOf criterion
         // - subschemas
