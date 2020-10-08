@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.com/aws-cloudformation/aws-cloudformation-resource-schema.svg?branch=master)](https://travis-ci.com/aws-cloudformation/aws-cloudformation-resource-schema)
 
-This document describes the [Resource Provider Definition Schema](https://github.com/aws-cloudformation/aws-cloudformation-resource-schema/blob/master/src/main/resources/schema/provider.definition.schema.v1.json) which is a _meta-schema_ that extends [draft-07](https://json-schema.org/draft-07/json-schema-release-notes.html) of [JSON Schema](https://json-schema.org/) to define a validating document against which resource schemas can be authored.
+This document describes the [Resource Provider Definition Schema](https://github.com/aws-cloudformation/aws-cloudformation-resource-schema/blob/master/src/main/resources/schema/provider.definition.schema.v1.json) which is a _meta-schema_ that extends [draft-07](http://json-schema.org/draft-07/json-schema-release-notes.html) of [JSON Schema](http://json-schema.org/) to define a validating document against which resource schemas can be authored.
 
 ## Examples
 
@@ -12,7 +12,7 @@ Numerous [examples](https://github.com/aws-cloudformation/aws-cloudformation-res
 
 ### Overview
 
-The _meta-schema_ which controls and validates your resource type definition is called the [Resource Provider Definition Schema](https://github.com/aws-cloudformation/aws-cloudformation-resource-schema/blob/master/src/main/resources/schema/provider.definition.schema.v1.json). It is fully compliant with [draft-07](https://json-schema.org/draft-07/json-schema-release-notes.html) of [JSON Schema](https://json-schema.org/) and many IDEs including [IntelliJ](https://www.jetbrains.com/idea/), [PyCharm](https://www.jetbrains.com/pycharm/) and [Visual Studio Code](https://code.visualstudio.com/) come with built-in or plugin-based support for code-completion and syntax validation while editing documents for JSON Schema compliance. Comprehensive [documentation](https://json-schema.org/understanding-json-schema/reference/) for JSON Schema exists and can answer many questions around correct usage.
+The _meta-schema_ which controls and validates your resource type definition is called the [Resource Provider Definition Schema](https://github.com/aws-cloudformation/aws-cloudformation-resource-schema/blob/master/src/main/resources/schema/provider.definition.schema.v1.json). It is fully compliant with [draft-07](http://json-schema.org/draft-07/json-schema-release-notes.html) of [JSON Schema](http://json-schema.org/) and many IDEs including [IntelliJ](https://www.jetbrains.com/idea/), [PyCharm](https://www.jetbrains.com/pycharm/) and [Visual Studio Code](https://code.visualstudio.com/) come with built-in or plugin-based support for code-completion and syntax validation while editing documents for JSON Schema compliance. Comprehensive [documentation](http://json-schema.org/understanding-json-schema/reference/) for JSON Schema exists and can answer many questions around correct usage.
 
 To get started, you will author a _specification_ for your resource type in a JSON document, which must be compliant with this _meta-schema_. To make authoring resource _specifications_ simpler, we have constrained the scope of the full JSON Schema standard to apply opinions around how certain validations can be expressed and encourage consistent modelling for all resource schemas. These opinions are codified in the _meta-schema_ and described in this document.
 
@@ -31,7 +31,7 @@ Certain properties of a resource are _semantic_ and have special meaning when us
 
 * **`primaryIdentifier`**: Must be either a single property, or a set of properties which can be used to uniquely identify the resource. If multiple properties are specified, these are treated as a **composite key** and combined into a single logical identifier. You would use this modelling to express contained identity (such as a named service within a container). This property can be independently provided as keys to a **READ** or **DELETE** request and **MUST** be supported as the only input to those operations. These properties are usually also marked as `readOnlyProperties` and **MUST** be returned from **READ** and **LIST** operations.
 * **`additionalIdentifiers`**: Each property listed in the `additionalIdentifiers` section must be able to be used to uniquely identify the resource. These properties can be independently provided as keys to a **READ** or **DELETE** request and **MUST** be supported as the only input to those operations. These properties are usually also marked as `readOnlyProperties` and **MUST** be returned from **READ** and **LIST** operations. A provider is not required to support `additionalIdentifiers`; doing so allows for other unique keys to be used to **READ** resources.
-* **`readOnlyProperties`**: A property in the `readOnlyProperties` list cannot be specified in a **CREATE** or **UPDATE** request, and attempting to do so will produce a runtime error from the handler.
+* **`readOnlyProperties`**: A property in the `readOnlyProperties` list cannot be specified by the customer.
 * **`writeOnlyProperties`**: A property in the `writeOnlyProperties` cannot be returned in a **READ** or **LIST** request, and can be used to express things like passwords, secrets or other sensitive data.
 * **`createOnlyProperties`**: A property in the `createOnlyProperties` cannot be specified in an **UPDATE** request, and can only be specified in a **CREATE** request. Another way to think about this - these are properties which are 'write-once', such as the [`Engine`](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-rds-database-instance.html#cfn-rds-dbinstance-engine) property for an [`AWS::RDS::DBInstance`](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-rds-database-instance.html) and if you wish to change such a property on a live resource, you should replace that resource by creating a new instance of the resource and terminating the old one. This is the behaviour CloudFormation follows for all properties documented as _'Update Requires: Replacement'_. An attempt to supply these properties to an **UPDATE** request will produce a runtime error from the handler.
 * **`deprecatedProperties`**: A property in the `deprecatedProperties` is not guaranteed to be present in the response from a **READ** request. These fields will still be accepted as input to **CREATE** and **UPDATE** requests however they may be ignored, or converted to new API forms when outbound service calls are made.
@@ -83,9 +83,9 @@ Relationships between resources can be expressed through the use of the `$ref` k
 
 #### Example
 
-The following example shows a property relationship between an `AWS::EC2::Subnet.VpcId` and an `AWS::EC2::VPC.Name`. The schema for the 'remote' type (`AWS::EC2::VPC`) is used to validate the content of the 'local' type (`AWS::EC2::Subnet`) and can be inferred as a dependency from the local to the remote type.
+The following example shows a property relationship between an `AWS::EC2::Subnet.VpcId` and an `AWS::EC2::VPC.Id`. The schema for the 'remote' type (`AWS::EC2::VPC`) is used to validate the content of the 'local' type (`AWS::EC2::Subnet`) and can be inferred as a dependency from the local to the remote type.
 
-Setting the $id property to a remote location will make validation framework to pull dependencies expressed using relative `$ref` URIs from the remote hosts. In this example, `VpcId` property will be verified against the schema for `AWS::EC2::VPC.Name` hosted at `https://schema.cloudformation.us-east-1.amazonaws.com/aws-ec2-vpc.json`
+Setting the $id property to a remote location will make validation framework to pull dependencies expressed using relative `$ref` URIs from the remote hosts. In this example, `VpcId` property will be verified against the schema for `AWS::EC2::VPC.Id` hosted at `https://schema.cloudformation.us-east-1.amazonaws.com/aws-ec2-vpc.json`
 
 ```
 {
@@ -95,7 +95,7 @@ Setting the $id property to a remote location will make validation framework to 
     "properties": {
         { ... }
         "VpcId": {
-            "$ref": "aws-ec2-vpc.json#/properties/Name"
+            "$ref": "aws-ec2-vpc.json#/properties/Id"
         }
     }
 }
@@ -107,7 +107,7 @@ Setting the $id property to a remote location will make validation framework to 
     "typeName": "AWS::EC2::VPC",
     "definitions": { ... },
     "properties": {
-        "Name": {
+        "Id": {
             "type": "string",
             "pattern": "$vpc-[0-9]{8,10}^"
         }

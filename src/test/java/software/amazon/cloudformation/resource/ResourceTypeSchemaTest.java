@@ -31,6 +31,8 @@ public class ResourceTypeSchemaTest {
     private static final String EMPTY_SCHEMA_PATH = "/empty-schema.json";
     private static final String SINGLETON_SCHEMA_PATH = "/singleton-test-schema.json";
     private static final String SCHEMA_WITH_ONEOF = "/valid-with-oneof-schema.json";
+    private static final String SCHEMA_WITH_ANYOF = "/valid-with-anyof-schema.json";
+    private static final String SCHEMA_WITH_ALLOF = "/valid-with-allof-schema.json";
     private static final String MINIMAL_SCHEMA_PATH = "/minimal-schema.json";
     private static final String NO_ADDITIONAL_PROPERTIES_SCHEMA_PATH = "/no-additional-properties-schema.json";
     private static final String WRITEONLY_MODEL_PATH = "/write-only-model.json";
@@ -180,6 +182,54 @@ public class ResourceTypeSchemaTest {
 
         // ensure that other non writeOnlyProperty is not removed
         assertThat(resourceModel.has("propertyB")).isTrue();
+    }
+
+    @Test
+    public void minimalSchema_definesProperty() {
+        JSONObject resourceDefinition = loadJSON(MINIMAL_SCHEMA_PATH);
+        ResourceTypeSchema schema = ResourceTypeSchema.load(resourceDefinition);
+
+        assertThat(schema.definesProperty("propertyA")).isTrue();
+        assertThat(schema.definesProperty("propertyNonExistent")).isFalse();
+    }
+
+    /**
+     * test definesProperty for when schema contains "oneOf"
+     */
+    @Test
+    public void schemaWithOneOf_definesProperty() {
+        JSONObject resourceDefinition = loadJSON(SCHEMA_WITH_ONEOF);
+        ResourceTypeSchema schema = ResourceTypeSchema.load(resourceDefinition);
+
+        assertThat(schema.definesProperty("id")).isTrue();
+        assertThat(schema.definesProperty("propertyA")).isTrue();
+        assertThat(schema.definesProperty("propertyNonExistent")).isFalse();
+    }
+
+    /**
+     * test definesProperty for when schema contains "anyOf"
+     */
+    @Test
+    public void schemaWithAnyOf_definesProperty() {
+        JSONObject resourceDefinition = loadJSON(SCHEMA_WITH_ANYOF);
+        ResourceTypeSchema schema = ResourceTypeSchema.load(resourceDefinition);
+
+        assertThat(schema.definesProperty("id")).isTrue();
+        assertThat(schema.definesProperty("propertyA")).isTrue();
+        assertThat(schema.definesProperty("propertyNonExistent")).isFalse();
+    }
+
+    /**
+     * test definesProperty for when schema contains "allOf"
+     */
+    @Test
+    public void schemaWithAllOf_definesProperty() {
+        JSONObject resourceDefinition = loadJSON(SCHEMA_WITH_ALLOF);
+        ResourceTypeSchema schema = ResourceTypeSchema.load(resourceDefinition);
+
+        assertThat(schema.definesProperty("id")).isTrue();
+        assertThat(schema.definesProperty("propertyA")).isTrue();
+        assertThat(schema.definesProperty("propertyNonExistent")).isFalse();
     }
 
     @Test
