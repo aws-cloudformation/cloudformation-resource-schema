@@ -139,7 +139,7 @@ Together with the `uniqueItems` property (which is native to JSON Schema), compl
 | true           | true           | ordered set    |
 | false          | true           | set      |
 
-#### optionPrefix/Suffix
+#### optionalPrefix/optionalSuffix
 
 Some properties can be updated by the downstream service teams and these properties could have a prefix/postfix or both once returned from the Read Handler. These metadata properties are strings
 which can be provided for a property and checked on drift to ensure the property is not drifted.
@@ -153,11 +153,11 @@ Some service teams consider null and empty list to be the same. This metadata pr
 By default drift considers null and empty list to be different.
 `nullEqualsEmpty: true`
 
-#### caseInsesitive
+#### caseSensitive
 
-Some service teams support properties which are caseInsensitive. This metadata property allows such properties to avoid drift when ignoring case. This metadata takes in a bollean true|false.
+Some service teams support properties which are case insensitive. This metadata property allows such properties to avoid drift when ignoring case. This metadata takes in a bollean true|false.
 By default drift is case sensitive.
-`caseInsesitive: true`
+`caseSensitive: true`
 
 ### Constraints
 

@@ -90,10 +90,10 @@
                             "type": "boolean",
                             "default": false
                         },
-                        "caseInsensitive": {
-                            "description": "When set to false, this flag indicates that case of the string will be honored, and changing the case of the string would indicate diff",
+                        "caseSensitive": {
+                            "description": "When set to true, this flag indicates that case of the string will be honored, and changing the case of the string would indicate diff",
                             "type": "boolean",
-                            "default": false
+                            "default": true
                         },
                         "optionalSuffix": {
                             "description": "When set, this flag indicates that the read handler will return this property with suffixed string",

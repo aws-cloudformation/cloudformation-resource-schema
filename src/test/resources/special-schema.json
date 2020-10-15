@@ -17,7 +17,7 @@
         },
         "propertyC": {
             "type": "string",
-            "caseInsensitive": true
+            "caseSensitive": true
         },
         "propertyD": {
             "type": "boolean"
