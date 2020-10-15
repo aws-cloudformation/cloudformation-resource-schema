@@ -1,0 +1,56 @@
+{
+    "typeName": "AWS::Test::TestModel",
+    "description": "A test schema for unit tests.",
+    "sourceUrl": "https://mycorp.com/my-repo.git",
+    "properties": {
+        "propertyA": {
+            "type": "string",
+            "default": "defaultValue"
+        },
+        "propertyB": {
+            "type": "array",
+            "items": {
+                "type": "integer"
+            },
+            "uniqueItems": false,
+            "insertionOrder": true
+        },
+        "propertyC": {
+            "type": "string",
+            "caseInsensitive": true
+        },
+        "propertyD": {
+            "type": "boolean"
+        },
+        "propertyE": {
+            "type": "array",
+            "items": {
+                "type": "integer"
+            },
+            "nullEqualsEmpty": true
+        }
+    },
+    "required": [
+        "propertyB"
+    ],
+    "createOnlyProperties": [
+        "/properties/propertyA",
+        "/properties/propertyD"
+    ],
+    "deprecatedProperties": [
+        "/properties/propertyC"
+    ],
+    "writeOnlyProperties": [
+        "/properties/propertyC",
+        "/properties/propertyE/nestedProperty"
+    ],
+    "primaryIdentifier": [
+        "/properties/propertyA"
+    ],
+    "additionalIdentifiers": [
+        [
+            "/properties/propertyB"
+        ]
+    ],
+    "additionalProperties": false
+}

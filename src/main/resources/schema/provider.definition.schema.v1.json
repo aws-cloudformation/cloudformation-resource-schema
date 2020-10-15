@@ -85,6 +85,26 @@
                             "type": "boolean",
                             "default": true
                         },
+                        "nullEqualsEmpty": {
+                            "description": "When set to false, this flag indicates that null and empty list are not equal, and changing the values from null to empty list would indicate diff",
+                            "type": "boolean",
+                            "default": false
+                        },
+                        "caseInsensitive": {
+                            "description": "When set to false, this flag indicates that case of the string will be honored, and changing the case of the string would indicate diff",
+                            "type": "boolean",
+                            "default": false
+                        },
+                        "optionalSuffix": {
+                            "description": "When set, this flag indicates that the read handler will return this property with suffixed string",
+                            "type": "string",
+                            "pattern": "^[a-zA-Z0-9$&+,:?@#|<>.^*()%!-]{0,}"
+                        },
+                        "optionalPrefix": {
+                            "description": "When set, this flag indicates that the read handler will return this property with prefixed string",
+                            "type": "string",
+                            "pattern": "^[a-zA-Z0-9$&+,:?@#|<>.^*()%!-]{0,}"
+                        },
                         "$ref": {
                             "$ref": "http://json-schema.org/draft-07/schema#/properties/$ref"
                         },

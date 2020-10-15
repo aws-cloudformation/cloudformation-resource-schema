@@ -39,6 +39,7 @@ import software.amazon.cloudformation.resource.exceptions.ValidationException;
 public class ValidatorTest {
     private static final String RESOURCE_DEFINITION_SCHEMA_PATH = "/schema/provider.definition.schema.v1.json";
     private static final String TEST_SCHEMA_PATH = "/test-schema.json";
+    private static final String SPECIAL_SCHEMA_PATH = "/special-schema.json";
     private static final String TEST_VALUE_SCHEMA_PATH = "/scrubbed-values-schema.json";
     private static final String SCHEMA_WITH_HANDLERS_PATH = "/valid-with-handlers-schema.json";
     private static final String TYPE_NAME_KEY = "typeName";
@@ -74,6 +75,15 @@ public class ValidatorTest {
         final JSONObject object = new JSONObject().put("propertyA", "abc").put("propertyB", Arrays.asList(1, 2, 3));
 
         validator.validateObject(object, new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_SCHEMA_PATH))));
+    }
+
+    @Test
+    public void validateObject_validSpecialObject_shouldNotThrow() {
+        final JSONObject object = new JSONObject().put("propertyB", Arrays.asList(1, 2, 3, 3, 2))
+            .put("propertyE", Arrays.asList()).put("propertyC", "ABC");
+
+        validator.validateObject(object,
+            new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(SPECIAL_SCHEMA_PATH))));
     }
 
     @Test
