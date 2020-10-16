@@ -155,7 +155,7 @@ By default drift considers null and empty list to be different.
 
 #### caseSensitive
 
-Some service teams support properties which are case insensitive. This metadata property allows such properties to avoid drift when ignoring case. This metadata takes in a bollean true|false.
+Some service teams support properties that are case insensitive. This metadata property allows such properties to avoid drift when ignoring case. This metadata takes in a boolean true|false.
 By default drift is case sensitive.
 `caseSensitive: true`
 
