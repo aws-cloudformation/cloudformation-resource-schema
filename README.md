@@ -142,7 +142,7 @@ Together with the `uniqueItems` property (which is native to JSON Schema), compl
 #### optionalPrefix/optionalSuffix
 
 Some properties can be updated by the downstream service teams and these properties could have a prefix/suffix or both once returned from the Read Handler. These metadata properties are strings
-which can be provided for a property and checked on drift to ensure the property is not drifted.
+which can be provided for a property and checked on drift to ensure the property has not drifted.
 
 `optionalPrefix: "anyString"`
 `optionalSuffix: '"anyString"`
