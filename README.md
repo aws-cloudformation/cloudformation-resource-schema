@@ -149,7 +149,7 @@ which can be provided for a property and checked on drift to ensure the property
 
 #### nullEqualsEmpty
 
-Some service teams consider null and empty list to be the same. This metadata property allows such properties to avoid drift when they equating null = []. This metadata takes in a bollean true|false.
+Some service teams consider null and empty list to be the same. This metadata property allows such properties to avoid drift when they equating null = []. This metadata takes in a boolean true|false.
 By default drift considers null and empty list to be different.
 `nullEqualsEmpty: true`
 
