@@ -13,7 +13,8 @@
         "create": {
             "permissions": [
                 "test:permission"
-            ]
+            ],
+            "timeoutInMinutes": 200
         },
         "read": {
             "permissions": []
