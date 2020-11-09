@@ -18,19 +18,14 @@
         "read": {
             "permissions": []
         },
-        "update": {
-            "permissions": [
-                "test:permission"
-            ]
-        },
         "delete": {
             "permissions": [
-                "test:permission"
+                "test:permissionA"
             ]
         },
         "list": {
             "permissions": [
-                "test:permission"
+                "test:permissionB"
             ]
         }
     },

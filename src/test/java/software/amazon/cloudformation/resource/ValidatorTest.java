@@ -349,7 +349,7 @@ public class ValidatorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "create", "update", "delete", "read", "list" })
+    @ValueSource(strings = { "create", "delete", "read", "list" })
     public void validateDefinition_timeoutAllowed_shouldNotThrow(final String handlerType) {
         final JSONObject definition = loadJSON(SCHEMA_WITH_HANDLERS_PATH);
 

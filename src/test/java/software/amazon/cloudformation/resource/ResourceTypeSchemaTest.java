@@ -35,6 +35,7 @@ public class ResourceTypeSchemaTest {
     private static final String MINIMAL_SCHEMA_PATH = "/minimal-schema.json";
     private static final String NO_ADDITIONAL_PROPERTIES_SCHEMA_PATH = "/no-additional-properties-schema.json";
     private static final String WRITEONLY_MODEL_PATH = "/write-only-model.json";
+    private static final String HANDLERS_SCHEMA_PATH = "/valid-with-handlers-schema.json";
 
     @Test
     public void getProperties() {
@@ -242,6 +243,22 @@ public class ResourceTypeSchemaTest {
 
     static JSONObject getEmptyModel() {
         return new JSONObject().put("id", "required.identifier");
+    }
+
+    /**
+     * validate that handler permissions are processed and can be retrieved programatically via the schema object
+     */
+
+    @Test
+    public void getHandlerPermissions_validPermissions_shouldReturnHandlerSetMap() {
+        JSONObject resourceDefinition = loadJSON(HANDLERS_SCHEMA_PATH);
+        ResourceTypeSchema schema = ResourceTypeSchema.load(resourceDefinition);
+
+        assertThat(schema.getHandlerPermissions().get("create")).contains("test:permission");
+        assertThat(schema.getHandlerPermissions().containsKey("update")).isFalse();
+        assertThat(schema.getHandlerPermissions().get("read")).isEmpty();
+        assertThat(schema.getHandlerPermissions().get("delete")).contains("test:permissionA");
+        assertThat(schema.getHandlerPermissions().get("list")).contains("test:permissionB");
     }
 
 }

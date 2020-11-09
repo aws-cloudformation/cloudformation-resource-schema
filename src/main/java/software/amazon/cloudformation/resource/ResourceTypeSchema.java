@@ -17,8 +17,10 @@ package software.amazon.cloudformation.resource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import lombok.Getter;
@@ -51,6 +53,7 @@ public class ResourceTypeSchema {
     private final List<List<JSONPointer>> additionalIdentifiers = new ArrayList<>();
     private final List<JSONPointer> readOnlyProperties = new ArrayList<>();
     private final List<JSONPointer> writeOnlyProperties = new ArrayList<>();
+    private final Map<String, Set<String>> handlerPermissions = new HashMap<>();
     private final Schema schema;
 
     public ResourceTypeSchema(Schema schema) {
@@ -109,6 +112,16 @@ public class ResourceTypeSchema {
         this.unprocessedProperties.computeIfPresent("writeOnlyProperties", (k, v) -> {
             ((ArrayList<?>) v).forEach(p -> this.writeOnlyProperties.add(new JSONPointer(p.toString())));
             return null;
+        });
+
+        this.unprocessedProperties.computeIfPresent("handlers", (k, v) -> {
+            ((HashMap<?, ?>) v).keySet().forEach(handlerKey -> {
+                handlerPermissions.put(handlerKey.toString(), new HashSet<>());
+                List<?> permissionsList = (List<?>) ((HashMap<?, ?>) ((HashMap<?, ?>) v).get(handlerKey)).get("permissions");
+                permissionsList.forEach(permission -> handlerPermissions.get(handlerKey.toString()).add(permission.toString()));
+            });
+            // timeoutInMinutes still unprocessed
+            return v;
         });
     }
 
