@@ -254,11 +254,11 @@ public class ResourceTypeSchemaTest {
         JSONObject resourceDefinition = loadJSON(HANDLERS_SCHEMA_PATH);
         ResourceTypeSchema schema = ResourceTypeSchema.load(resourceDefinition);
 
-        assertThat(schema.getHandlerPermissions().get("create")).contains("test:permission");
-        assertThat(schema.getHandlerPermissions().containsKey("update")).isFalse();
-        assertThat(schema.getHandlerPermissions().get("read")).isEmpty();
-        assertThat(schema.getHandlerPermissions().get("delete")).contains("test:permissionA");
-        assertThat(schema.getHandlerPermissions().get("list")).contains("test:permissionB");
+        assertThat(schema.getHandlerPermissions("create")).contains("test:permission");
+        assertThat(schema.getHandlerPermissions("update")).isNull();
+        assertThat(schema.getHandlerPermissions("read")).isEmpty();
+        assertThat(schema.getHandlerPermissions("delete")).contains("test:permissionA");
+        assertThat(schema.getHandlerPermissions("list")).contains("test:permissionB");
     }
 
 }
