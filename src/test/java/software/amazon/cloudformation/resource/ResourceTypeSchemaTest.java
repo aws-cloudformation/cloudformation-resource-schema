@@ -254,19 +254,26 @@ public class ResourceTypeSchemaTest {
         JSONObject resourceDefinition = loadJSON(HANDLERS_SCHEMA_PATH);
         ResourceTypeSchema schema = ResourceTypeSchema.load(resourceDefinition);
 
+        assertThat(schema.hasHandler("create")).isTrue();
         assertThat(schema.getHandlerPermissions("create")).contains("test:permission");
         // timeout specified in schema
         assertThat(schema.getHandlerTimeoutInMinutes("create")).isEqualTo(200);
 
         // update not in handler definition
+        assertThat(schema.hasHandler("update")).isFalse();
         assertThat(schema.getHandlerPermissions("update")).isNull();
         assertThat(schema.getHandlerTimeoutInMinutes("update")).isNull();
 
         // no permissions
+        assertThat(schema.hasHandler("read")).isTrue();
         assertThat(schema.getHandlerPermissions("read")).isEmpty();
         // timeout default
         assertThat(schema.getHandlerTimeoutInMinutes("read")).isEqualTo(120);
+
+        assertThat(schema.hasHandler("delete")).isTrue();
         assertThat(schema.getHandlerPermissions("delete")).contains("test:permissionA");
+
+        assertThat(schema.hasHandler("list")).isTrue();
         assertThat(schema.getHandlerPermissions("list")).contains("test:permissionB");
     }
 

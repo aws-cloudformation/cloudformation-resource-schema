@@ -175,6 +175,10 @@ public class ResourceTypeSchema {
         return handlers.containsKey(action) ? handlers.get(action).getTimeoutInMinutes() : null;
     }
 
+    public Boolean hasHandler(String action) {
+        return handlers.containsKey(action);
+    }
+
     public Map<String, Object> getUnprocessedProperties() {
         return Collections.unmodifiableMap(this.unprocessedProperties);
     }
