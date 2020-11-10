@@ -17,10 +17,13 @@ package software.amazon.cloudformation.resource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 
 import org.everit.json.schema.CombinedSchema;
@@ -37,6 +40,7 @@ import software.amazon.cloudformation.resource.exceptions.ValidationException;
 public class ResourceTypeSchema {
 
     private static final Validator VALIDATOR = new Validator();
+    private static final Integer DEFAULT_TIMEOUT_IN_MINUTES = 120;
 
     private final Map<String, Object> unprocessedProperties = new HashMap<>();
 
@@ -51,6 +55,8 @@ public class ResourceTypeSchema {
     private final List<List<JSONPointer>> additionalIdentifiers = new ArrayList<>();
     private final List<JSONPointer> readOnlyProperties = new ArrayList<>();
     private final List<JSONPointer> writeOnlyProperties = new ArrayList<>();
+    @Getter(AccessLevel.NONE)
+    private final Map<String, Handler> handlers = new HashMap<>();
     private final Schema schema;
 
     public ResourceTypeSchema(Schema schema) {
@@ -110,6 +116,19 @@ public class ResourceTypeSchema {
             ((ArrayList<?>) v).forEach(p -> this.writeOnlyProperties.add(new JSONPointer(p.toString())));
             return null;
         });
+
+        this.unprocessedProperties.computeIfPresent("handlers", (k, v) -> {
+            ((HashMap<?, ?>) v).keySet().forEach(handlerKey -> {
+                HashMap<?, ?> handlerInfo = (HashMap<?, ?>) ((HashMap<?, ?>) v).get(handlerKey);
+                HashSet<String> handlerPermissions = new HashSet<>();
+                ((List<?>) handlerInfo.get("permissions")).forEach(permission -> handlerPermissions.add(permission.toString()));
+                Integer timeoutInMinutes = handlerInfo.containsKey("timeoutInMinutes")
+                    ? ((Integer) handlerInfo.get("timeoutInMinutes"))
+                    : DEFAULT_TIMEOUT_IN_MINUTES;
+                this.handlers.put(handlerKey.toString(), new Handler(handlerPermissions, timeoutInMinutes));
+            });
+            return null;
+        });
     }
 
     public static ResourceTypeSchema load(final JSONObject resourceDefinition) {
@@ -146,6 +165,18 @@ public class ResourceTypeSchema {
 
     public List<String> getWriteOnlyPropertiesAsStrings() throws ValidationException {
         return this.writeOnlyProperties.stream().map(JSONPointer::toString).collect(Collectors.toList());
+    }
+
+    public Set<String> getHandlerPermissions(String action) {
+        return handlers.containsKey(action) ? handlers.get(action).getPermissions() : null;
+    }
+
+    public Integer getHandlerTimeoutInMinutes(String action) {
+        return handlers.containsKey(action) ? handlers.get(action).getTimeoutInMinutes() : null;
+    }
+
+    public Boolean hasHandler(String action) {
+        return handlers.containsKey(action);
     }
 
     public Map<String, Object> getUnprocessedProperties() {

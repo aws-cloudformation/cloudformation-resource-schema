@@ -35,6 +35,7 @@ public class ResourceTypeSchemaTest {
     private static final String MINIMAL_SCHEMA_PATH = "/minimal-schema.json";
     private static final String NO_ADDITIONAL_PROPERTIES_SCHEMA_PATH = "/no-additional-properties-schema.json";
     private static final String WRITEONLY_MODEL_PATH = "/write-only-model.json";
+    private static final String HANDLERS_SCHEMA_PATH = "/valid-with-handlers-schema.json";
 
     @Test
     public void getProperties() {
@@ -242,6 +243,38 @@ public class ResourceTypeSchemaTest {
 
     static JSONObject getEmptyModel() {
         return new JSONObject().put("id", "required.identifier");
+    }
+
+    /**
+     * validate that handler permissions are processed and can be retrieved programatically via the schema object
+     */
+
+    @Test
+    public void getHandlerProperties_validPermissions_shouldReturnHandlerSetMap() {
+        JSONObject resourceDefinition = loadJSON(HANDLERS_SCHEMA_PATH);
+        ResourceTypeSchema schema = ResourceTypeSchema.load(resourceDefinition);
+
+        assertThat(schema.hasHandler("create")).isTrue();
+        assertThat(schema.getHandlerPermissions("create")).contains("test:permission");
+        // timeout specified in schema
+        assertThat(schema.getHandlerTimeoutInMinutes("create")).isEqualTo(200);
+
+        // update not in handler definition
+        assertThat(schema.hasHandler("update")).isFalse();
+        assertThat(schema.getHandlerPermissions("update")).isNull();
+        assertThat(schema.getHandlerTimeoutInMinutes("update")).isNull();
+
+        // no permissions
+        assertThat(schema.hasHandler("read")).isTrue();
+        assertThat(schema.getHandlerPermissions("read")).isEmpty();
+        // timeout default
+        assertThat(schema.getHandlerTimeoutInMinutes("read")).isEqualTo(120);
+
+        assertThat(schema.hasHandler("delete")).isTrue();
+        assertThat(schema.getHandlerPermissions("delete")).contains("test:permissionA");
+
+        assertThat(schema.hasHandler("list")).isTrue();
+        assertThat(schema.getHandlerPermissions("list")).contains("test:permissionB");
     }
 
 }
