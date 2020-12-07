@@ -55,5 +55,6 @@
             "/properties/propertyB"
         ]
     ],
+    "replacementStrategy": "create_then_delete",
     "additionalProperties": false
 }

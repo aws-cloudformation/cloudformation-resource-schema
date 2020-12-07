@@ -24,6 +24,7 @@ import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
@@ -31,7 +32,9 @@ import org.json.JSONTokener;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import software.amazon.cloudformation.resource.exceptions.ValidationException;
@@ -323,6 +326,22 @@ public class ValidatorTest {
     }
 
     @ParameterizedTest
+    @MethodSource("generateValidReplacementStrategies")
+    public void validateDefinition_validReplacementStrategy_shouldNotThrow(final String replacementStrategy) {
+        final JSONObject definition = baseSchema().put("replacementStrategy", replacementStrategy);
+
+        validator.validateResourceDefinition(definition);
+    }
+
+    @ParameterizedTest
+    @MethodSource("generateInValidReplacementStrategies")
+    public void validateDefinition_DuplicateReplacementStrategy_shouldThrow(final String replacementStrategy) {
+        final JSONObject definition = baseSchema().put("replacementStrategy", replacementStrategy);
+        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> validator.validateResourceDefinition(definition))
+            .withMessageContaining("#/replacementStrategy");
+    }
+
+    @ParameterizedTest
     @ValueSource(ints = { 1, 2161 })
     public void validateDefinition_invalidTimeout_shouldThrow(final int timeout) {
         // modifying the valid-with-handlers.json to add invalid timeout
@@ -495,6 +514,19 @@ public class ValidatorTest {
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> {
             validator.registerMetaSchema(SchemaLoader.builder(), badSchema);
         });
+    }
+
+    private static Stream<Arguments> generateValidReplacementStrategies() {
+        return Stream.of(
+            Arguments.of("create_then_delete"),
+            Arguments.of("delete_then_create"));
+    }
+
+    private static Stream<Arguments> generateInValidReplacementStrategies() {
+        return Stream.of(
+            Arguments.of("delete"),
+            Arguments.of(""),
+            Arguments.of("random string"));
     }
 
     static JSONObject loadJSON(String path) {

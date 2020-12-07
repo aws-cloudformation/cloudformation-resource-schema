@@ -49,6 +49,7 @@ public class ResourceTypeSchema {
     private final String typeName;
     private final String schemaUrl; // $schema
 
+    private final String replacementStrategy;
     private final List<JSONPointer> createOnlyProperties = new ArrayList<>();
     private final List<JSONPointer> deprecatedProperties = new ArrayList<>();
     private final List<JSONPointer> primaryIdentifier = new ArrayList<>();
@@ -82,6 +83,11 @@ public class ResourceTypeSchema {
             ? this.unprocessedProperties.get("$schema").toString()
             : null;
         this.unprocessedProperties.remove("$schema");
+
+        this.replacementStrategy = this.unprocessedProperties.containsKey("replacementStrategy")
+            ? this.unprocessedProperties.get("replacementStrategy").toString()
+            : "create_then_delete";
+        this.unprocessedProperties.remove("replacementStrategy");
 
         this.unprocessedProperties.computeIfPresent("createOnlyProperties", (k, v) -> {
             ((ArrayList<?>) v).forEach(p -> this.createOnlyProperties.add(new JSONPointer(p.toString())));
@@ -186,6 +192,10 @@ public class ResourceTypeSchema {
     public void removeWriteOnlyProperties(final JSONObject resourceModel) {
         this.getWriteOnlyPropertiesAsStrings().stream().forEach(writeOnlyProperty -> removeProperty(
             new PublicJSONPointer(writeOnlyProperty.replaceFirst("^/properties", "")), resourceModel));
+    }
+
+    public String getReplacementStrategy() {
+        return this.replacementStrategy;
     }
 
     public static void removeProperty(final PublicJSONPointer property, final JSONObject resourceModel) {

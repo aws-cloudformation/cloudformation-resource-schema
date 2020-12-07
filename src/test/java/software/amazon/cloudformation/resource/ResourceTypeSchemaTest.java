@@ -29,6 +29,7 @@ import software.amazon.cloudformation.resource.exceptions.ValidationException;
 public class ResourceTypeSchemaTest {
     private static final String TEST_SCHEMA_PATH = "/test-schema.json";
     private static final String EMPTY_SCHEMA_PATH = "/empty-schema.json";
+    private static final String SINGLETON_SCHEMA_PATH = "/singleton-test-schema.json";
     private static final String SCHEMA_WITH_ONEOF = "/valid-with-oneof-schema.json";
     private static final String SCHEMA_WITH_ANYOF = "/valid-with-anyof-schema.json";
     private static final String SCHEMA_WITH_ALLOF = "/valid-with-allof-schema.json";
@@ -105,6 +106,33 @@ public class ResourceTypeSchemaTest {
     }
 
     @Test
+    public void getReplacementStrategy() {
+        JSONObject o = loadJSON(TEST_SCHEMA_PATH);
+        final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
+
+        String replacementStrategy = schema.getReplacementStrategy();
+        assertThat(replacementStrategy).isEqualTo("create_then_delete");
+    }
+
+    @Test
+    public void getSingletonReplacementStrategy() {
+        JSONObject o = loadJSON(SINGLETON_SCHEMA_PATH);
+        final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
+
+        String replacementStrategy = schema.getReplacementStrategy();
+        assertThat(replacementStrategy).isEqualTo("delete_then_create");
+    }
+
+    @Test
+    public void getUnspecifiedReplacementStrategy() {
+        JSONObject o = loadJSON(MINIMAL_SCHEMA_PATH);
+        final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
+
+        String replacementStrategy = schema.getReplacementStrategy();
+        assertThat(replacementStrategy).isEqualTo("create_then_delete");
+    }
+
+    @Test
     public void invalidSchema_shouldThrow() {
         JSONObject o = loadJSON(EMPTY_SCHEMA_PATH);
 
@@ -136,6 +164,7 @@ public class ResourceTypeSchemaTest {
         assertThat(schema.getAdditionalIdentifiersAsStrings()).isEmpty();
         assertThat(schema.getReadOnlyPropertiesAsStrings()).isEmpty();
         assertThat(schema.getWriteOnlyPropertiesAsStrings()).isEmpty();
+        assertThat(schema.getReplacementStrategy()).isEqualTo("create_then_delete");
     }
 
     @Test
