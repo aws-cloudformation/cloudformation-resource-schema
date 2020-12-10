@@ -16,6 +16,8 @@ package software.amazon.cloudformation.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static software.amazon.cloudformation.resource.ValidatorTest.loadJSON;
 
 import java.util.List;
@@ -46,6 +48,7 @@ public class ResourceTypeSchemaTest {
         assertThat(schema.getDescription()).isEqualTo("A test schema for unit tests.");
         assertThat(schema.getSourceUrl()).isEqualTo("https://mycorp.com/my-repo.git");
         assertThat(schema.getTypeName()).isEqualTo("AWS::Test::TestModel");
+        assertFalse(schema.getTaggable());
         assertThat(schema.getUnprocessedProperties()).isEmpty();
     }
 
@@ -121,6 +124,7 @@ public class ResourceTypeSchemaTest {
 
         String replacementStrategy = schema.getReplacementStrategy();
         assertThat(replacementStrategy).isEqualTo("delete_then_create");
+        assertTrue(schema.getTaggable());
     }
 
     @Test
