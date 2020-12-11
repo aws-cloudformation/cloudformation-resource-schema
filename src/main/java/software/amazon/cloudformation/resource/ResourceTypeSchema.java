@@ -204,10 +204,6 @@ public class ResourceTypeSchema {
         return this.replacementStrategy;
     }
 
-    public boolean getTaggable() {
-        return this.taggable;
-    }
-
     public static void removeProperty(final PublicJSONPointer property, final JSONObject resourceModel) {
         List<String> refTokens = property.getRefTokens();
         final String key = refTokens.get(refTokens.size() - 1);
