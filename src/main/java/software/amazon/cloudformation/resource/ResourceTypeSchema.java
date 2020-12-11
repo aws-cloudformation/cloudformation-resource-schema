@@ -57,6 +57,7 @@ public class ResourceTypeSchema {
     private final List<List<JSONPointer>> additionalIdentifiers = new ArrayList<>();
     private final List<JSONPointer> readOnlyProperties = new ArrayList<>();
     private final List<JSONPointer> writeOnlyProperties = new ArrayList<>();
+    private final Map<String, String> propertyTransform = new HashMap<>();
     @Getter(AccessLevel.NONE)
     private final Map<String, Handler> handlers = new HashMap<>();
     private final Schema schema;
@@ -128,7 +129,12 @@ public class ResourceTypeSchema {
             ((ArrayList<?>) v).forEach(p -> this.writeOnlyProperties.add(new JSONPointer(p.toString())));
             return null;
         });
-
+        this.unprocessedProperties.computeIfPresent("propertyTransform", (k, v) -> {
+            ((Map<?, ?>) v).forEach((key, value) -> {
+                    this.propertyTransform.put(key.toString(), value.toString());
+            });
+            return null;
+        });
         this.unprocessedProperties.computeIfPresent("handlers", (k, v) -> {
             ((HashMap<?, ?>) v).keySet().forEach(handlerKey -> {
                 HashMap<?, ?> handlerInfo = (HashMap<?, ?>) ((HashMap<?, ?>) v).get(handlerKey);
