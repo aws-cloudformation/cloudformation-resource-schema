@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static software.amazon.cloudformation.resource.ValidatorTest.loadJSON;
 
 import java.util.List;
+import java.util.Map;
 
 import org.everit.json.schema.PublicJSONPointer;
 import org.json.JSONObject;
@@ -76,6 +77,15 @@ public class ResourceTypeSchemaTest {
 
         List<String> result = schema.getPrimaryIdentifierAsStrings();
         assertThat(result).containsExactly("/properties/propertyA");
+    }
+
+    @Test
+    public void getPropertyTransform() {
+        JSONObject o = loadJSON(TEST_SCHEMA_PATH);
+        final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
+
+        Map<String, String> result = schema.getPropertyTransform();
+        assertThat(result).containsEntry("/properties/propertyB", "$count(propertyB) = 0 ? null : propertyB");
     }
 
     @Test
