@@ -326,6 +326,14 @@ public class ValidatorTest {
     }
 
     @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    public void validateDefinition_validTaggable_shouldSucceed(final boolean taggable) {
+        final JSONObject definition = baseSchema().put("taggable", taggable);
+
+        validator.validateResourceDefinition(definition);
+    }
+
+    @ParameterizedTest
     @MethodSource("generateValidReplacementStrategies")
     public void validateDefinition_validReplacementStrategy_shouldNotThrow(final String replacementStrategy) {
         final JSONObject definition = baseSchema().put("replacementStrategy", replacementStrategy);

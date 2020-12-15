@@ -50,6 +50,7 @@ public class ResourceTypeSchema {
     private final String schemaUrl; // $schema
 
     private final String replacementStrategy;
+    private final boolean taggable;
     private final List<JSONPointer> createOnlyProperties = new ArrayList<>();
     private final List<JSONPointer> deprecatedProperties = new ArrayList<>();
     private final List<JSONPointer> primaryIdentifier = new ArrayList<>();
@@ -88,6 +89,11 @@ public class ResourceTypeSchema {
             ? this.unprocessedProperties.get("replacementStrategy").toString()
             : "create_then_delete";
         this.unprocessedProperties.remove("replacementStrategy");
+
+        this.taggable = this.unprocessedProperties.containsKey("taggable")
+            ? Boolean.valueOf(this.unprocessedProperties.get("taggable").toString())
+            : true;
+        this.unprocessedProperties.remove("taggable");
 
         this.unprocessedProperties.computeIfPresent("createOnlyProperties", (k, v) -> {
             ((ArrayList<?>) v).forEach(p -> this.createOnlyProperties.add(new JSONPointer(p.toString())));

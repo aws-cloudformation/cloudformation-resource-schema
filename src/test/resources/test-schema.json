@@ -56,5 +56,6 @@
         ]
     ],
     "replacementStrategy": "create_then_delete",
+    "taggable": false,
     "additionalProperties": false
 }

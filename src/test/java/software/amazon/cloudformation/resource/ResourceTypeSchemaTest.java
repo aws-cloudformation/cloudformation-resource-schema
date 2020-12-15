@@ -46,6 +46,7 @@ public class ResourceTypeSchemaTest {
         assertThat(schema.getDescription()).isEqualTo("A test schema for unit tests.");
         assertThat(schema.getSourceUrl()).isEqualTo("https://mycorp.com/my-repo.git");
         assertThat(schema.getTypeName()).isEqualTo("AWS::Test::TestModel");
+        assertThat(schema.isTaggable()).isFalse();
         assertThat(schema.getUnprocessedProperties()).isEmpty();
     }
 
@@ -121,6 +122,7 @@ public class ResourceTypeSchemaTest {
 
         String replacementStrategy = schema.getReplacementStrategy();
         assertThat(replacementStrategy).isEqualTo("delete_then_create");
+        assertThat(schema.isTaggable()).isTrue();
     }
 
     @Test
