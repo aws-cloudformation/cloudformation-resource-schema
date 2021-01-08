@@ -424,6 +424,14 @@
             "$ref": "#/definitions/resourceLink"
         }
     },
+    "propertyTransform": {
+        "type": "object",
+        "patternProperties": {
+            "^[A-Za-z0-9]{1,64}$": {
+                "type": "string"
+            }
+        }
+    },
     "required": [
         "typeName",
         "properties",
