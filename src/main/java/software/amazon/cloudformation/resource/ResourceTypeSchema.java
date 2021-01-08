@@ -131,7 +131,7 @@ public class ResourceTypeSchema {
         });
         this.unprocessedProperties.computeIfPresent("propertyTransform", (k, v) -> {
             ((Map<?, ?>) v).forEach((key, value) -> {
-                    this.propertyTransform.put(key.toString(), value.toString());
+                this.propertyTransform.put(key.toString(), value.toString());
             });
             return null;
         });
