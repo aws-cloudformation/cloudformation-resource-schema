@@ -25,7 +25,7 @@ jobs:
       with:
         python-version: 3.8
     - name: install pre-commit
-      run: pip3 install --user pre-commit
+      uses: pre-commit/action@v2.0.0
     - name: Run pre-commit checks
       run: pre-commit run --all-files --verbose
     - name: Failure diff
