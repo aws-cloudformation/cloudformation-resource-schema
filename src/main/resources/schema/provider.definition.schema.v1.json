@@ -304,7 +304,7 @@
         "taggable": {
             "$comment": "A boolean flag indicating whether this resource type supports updatable tagging.",
             "type": "boolean",
-            "default": "true"
+            "default": true
         },
         "replacementStrategy": {
             "$comment": "The order of replacement for an immutable resource update.",
