@@ -30,6 +30,10 @@
             }
         }
     },
+    "propertyTransform": {
+        "/properties/propertyA": "$join([$string(test), propertyA])",
+        "/properties/propertyB": "$count(propertyB) = 0 ? null : propertyB"
+    },
     "required": [
         "propertyB"
     ],
