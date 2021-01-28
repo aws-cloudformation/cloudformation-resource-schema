@@ -23,7 +23,7 @@ All resources **MUST** specify a `typeName` which adheres to the Regular Express
 
 ### Resource Shape
 
-The _shape_ of your resource defines the properties for that resource and how they should be applied. This includes the type of each property, validation patterns or enums, and additional descriptive metadata such a documentation and example usage. Refer to the `#/definitions/properties` section of the _meta-schema_ for the full set of supported properties you can use to describe your resource _shape_.
+The _shape_ of your resource defines the properties for that resource and how they should be applied. This includes the type of each property, validation patterns or enums, and additional descriptive metadata such as documentation and example usage. Refer to the `#/definitions/properties` section of the _meta-schema_ for the full set of supported properties you can use to describe your resource _shape_.
 
 ### Resource Semantics
 
