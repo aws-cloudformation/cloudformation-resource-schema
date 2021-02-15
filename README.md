@@ -1,4 +1,4 @@
-    ## AWS CloudFormation Resource Schema
+## AWS CloudFormation Resource Schema
 
 [![Build Status](https://travis-ci.com/aws-cloudformation/aws-cloudformation-resource-schema.svg?branch=master)](https://travis-ci.com/aws-cloudformation/aws-cloudformation-resource-schema)
 
@@ -54,7 +54,19 @@ The following (truncated) example shows some of the semantic definitions for an 
             "BucketName": "/BucketName"
         }
     },
-    "definitions": { ... },
+    "definitions": {
+        "NestedDefinitions" : {
+              "type" : "object",
+              "additionalProperties" : false,
+              "properties" : {
+                "ReturnData" : {
+                  "type" : "boolean"
+                },
+                "Expression" : {
+                  "type" : "string"
+                }
+          },
+    },
     "properties": {
         "Arn": {
             "$ref": "aws.common.types.v1.json#/definitions/Arn"
@@ -64,6 +76,9 @@ The following (truncated) example shows some of the semantic definitions for an 
         },
         "Id": {
             "type": "integer"
+        },
+        "NestedProperty": {
+            "$ref": "#/definitions/NestedDefinitions"
         }
     },
     "createOnlyProperties": [
@@ -80,7 +95,8 @@ The following (truncated) example shows some of the semantic definitions for an 
         "/properties/WebsiteURL"
     ],
     "propertyTransform": {
-        "/properties/Id": "$abs(Id)"
+        "/properties/Id": "$abs(Id) OR $power(Id, 2)",
+        "/properties/NestedProperty/Expression": $join(["Prefix", Expression])
     }
 }
 ```
