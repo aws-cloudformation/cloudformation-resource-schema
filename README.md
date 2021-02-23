@@ -95,11 +95,14 @@ The following (truncated) example shows some of the semantic definitions for an 
         "/properties/WebsiteURL"
     ],
     "propertyTransform": {
-        "/properties/Id": "$abs(Id) OR $power(Id, 2)",
+        "/properties/Id": "$abs(Id) $OR $power(Id, 2)",
         "/properties/NestedProperty/Expression": $join(["Prefix", Expression])
     }
 }
 ```
+**Note:** $OR is supported between 2 Jsontata functions or experessions. It is not supported as part of a string.
+Following use of $OR is not supported in propertyTransform:
+```"/properties/e": '$join([e, "T $OR Y"])',```
 
 ### Relationships
 
