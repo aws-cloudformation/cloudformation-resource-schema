@@ -37,6 +37,8 @@ public class ResourceTypeSchemaTest {
     private static final String MINIMAL_SCHEMA_PATH = "/minimal-schema.json";
     private static final String NO_ADDITIONAL_PROPERTIES_SCHEMA_PATH = "/no-additional-properties-schema.json";
     private static final String WRITEONLY_MODEL_PATH = "/write-only-model.json";
+    private static final String CREATEONLY_MODEL_PATH = "/create-only-model.json";
+    private static final String CREATEONLY_CURRENT_MODEL_PATH = "/create-only-current-model.json";
     private static final String HANDLERS_SCHEMA_PATH = "/valid-with-handlers-schema.json";
 
     @Test
@@ -58,7 +60,8 @@ public class ResourceTypeSchemaTest {
 
         List<String> result = schema.getCreateOnlyPropertiesAsStrings();
 
-        assertThat(result).containsExactly("/properties/propertyA", "/properties/propertyD");
+        assertThat(result).containsExactly("/properties/propertyA", "/properties/propertyD",
+            "/properties/propertyE/nestedCreateOnlyProperty");
     }
 
     @Test
@@ -195,6 +198,29 @@ public class ResourceTypeSchemaTest {
 
         // ensure that other non writeOnlyProperty is not removed
         assertThat(resourceModel.has("propertyB")).isTrue();
+    }
+
+    @Test
+    public void compareCreateOnlyProperties_hasEqualCreateOnlyProperties() {
+        JSONObject o = loadJSON(TEST_SCHEMA_PATH);
+        ResourceTypeSchema schema = ResourceTypeSchema.load(o);
+        JSONObject resourceModel = loadJSON(CREATEONLY_MODEL_PATH);
+
+        final boolean result = schema.compareCreateOnlyProperties(resourceModel, resourceModel);
+
+        assertThat(result).isEqualTo(true);
+    }
+
+    @Test
+    public void compareCreateOnlyProperties_hasNotEqualCreateOnlyProperties() {
+        JSONObject o = loadJSON(TEST_SCHEMA_PATH);
+        ResourceTypeSchema schema = ResourceTypeSchema.load(o);
+        JSONObject previousResourceModel = loadJSON(CREATEONLY_MODEL_PATH);
+        JSONObject currentResourceModel = loadJSON(CREATEONLY_CURRENT_MODEL_PATH);
+
+        final boolean result = schema.compareCreateOnlyProperties(previousResourceModel, currentResourceModel);
+
+        assertThat(result).isEqualTo(false);
     }
 
     @Test

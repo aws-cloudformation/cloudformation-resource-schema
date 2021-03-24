@@ -1,0 +1,7 @@
+{
+    "propertyA": "createOnly",
+    "propertyD": true,
+    "propertyE": {
+        "nestedCreateOnlyProperty": "something write only"
+    }
+}

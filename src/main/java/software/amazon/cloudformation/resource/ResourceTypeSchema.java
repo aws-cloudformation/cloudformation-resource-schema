@@ -206,6 +206,18 @@ public class ResourceTypeSchema {
             new PublicJSONPointer(writeOnlyProperty.replaceFirst("^/properties", "")), resourceModel));
     }
 
+    public boolean compareCreateOnlyProperties(final JSONObject previousResourceModel,
+                                               final JSONObject currentResourceModel) {
+        boolean compare = true;
+        for (String createOnlyProperty : this.getCreateOnlyPropertiesAsStrings()) {
+            final boolean result = compareProperty(
+                new PublicJSONPointer(createOnlyProperty.replaceFirst("^/properties", "")),
+                previousResourceModel, currentResourceModel);
+            compare = compare && result;
+        }
+        return compare;
+    }
+
     public String getReplacementStrategy() {
         return this.replacementStrategy;
     }
@@ -226,6 +238,29 @@ public class ResourceTypeSchema {
             }
         } catch (JSONPointerException | NumberFormatException e) {
             // do nothing, as this indicates the model does not have a value for the pointer
+        }
+    }
+
+    public static boolean compareProperty(final PublicJSONPointer property,
+                                          final JSONObject previousResourceModel,
+                                          final JSONObject currentresourceModel) {
+        List<String> refTokens = property.getRefTokens();
+        final String key = refTokens.get(refTokens.size() - 1);
+        try {
+            // if size is more than one, fetch parent object/array of key to remove so that
+            // we can remove
+            if (refTokens.size() > 1) {
+                // use sublist to specify to point at the parent object
+                final JSONPointer parentObjectPointer = new JSONPointer(refTokens.subList(0, refTokens.size() - 1));
+                final JSONObject previousParentObject = (JSONObject) parentObjectPointer.queryFrom(previousResourceModel);
+                final JSONObject currentParentObject = (JSONObject) parentObjectPointer.queryFrom(currentresourceModel);
+                return previousParentObject.get(key) == currentParentObject.get(key);
+            } else {
+                return previousResourceModel.get(key) == currentresourceModel.get(key);
+            }
+        } catch (JSONPointerException | NumberFormatException e) {
+            // do nothing, as this indicates the model does not have a value for the pointer
+            return false;
         }
     }
 

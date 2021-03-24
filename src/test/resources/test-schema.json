@@ -26,6 +26,9 @@
                 },
                 "writeOnlyArray": {
                     "type": "string"
+                },
+                "nestedCreateOnlyProperty": {
+                    "type": "string"
                 }
             }
         }
@@ -39,7 +42,8 @@
     ],
     "createOnlyProperties": [
         "/properties/propertyA",
-        "/properties/propertyD"
+        "/properties/propertyD",
+        "/properties/propertyE/nestedCreateOnlyProperty"
     ],
     "deprecatedProperties": [
         "/properties/propertyC"
