@@ -52,11 +52,11 @@ public class ResourceTypeSchemaTest {
     }
 
     @Test
-    public void getConditionallyCreateOnlyProperties() {
+    public void getConditionalCreateOnlyProperties() {
         JSONObject o = loadJSON(TEST_SCHEMA_PATH);
         final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
 
-        List<String> result = schema.getConditionallyCreateOnlyPropertiesAsStrings();
+        List<String> result = schema.getConditionalCreateOnlyPropertiesAsStrings();
 
         assertThat(result).containsExactly("/properties/propertyF");
     }
@@ -181,7 +181,7 @@ public class ResourceTypeSchemaTest {
         assertThat(schema.getTypeName()).isEqualTo("AWS::Test::TestModel");
         assertThat(schema.getUnprocessedProperties()).isEmpty();
         assertThat(schema.getCreateOnlyPropertiesAsStrings()).isEmpty();
-        assertThat(schema.getConditionallyCreateOnlyPropertiesAsStrings()).isEmpty();
+        assertThat(schema.getConditionalCreateOnlyPropertiesAsStrings()).isEmpty();
         assertThat(schema.getDeprecatedPropertiesAsStrings()).isEmpty();
         assertThat(schema.getPrimaryIdentifierAsStrings()).containsExactly("/properties/PropertyA");
         assertThat(schema.getAdditionalIdentifiersAsStrings()).isEmpty();

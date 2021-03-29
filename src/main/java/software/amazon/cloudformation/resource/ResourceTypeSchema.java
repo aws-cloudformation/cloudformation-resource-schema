@@ -52,7 +52,7 @@ public class ResourceTypeSchema {
     private final String replacementStrategy;
     private final boolean taggable;
     private final List<JSONPointer> createOnlyProperties = new ArrayList<>();
-    private final List<JSONPointer> conditionallyCreateOnlyProperties = new ArrayList<>();
+    private final List<JSONPointer> conditionalCreateOnlyProperties = new ArrayList<>();
     private final List<JSONPointer> deprecatedProperties = new ArrayList<>();
     private final List<JSONPointer> primaryIdentifier = new ArrayList<>();
     private final List<List<JSONPointer>> additionalIdentifiers = new ArrayList<>();
@@ -97,8 +97,8 @@ public class ResourceTypeSchema {
             : true;
         this.unprocessedProperties.remove("taggable");
 
-        this.unprocessedProperties.computeIfPresent("conditionallyCreateOnlyProperties", (k, v) -> {
-            ((ArrayList<?>) v).forEach(p -> this.conditionallyCreateOnlyProperties.add(new JSONPointer(p.toString())));
+        this.unprocessedProperties.computeIfPresent("conditionalCreateOnlyProperties", (k, v) -> {
+            ((ArrayList<?>) v).forEach(p -> this.conditionalCreateOnlyProperties.add(new JSONPointer(p.toString())));
             return null;
         });
 
@@ -165,8 +165,8 @@ public class ResourceTypeSchema {
         return schema.getDescription();
     }
 
-    public List<String> getConditionallyCreateOnlyPropertiesAsStrings() throws ValidationException {
-        return this.conditionallyCreateOnlyProperties.stream().map(JSONPointer::toString).collect(Collectors.toList());
+    public List<String> getConditionalCreateOnlyPropertiesAsStrings() throws ValidationException {
+        return this.conditionalCreateOnlyProperties.stream().map(JSONPointer::toString).collect(Collectors.toList());
     }
 
     public List<String> getCreateOnlyPropertiesAsStrings() throws ValidationException {

@@ -40,7 +40,7 @@
     "required": [
         "propertyB"
     ],
-    "conditionallyCreateOnlyProperties": [
+    "conditionalCreateOnlyProperties": [
         "/properties/propertyF"
     ],
     "createOnlyProperties": [
