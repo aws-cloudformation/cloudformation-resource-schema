@@ -1,0 +1,37 @@
+{
+  "typeName": "AWS::Valid::TypeName",
+  "description": "A test schema for unit tests.",
+  "properties": {
+    "property1": {
+      "type": "array"
+    }
+  },
+  "primaryIdentifier": [
+    "/property1"
+  ],
+  "handlers": {
+    "create": {
+      "permissions": [
+        "test:permission"
+      ],
+      "timeoutInMinutes": 200
+    },
+    "update": {
+      "permissions": []
+    },
+    "read": {
+      "permissions": []
+    },
+    "delete": {
+      "permissions": [
+        "test:permissionA"
+      ]
+    },
+    "list": {
+      "permissions": [
+        "test:permissionB"
+      ]
+    }
+  },
+  "additionalProperties": false
+}
