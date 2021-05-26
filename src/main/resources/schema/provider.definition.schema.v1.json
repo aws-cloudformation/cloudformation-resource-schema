@@ -302,7 +302,7 @@
             "$ref": "#/definitions/httpsUrl"
         },
         "taggable": {
-            "$comment": "A boolean flag indicating whether this resource type supports updatable tagging.",
+            "description": "A boolean flag indicating whether this resource type supports tagging.",
             "type": "boolean",
             "default": true
         },
