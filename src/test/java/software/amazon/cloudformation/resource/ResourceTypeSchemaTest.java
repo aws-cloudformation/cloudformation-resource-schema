@@ -38,7 +38,6 @@ public class ResourceTypeSchemaTest {
     private static final String NO_ADDITIONAL_PROPERTIES_SCHEMA_PATH = "/no-additional-properties-schema.json";
     private static final String WRITEONLY_MODEL_PATH = "/write-only-model.json";
     private static final String HANDLERS_SCHEMA_PATH = "/valid-with-handlers-schema.json";
-    private static final String SCHEMA_WIRH_UPDATE_HANDLER_PATH = "/valid-with-update-handler-schema.json";
 
     @Test
     public void getProperties() {
@@ -143,22 +142,7 @@ public class ResourceTypeSchemaTest {
 
         String replacementStrategy = schema.getReplacementStrategy();
         assertThat(replacementStrategy).isEqualTo("delete_then_create");
-    }
-
-    @Test
-    public void schemaWithUpdateHandlerShouldBeTaggable() {
-        JSONObject o = loadJSON(SCHEMA_WIRH_UPDATE_HANDLER_PATH);
-        final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
-
         assertThat(schema.isTaggable()).isTrue();
-    }
-
-    @Test
-    public void schemaWithoutUpdateHandlerShouldNotBeTaggable() {
-        JSONObject o = loadJSON(HANDLERS_SCHEMA_PATH);
-        final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
-
-        assertThat(schema.isTaggable()).isFalse();
     }
 
     @Test

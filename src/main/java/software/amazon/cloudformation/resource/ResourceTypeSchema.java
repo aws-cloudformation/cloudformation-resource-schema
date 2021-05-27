@@ -92,6 +92,11 @@ public class ResourceTypeSchema {
             : "create_then_delete";
         this.unprocessedProperties.remove("replacementStrategy");
 
+        this.taggable = this.unprocessedProperties.containsKey("taggable")
+            ? Boolean.valueOf(this.unprocessedProperties.get("taggable").toString())
+            : true;
+        this.unprocessedProperties.remove("taggable");
+
         this.unprocessedProperties.computeIfPresent("conditionalCreateOnlyProperties", (k, v) -> {
             ((ArrayList<?>) v).forEach(p -> this.conditionalCreateOnlyProperties.add(new JSONPointer(p.toString())));
             return null;
@@ -148,11 +153,6 @@ public class ResourceTypeSchema {
             });
             return null;
         });
-
-        this.taggable = this.unprocessedProperties.containsKey("taggable")
-            ? Boolean.valueOf(this.unprocessedProperties.get("taggable").toString())
-            : this.handlers.containsKey("update");
-        this.unprocessedProperties.remove("taggable");
     }
 
     public static ResourceTypeSchema load(final JSONObject resourceDefinition) {
