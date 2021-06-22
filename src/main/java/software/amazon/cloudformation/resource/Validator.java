@@ -15,57 +15,33 @@
 package software.amazon.cloudformation.resource;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import lombok.Builder;
 
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.loader.SchemaClient;
-import org.everit.json.schema.loader.SchemaLoader;
 import org.everit.json.schema.loader.SchemaLoader.SchemaLoaderBuilder;
 import org.everit.json.schema.loader.internal.DefaultSchemaClient;
-import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 import software.amazon.cloudformation.resource.exceptions.ValidationException;
 
-public class Validator implements SchemaValidator {
-    private static final URI JSON_SCHEMA_URI_HTTP = newURI("http://json-schema.org/draft-07/schema");
+public class Validator extends BaseValidator {
+
     private static final URI RESOURCE_DEFINITION_SCHEMA_URI = newURI(
         "https://schema.cloudformation.us-east-1.amazonaws.com/provider.definition.schema.v1.json");
-    private static final String ID_KEY = "$id";
-    private static final String JSON_SCHEMA_PATH = "/schema/schema";
-    private static final String RESOURCE_DEFINITION_SCHEMA_PATH = "/schema/provider.definition.schema.v1.json";
-
-    /**
-     * resource definition schema ("resource schema schema"). All resource schemas
-     * are validated against this one and JSON schema draft v7 below.
-     */
-    private final JSONObject definitionSchemaJsonObject;
-
-    /**
-     * locally cached draft-07 JSON schema. All resource schemas are validated
-     * against it
-     */
-    private final JSONObject jsonSchemaObject;
-    /**
-     * this is what SchemaLoader uses to download remote $refs. Not necessarily an
-     * HTTP client, see the docs for details. We override the default SchemaClient
-     * client in unit tests to be able to control how remote refs are resolved.
-     */
-    private final SchemaClient downloader;
+    protected static final String RESOURCE_DEFINITION_SCHEMA_PATH = "/schema/provider.definition.schema.v1.json";
+    protected static final String TYPE_CONFIGURATION_DEFINITION_SCHEMA_PATH = "/schema/provider.configuration.definition.schema.v1.json";
+    private JSONObject typeConfigurationDefinitionJson;
 
     public Validator(SchemaClient downloader) {
-        this(loadResourceAsJSON(JSON_SCHEMA_PATH), loadResourceAsJSON(RESOURCE_DEFINITION_SCHEMA_PATH), downloader);
+        this(loadResourceAsJSON(RESOURCE_DEFINITION_SCHEMA_PATH), downloader);
+        this.typeConfigurationDefinitionJson = loadResourceAsJSON(TYPE_CONFIGURATION_DEFINITION_SCHEMA_PATH);
     }
 
-    private Validator(JSONObject jsonSchema,
-                      JSONObject definitionSchema,
+    private Validator(JSONObject definitionSchema,
                       SchemaClient downloader) {
-        this.jsonSchemaObject = jsonSchema;
-        this.definitionSchemaJsonObject = definitionSchema;
-        this.downloader = downloader;
+        super(definitionSchema, downloader);
     }
 
     @Builder
@@ -78,25 +54,13 @@ public class Validator implements SchemaValidator {
      */
     private Schema makeResourceDefinitionSchema() {
         SchemaLoaderBuilder builder = getSchemaLoader();
+        registerMetaSchema(builder, typeConfigurationDefinitionJson);
         builder.schemaJson(definitionSchemaJsonObject);
         return builder.build().load().build();
     }
 
-    @Override
-    public void validateObject(final JSONObject modelObject, final JSONObject definitionSchemaObject) throws ValidationException {
-        final SchemaLoaderBuilder loader = getSchemaLoader(definitionSchemaObject);
-
-        try {
-            final Schema schema = loader.build().load().build();
-            schema.validate(modelObject); // throws a ValidationException if this object is invalid
-        } catch (final org.everit.json.schema.ValidationException e) {
-            throw ValidationException.newScrubbedException(e);
-        }
-    }
-
     /**
-     * Performs JSON Schema validation for the input resource definition against the
-     * resource provider definition schema
+     * Performs JSON Schema validation for the input resource definition against the resource provider definition schema
      *
      * @param resourceDefinition JSON-encoded resource definition
      * @throws ValidationException Thrown for any schema validation errors
@@ -110,8 +74,8 @@ public class Validator implements SchemaValidator {
      * create a Schema instance that can be used to validate CloudFormation resources.
      *
      * @param resourceDefinition - CloudFormation Resource Provider Schema (Resource Definition)
-     * @throws ValidationException if supplied <code>resourceDefinition</code> is invalid.
      * @return - Schema instance for the given Resource Definition
+     * @throws ValidationException if supplied <code>resourceDefinition</code> is invalid.
      */
     public Schema loadResourceDefinitionSchema(final JSONObject resourceDefinition) {
 
@@ -131,7 +95,8 @@ public class Validator implements SchemaValidator {
             // step 2: load resource definition as a Schema that can be used to validate resource models;
             // definitionSchemaJsonObject becomes a meta-schema
             SchemaLoaderBuilder builder = getSchemaLoader();
-            registerMetaSchema(builder, jsonSchemaObject);
+            registerMetaSchema(builder, resourceDefinition);
+            registerMetaSchema(builder, typeConfigurationDefinitionJson);
             builder.schemaJson(resourceDefinition);
             // when resource definition is loaded as a schema, $refs are resolved and validated
             return builder.build().load().build();

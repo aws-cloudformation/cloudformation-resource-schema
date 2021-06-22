@@ -293,6 +293,26 @@ public class ResourceTypeSchemaTest {
             () -> schema.validate(modelWithNeitherAnorB));
     }
 
+    /**
+     * Test loading the type schema with valid typeconfiguration
+     */
+    @Test
+    public void test_loadMinimalSchema_withValidTypeConfiguration() {
+        JSONObject resourceDefinition = loadJSON(MINIMAL_SCHEMA_WITH_TYPE_CONFIGURATION_PATH);
+        ResourceTypeSchema.load(resourceDefinition);
+    }
+
+    /**
+     * Test loading the type schema with invalid typeconfiguration
+     */
+    @Test
+    public void test_loadMinimalSchema_withInValidTypeConfiguration() {
+        JSONObject resourceDefinition = loadJSON(MINIMAL_SCHEMA_WITH_INVALID_TYPE_CONFIGURATION_PATH);
+        assertThatExceptionOfType(ValidationException.class)
+            .isThrownBy(() -> ResourceTypeSchema.load(resourceDefinition))
+            .withMessageContaining("2 schema violations found"); //additionalProperties missing and CloudFormationConfiguration not permitted
+    }
+
     static JSONObject getEmptyModel() {
         return new JSONObject().put("id", "required.identifier");
     }
