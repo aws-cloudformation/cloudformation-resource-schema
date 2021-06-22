@@ -310,7 +310,8 @@ public class ResourceTypeSchemaTest {
         JSONObject resourceDefinition = loadJSON(MINIMAL_SCHEMA_WITH_INVALID_TYPE_CONFIGURATION_PATH);
         assertThatExceptionOfType(ValidationException.class)
             .isThrownBy(() -> ResourceTypeSchema.load(resourceDefinition))
-            .withMessageContaining("2 schema violations found"); //additionalProperties missing and CloudFormationConfiguration not permitted
+            .withMessageContaining("2 schema violations found"); // additionalProperties missing and CloudFormationConfiguration
+                                                                 // not permitted
     }
 
     static JSONObject getEmptyModel() {

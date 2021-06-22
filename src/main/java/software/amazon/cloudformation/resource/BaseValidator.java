@@ -16,7 +16,9 @@ package software.amazon.cloudformation.resource;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+
 import lombok.SneakyThrows;
+
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.loader.SchemaClient;
 import org.everit.json.schema.loader.SchemaLoader;
@@ -24,6 +26,7 @@ import org.everit.json.schema.loader.SchemaLoader.SchemaLoaderBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+
 import software.amazon.cloudformation.resource.exceptions.ValidationException;
 
 class BaseValidator implements SchemaValidator {

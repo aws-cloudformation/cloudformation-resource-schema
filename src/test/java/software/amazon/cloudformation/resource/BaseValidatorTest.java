@@ -1,17 +1,17 @@
 /*
- * Copyright 2010-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
- */
+* Copyright 2010-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License").
+* You may not use this file except in compliance with the License.
+* A copy of the License is located at
+*
+*  http://aws.amazon.com/apache2.0
+*
+* or in the "license" file accompanying this file. This file is distributed
+* on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+* express or implied. See the License for the specific language governing
+* permissions and limitations under the License.
+*/
 package software.amazon.cloudformation.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -64,7 +64,7 @@ public class BaseValidatorTest {
      * trivial coverage test: cannot cache a schema if it has an invalid $id
      */
     @ParameterizedTest
-    @ValueSource(strings = {":invalid/uri", ""})
+    @ValueSource(strings = { ":invalid/uri", "" })
     public void registerMetaSchema_invalidRelativeRef_shouldThrow(String uri) {
         JSONObject badSchema = loadJSON(RESOURCE_DEFINITION_SCHEMA_PATH);
         badSchema.put("$id", uri);
@@ -138,7 +138,7 @@ public class BaseValidatorTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"WaaaaaaaayTooLong,maxLength", "TooShort,minLength", "NoPatternMatch,pattern"})
+    @CsvSource({ "WaaaaaaaayTooLong,maxLength", "TooShort,minLength", "NoPatternMatch,pattern" })
     public void validateObject_invalidStringValue_messageShouldNotContainValue(final String value, final String keyword) {
         final JSONObject object = new JSONObject().put("StringProperty", value);
 
@@ -153,7 +153,7 @@ public class BaseValidatorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"enum", "const"})
+    @ValueSource(strings = { "enum", "const" })
     public void validateObject_invalidEnumValue_messageShouldNotContainValue(final String keyword) {
         final String propName = keyword + "Property";
         final String propVal = "NotPartOfEnum";
@@ -178,7 +178,7 @@ public class BaseValidatorTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"test-test,uniqueItems", "test,minItems", "test-test2-test3,maxItems", "Y-X,contains"})
+    @CsvSource({ "test-test,uniqueItems", "test,minItems", "test-test2-test3,maxItems", "Y-X,contains" })
     public void validateObject_invalidArrayValue_messageShouldNotContainValue(final String listAsString, final String keyword) {
         final List<String> values = Arrays.asList(listAsString.split("-"));
         final JSONObject object = new JSONObject().put("ArrayProperty", values);
@@ -195,11 +195,11 @@ public class BaseValidatorTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"5,IntProperty,minimum", "300,IntProperty,maximum", "23,IntProperty,multipleOf",
-        "5,NumberProperty,exclusiveMinimum", "300,NumberProperty,exclusiveMaximum"})
+    @CsvSource({ "5,IntProperty,minimum", "300,IntProperty,maximum", "23,IntProperty,multipleOf",
+        "5,NumberProperty,exclusiveMinimum", "300,NumberProperty,exclusiveMaximum" })
     public void validateObject_invalidNumValue_messageShouldNotContainValue(final String numAsString,
-        final String propName,
-        final String keyword) {
+                                                                            final String propName,
+                                                                            final String keyword) {
         final JSONObject object = new JSONObject().put(propName, Integer.valueOf(numAsString));
 
         final ValidationException e = catchThrowableOfType(
@@ -213,7 +213,7 @@ public class BaseValidatorTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"test,minProperties", "test-test1-test2,maxProperties", "test-dep,dependencies"})
+    @CsvSource({ "test,minProperties", "test-test1-test2,maxProperties", "test-dep,dependencies" })
     public void validateObject_invalidSubObject_messageShouldNotContainValue(final String keysAsString, final String keyword) {
         final String val = "testValue";
         final JSONObject subSchema = new JSONObject();
@@ -235,9 +235,9 @@ public class BaseValidatorTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"test,minProperties", "test-test1-test2,maxProperties", "test-dep,dependencies"})
+    @CsvSource({ "test,minProperties", "test-test1-test2,maxProperties", "test-dep,dependencies" })
     public void validateObject_invalidPatternProperties_messageShouldNotContainValue(final String keysAsString,
-        final String keyword) {
+                                                                                     final String keyword) {
         final String val = "Value";
         final JSONObject object = new JSONObject().put("MapProperty", new JSONObject().put("def", "val"));
 
@@ -253,7 +253,7 @@ public class BaseValidatorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"anyOf", "allOf", "oneOf"})
+    @ValueSource(strings = { "anyOf", "allOf", "oneOf" })
     public void validateObject_invalidCombiner_messageShouldNotContainValue(final String keyword) {
         final String propName = keyword + "Property";
         final String propVal = "NotAnInteger";
