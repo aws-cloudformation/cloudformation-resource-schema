@@ -35,6 +35,8 @@ public class ResourceTypeSchemaTest {
     private static final String SCHEMA_WITH_ANYOF = "/valid-with-anyof-schema.json";
     private static final String SCHEMA_WITH_ALLOF = "/valid-with-allof-schema.json";
     private static final String MINIMAL_SCHEMA_PATH = "/minimal-schema.json";
+    private static final String MINIMAL_SCHEMA_WITH_TYPE_CONFIGURATION_PATH = "/minimal-schema-with-typeconfiguration.json";
+    private static final String MINIMAL_SCHEMA_WITH_INVALID_TYPE_CONFIGURATION_PATH = "/minimal-schema-with-invalid-typeconfiguration.json";
     private static final String NO_ADDITIONAL_PROPERTIES_SCHEMA_PATH = "/no-additional-properties-schema.json";
     private static final String WRITEONLY_MODEL_PATH = "/write-only-model.json";
     private static final String HANDLERS_SCHEMA_PATH = "/valid-with-handlers-schema.json";
@@ -291,6 +293,27 @@ public class ResourceTypeSchemaTest {
 
         assertThatExceptionOfType(org.everit.json.schema.ValidationException.class).isThrownBy(
             () -> schema.validate(modelWithNeitherAnorB));
+    }
+
+    /**
+     * Test loading the type schema with valid typeconfiguration
+     */
+    @Test
+    public void test_loadMinimalSchema_withValidTypeConfiguration() {
+        JSONObject resourceDefinition = loadJSON(MINIMAL_SCHEMA_WITH_TYPE_CONFIGURATION_PATH);
+        ResourceTypeSchema.load(resourceDefinition);
+    }
+
+    /**
+     * Test loading the type schema with invalid typeconfiguration
+     */
+    @Test
+    public void test_loadMinimalSchema_withInValidTypeConfiguration() {
+        JSONObject resourceDefinition = loadJSON(MINIMAL_SCHEMA_WITH_INVALID_TYPE_CONFIGURATION_PATH);
+        assertThatExceptionOfType(ValidationException.class)
+            .isThrownBy(() -> ResourceTypeSchema.load(resourceDefinition))
+            .withMessageContaining("2 schema violations found"); // additionalProperties missing and CloudFormationConfiguration
+                                                                 // not permitted
     }
 
     static JSONObject getEmptyModel() {

@@ -1,0 +1,24 @@
+{
+    "typeName": "AWS::Test::TestModel",
+    "description": "A test invalid schema for unit tests.",
+    "$comment": "This schema is invalid as additionalProperties is missing in typeConfiguration and also typeConfiguration properties should not start with CloudFormation",
+    "properties": {
+        "propertyA": {
+            "type": "boolean"
+        }
+    },
+    "primaryIdentifier": [
+        "/properties/PropertyA"
+    ],
+    "additionalProperties": false,
+    "typeConfiguration": {
+        "properties": {
+            "CloudFormationConfiguration": {
+                "type": "string"
+            },
+            "APIKey": {
+                "type": "string"
+            }
+        }
+    }
+}
