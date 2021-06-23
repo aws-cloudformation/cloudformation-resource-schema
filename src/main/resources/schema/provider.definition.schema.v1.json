@@ -131,7 +131,6 @@
         },
         "definitions": {
             "$ref": "base.definition.schema.v1.json#/properties/definitions"
-
         },
         "handlers": {
             "description": "Defines the provisioning operations which can be performed on this resource type",
