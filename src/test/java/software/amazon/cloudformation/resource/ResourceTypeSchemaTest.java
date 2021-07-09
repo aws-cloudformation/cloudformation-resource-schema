@@ -29,6 +29,7 @@ import software.amazon.cloudformation.resource.exceptions.ValidationException;
 
 public class ResourceTypeSchemaTest {
     private static final String TEST_SCHEMA_PATH = "/test-schema.json";
+    private static final String TEST_SCHEMA_WITH_EMPTY_WRITE_ONLY_PATH = "/test-schema-with-empty-write-only.json";
     private static final String EMPTY_SCHEMA_PATH = "/empty-schema.json";
     private static final String SINGLETON_SCHEMA_PATH = "/singleton-test-schema.json";
     private static final String SCHEMA_WITH_ONEOF = "/valid-with-oneof-schema.json";
@@ -38,7 +39,6 @@ public class ResourceTypeSchemaTest {
     private static final String MINIMAL_SCHEMA_WITH_TYPE_CONFIGURATION_PATH = "/minimal-schema-with-typeconfiguration.json";
     private static final String MINIMAL_SCHEMA_WITH_INVALID_TYPE_CONFIGURATION_PATH = "/minimal-schema-with-invalid-typeconfiguration.json";
     private static final String NO_ADDITIONAL_PROPERTIES_SCHEMA_PATH = "/no-additional-properties-schema.json";
-    private static final String WRITEONLY_MODEL_PATH = "/write-only-model.json";
     private static final String HANDLERS_SCHEMA_PATH = "/valid-with-handlers-schema.json";
 
     @Test
@@ -196,7 +196,7 @@ public class ResourceTypeSchemaTest {
     public void removeWriteOnlyProperties_hasWriteOnlyProperties_shouldRemove() {
         JSONObject o = loadJSON(TEST_SCHEMA_PATH);
         ResourceTypeSchema schema = ResourceTypeSchema.load(o);
-        JSONObject resourceModel = loadJSON(WRITEONLY_MODEL_PATH);
+        JSONObject resourceModel = o.getJSONObject("properties");
 
         schema.removeWriteOnlyProperties(resourceModel);
 
@@ -208,6 +208,18 @@ public class ResourceTypeSchemaTest {
 
         // ensure that other non writeOnlyProperty is not removed
         assertThat(resourceModel.has("propertyB")).isTrue();
+    }
+
+    @Test
+    public void removeWriteOnlyProperties_hasWriteOnlyProperties_shouldDoNothing() {
+        JSONObject o = loadJSON(TEST_SCHEMA_WITH_EMPTY_WRITE_ONLY_PATH);
+        ResourceTypeSchema schema = ResourceTypeSchema.load(o);
+        JSONObject resourceModel = o.getJSONObject("properties");
+
+        schema.removeWriteOnlyProperties(resourceModel);
+
+        // ensure that other non writeOnlyProperty is not removed
+        assertThat(resourceModel.has("propertyA")).isTrue();
     }
 
     @Test
