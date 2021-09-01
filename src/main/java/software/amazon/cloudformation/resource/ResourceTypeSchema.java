@@ -51,6 +51,7 @@ public class ResourceTypeSchema {
 
     private final String replacementStrategy;
     private final boolean taggable;
+    private final Map<String, Object> tagging = new HashMap<>();
     private final List<JSONPointer> createOnlyProperties = new ArrayList<>();
     private final List<JSONPointer> conditionalCreateOnlyProperties = new ArrayList<>();
     private final List<JSONPointer> deprecatedProperties = new ArrayList<>();
@@ -91,11 +92,6 @@ public class ResourceTypeSchema {
             ? this.unprocessedProperties.get("replacementStrategy").toString()
             : "create_then_delete";
         this.unprocessedProperties.remove("replacementStrategy");
-
-        this.taggable = this.unprocessedProperties.containsKey("taggable")
-            ? Boolean.valueOf(this.unprocessedProperties.get("taggable").toString())
-            : true;
-        this.unprocessedProperties.remove("taggable");
 
         this.unprocessedProperties.computeIfPresent("conditionalCreateOnlyProperties", (k, v) -> {
             ((ArrayList<?>) v).forEach(p -> this.conditionalCreateOnlyProperties.add(new JSONPointer(p.toString())));
@@ -153,6 +149,57 @@ public class ResourceTypeSchema {
             });
             return null;
         });
+
+        this.unprocessedProperties.computeIfPresent("tagging", (k, v) -> {
+            ((Map<?, ?>) v).forEach((key, value) -> {
+                if (!key.equals("tagProperty") && !key.equals("tagPropertyType")) {
+                    this.tagging.put(key.toString(), Boolean.valueOf(value.toString()));
+                } else if (key.equals("tagProperty")) {
+                    this.tagging.put(key.toString(), new JSONPointer(value.toString()));
+                } else {
+                    this.tagging.put(key.toString(), value.toString());
+                }
+            });
+
+            if (this.tagging.containsKey("taggable") && this.tagging.containsKey("tagOnCreate")
+                && this.tagging.get("taggable").equals(false) && this.tagging.get("tagOnCreate").equals(true)) {
+                throw new ValidationException("Invalid tagOnCreate value since taggable is marked false", "tagging",
+                                              "#/tagging/tagOnCreate");
+            } else if (this.tagging.containsKey("taggable") && this.tagging.containsKey("tagUpdatable") &&
+                this.tagging.get("taggable").equals(false) && this.tagging.get("tagUpdatable").equals(true)) {
+                throw new ValidationException("Invalid tagUpdatable value since taggable is marked false", "tagging",
+                                              "#/tagging/tagUpdatable");
+            } else if (this.tagging.containsKey("taggable") && this.tagging.containsKey("CFNSystemTags") &&
+                this.tagging.get("taggable").equals(false) && this.tagging.get("CFNSystemTags").equals(true)) {
+                throw new ValidationException("Invalid CFNSystemTags value since taggable is marked false", "tagging",
+                                              "#/tagging/CFNSystemTags");
+            } else if (this.tagging.containsKey("tagUpdatable") && this.tagging.get("tagUpdatable").equals(true)
+                && !this.handlers.containsKey("update")) {
+                throw new ValidationException("Invalid tagUpdatable value since update handler is missing", "tagging",
+                                              "#/tagging/tagUpdatable");
+            }
+            return null;
+        });
+
+        if (this.unprocessedProperties.containsKey("taggable")) {
+            this.taggable = Boolean.parseBoolean(this.unprocessedProperties.get("taggable").toString());
+            if (!this.tagging.containsKey("taggable")) {
+                this.tagging.put("taggable", this.taggable);
+                if (this.taggable) {
+                    // default value to true when taggable to enforce tagging feature
+                    tagging.put("tagOnCreate", true);
+                    tagging.put("tagUpdatable", true);
+                    tagging.put("CFNSystemTags", true);
+                }
+            } else {
+                if (!this.tagging.get("taggable").equals(this.taggable)) {
+                    throw new ValidationException("Conflicting taggable value", "tagging", "#/tagging/taggable");
+                }
+            }
+        } else {
+            this.taggable = true;
+        }
+        this.unprocessedProperties.remove("taggable");
     }
 
     public static ResourceTypeSchema load(final JSONObject resourceDefinition) {

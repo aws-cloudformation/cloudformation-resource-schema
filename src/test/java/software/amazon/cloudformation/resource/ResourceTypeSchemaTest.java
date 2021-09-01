@@ -35,6 +35,10 @@ public class ResourceTypeSchemaTest {
     private static final String SCHEMA_WITH_ONEOF = "/valid-with-oneof-schema.json";
     private static final String SCHEMA_WITH_ANYOF = "/valid-with-anyof-schema.json";
     private static final String SCHEMA_WITH_ALLOF = "/valid-with-allof-schema.json";
+    private static final String SCHEMA_WITH_TAGGING = "/valid-with-tagging-schema.json";
+    private static final String INVALID_SCHEMA_WITH_UPDATE_TAGS = "/invalid-update-tagging-schema.json";
+    private static final String INVALID_SCHEMA_WITH_SYSTEM_TAGS = "/invalid-system-tags-schema.json";
+    private static final String INVALID_SCHEMA_WITH_TAGGABLE = "/invalid-taggable-schema.json";
     private static final String MINIMAL_SCHEMA_PATH = "/minimal-schema.json";
     private static final String MINIMAL_SCHEMA_WITH_TYPE_CONFIGURATION_PATH = "/minimal-schema-with-typeconfiguration.json";
     private static final String MINIMAL_SCHEMA_WITH_INVALID_TYPE_CONFIGURATION_PATH = "/minimal-schema-with-invalid-typeconfiguration.json";
@@ -364,4 +368,60 @@ public class ResourceTypeSchemaTest {
         assertThat(schema.getHandlerPermissions("list")).contains("test:permissionB");
     }
 
+    /**
+     * validate that tagging metadata are processed and can be retrieved programatically via the schema object
+     */
+
+    @Test
+    public void schemaWithTagging_withValidConfiguration() {
+        JSONObject resourceDefinition = loadJSON(SCHEMA_WITH_TAGGING);
+        ResourceTypeSchema schema = ResourceTypeSchema.load(resourceDefinition);
+
+        assertThat(schema.getTagging().get("taggable")).isEqualTo(true);
+        assertThat(schema.getTagging().get("tagOnCreate")).isEqualTo(true);
+        assertThat(schema.getTagging().get("tagUpdatable")).isEqualTo(false);
+        assertThat(schema.getTagging().get("CFNSystemTags")).isEqualTo(false);
+        assertThat(schema.definesProperty("propertyB")).isTrue();
+        assertThat(schema.getTagging().get("tagProperty")).asString().isEqualTo("/properties/propertyB");
+        assertThat(schema.getTagging().get("tagPropertyType")).isEqualTo("List");
+    }
+
+    /**
+     * validate that tagging metadata are processed and will throw exception
+     * when tagUpdatable is true but update handler is missing
+     */
+
+    @Test
+    public void schemaWithTagging_withInvalid_tagUpdatable_shouldThrow() {
+        JSONObject resourceDefinition = loadJSON(INVALID_SCHEMA_WITH_UPDATE_TAGS);
+
+        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> ResourceTypeSchema.load(resourceDefinition))
+            .withMessage("Invalid tagUpdatable value since update handler is missing");
+    }
+
+    /**
+     * validate that tagging metadata are processed and will throw exception
+     * when CFNSystemTags is false and taggable is true
+     */
+
+    @Test
+    public void schemaWithTagging_withInvalid_CFNSystemTags_shouldThrow() {
+        JSONObject resourceDefinition = loadJSON(INVALID_SCHEMA_WITH_SYSTEM_TAGS);
+
+        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> ResourceTypeSchema.load(resourceDefinition))
+            .withMessage("Invalid CFNSystemTags value since taggable is marked false");
+    }
+
+    /**
+     * validate that tagging metadata are processed and will throw exception
+     * when deprecated taggable and new taggable are different values
+     */
+
+    @Test
+    public void schemaWithTagging_withInvalid_taggable_shouldThrow() {
+        JSONObject resourceDefinition = loadJSON(INVALID_SCHEMA_WITH_TAGGABLE);
+
+        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> ResourceTypeSchema.load(resourceDefinition))
+            .withMessage("Conflicting taggable value");
+    }
 }
