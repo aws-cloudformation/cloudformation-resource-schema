@@ -1,20 +1,20 @@
 {
-  "typeName": "AWS::Test::TestModel",
-  "description": "A test schema for unit tests.",
-  "properties": {
-    "propertyA": {
-      "type": "boolean"
-    }
-  },
-  "primaryIdentifier": [
-    "/properties/propertyA"
-  ],
-  "replacementStrategy": "delete_then_create",
-  "tagging": {
-    "taggable": false,
-    "tagOnCreate": false,
-    "tagUpdatable": false,
-    "CFNSystemTags": true
-  },
-  "additionalProperties": false
+    "typeName": "AWS::Test::TestModel",
+    "description": "A test schema for unit tests.",
+    "properties": {
+        "propertyA": {
+            "type": "boolean"
+        }
+    },
+    "primaryIdentifier": [
+        "/properties/propertyA"
+    ],
+    "replacementStrategy": "delete_then_create",
+    "tagging": {
+        "taggable": false,
+        "tagOnCreate": false,
+        "tagUpdatable": false,
+        "CFNSystemTags": true
+    },
+    "additionalProperties": false
 }
