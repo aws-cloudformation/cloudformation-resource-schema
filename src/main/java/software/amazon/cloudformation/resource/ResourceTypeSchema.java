@@ -152,32 +152,16 @@ public class ResourceTypeSchema {
 
         this.unprocessedProperties.computeIfPresent("tagging", (k, v) -> {
             ((Map<?, ?>) v).forEach((key, value) -> {
-                if (!key.equals("tagProperty") && !key.equals("tagPropertyType")) {
+                if (key.equals("taggable") || key.equals("tagOnCreate") || key.equals("tagUpdatable")
+                    || key.equals("cloudFormationSystemTags")) {
                     this.tagging.put(key.toString(), Boolean.valueOf(value.toString()));
                 } else if (key.equals("tagProperty")) {
                     this.tagging.put(key.toString(), new JSONPointer(value.toString()));
                 } else {
-                    this.tagging.put(key.toString(), value.toString());
+                    throw new ValidationException("Unexpected tagging metadata attribute", "tagging", "#/tagging/" + key);
                 }
             });
-
-            if (this.tagging.containsKey("taggable") && this.tagging.containsKey("tagOnCreate")
-                && this.tagging.get("taggable").equals(false) && this.tagging.get("tagOnCreate").equals(true)) {
-                throw new ValidationException("Invalid tagOnCreate value since taggable is marked false", "tagging",
-                                              "#/tagging/tagOnCreate");
-            } else if (this.tagging.containsKey("taggable") && this.tagging.containsKey("tagUpdatable") &&
-                this.tagging.get("taggable").equals(false) && this.tagging.get("tagUpdatable").equals(true)) {
-                throw new ValidationException("Invalid tagUpdatable value since taggable is marked false", "tagging",
-                                              "#/tagging/tagUpdatable");
-            } else if (this.tagging.containsKey("taggable") && this.tagging.containsKey("CFNSystemTags") &&
-                this.tagging.get("taggable").equals(false) && this.tagging.get("CFNSystemTags").equals(true)) {
-                throw new ValidationException("Invalid CFNSystemTags value since taggable is marked false", "tagging",
-                                              "#/tagging/CFNSystemTags");
-            } else if (this.tagging.containsKey("tagUpdatable") && this.tagging.get("tagUpdatable").equals(true)
-                && !this.handlers.containsKey("update")) {
-                throw new ValidationException("Invalid tagUpdatable value since update handler is missing", "tagging",
-                                              "#/tagging/tagUpdatable");
-            }
+            validateTaggingMetadata();
             return null;
         });
 
@@ -187,19 +171,41 @@ public class ResourceTypeSchema {
                 this.tagging.put("taggable", this.taggable);
                 if (this.taggable) {
                     // default value to true when taggable to enforce tagging feature
-                    tagging.put("tagOnCreate", true);
-                    tagging.put("tagUpdatable", true);
-                    tagging.put("CFNSystemTags", true);
+                    tagging.put("tagOnCreate", tagging.getOrDefault("tagOnCreate", true));
+                    tagging.put("tagUpdatable", tagging.getOrDefault("tagUpdatable", true));
+                    tagging.put("cloudFormationSystemTags", tagging.getOrDefault("cloudFormationSystemTags", true));
                 }
             } else {
-                if (!this.tagging.get("taggable").equals(this.taggable)) {
-                    throw new ValidationException("Conflicting taggable value", "tagging", "#/tagging/taggable");
-                }
+                throw new ValidationException("More than one configuration found for taggable value." +
+                    " Please remove the deprecated taggable property.", "tagging", "#/tagging/taggable");
             }
         } else {
             this.taggable = true;
         }
         this.unprocessedProperties.remove("taggable");
+    }
+
+    private void validateTaggingMetadata() {
+        final boolean taggable_value = (boolean) this.tagging.getOrDefault("taggable", true);
+        final boolean tagOnCreate_value = (boolean) this.tagging.getOrDefault("tagOnCreate", taggable_value);
+        final boolean tagUpdatable_value = (boolean) this.tagging.getOrDefault("tagUpdatable", taggable_value);
+        final boolean systemTags_value = (boolean) this.tagging.getOrDefault("cloudFormationSystemTags", taggable_value);
+        if (!taggable_value && tagOnCreate_value) {
+            throw new ValidationException("Invalid tagOnCreate value since taggable is marked false", "tagging",
+                                          "#/tagging/tagOnCreate");
+        }
+        if (!taggable_value && tagUpdatable_value) {
+            throw new ValidationException("Invalid tagUpdatable value since taggable is marked false", "tagging",
+                                          "#/tagging/tagUpdatable");
+        }
+        if (!taggable_value && systemTags_value) {
+            throw new ValidationException("Invalid cloudFormationSystemTags value since taggable is marked false", "tagging",
+                                          "#/tagging/cloudFormationSystemTags");
+        }
+        if (tagUpdatable_value && !this.handlers.containsKey("update")) {
+            throw new ValidationException("Invalid tagUpdatable value since update handler is missing", "tagging",
+                                          "#/tagging/tagUpdatable");
+        }
     }
 
     public static ResourceTypeSchema load(final JSONObject resourceDefinition) {

@@ -14,7 +14,7 @@
         "taggable": false,
         "tagOnCreate": false,
         "tagUpdatable": false,
-        "CFNSystemTags": true
+        "cloudFormationSystemTags": true
     },
     "additionalProperties": false
 }

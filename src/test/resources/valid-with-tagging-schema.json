@@ -20,9 +20,8 @@
         "taggable": true,
         "tagOnCreate": true,
         "tagUpdatable": false,
-        "CFNSystemTags": false,
-        "tagProperty": "/properties/propertyB",
-        "tagPropertyType": "List"
+        "cloudFormationSystemTags": false,
+        "tagProperty": "/properties/propertyB"
     },
     "additionalProperties": false
 }

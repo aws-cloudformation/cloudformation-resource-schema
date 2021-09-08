@@ -380,10 +380,9 @@ public class ResourceTypeSchemaTest {
         assertThat(schema.getTagging().get("taggable")).isEqualTo(true);
         assertThat(schema.getTagging().get("tagOnCreate")).isEqualTo(true);
         assertThat(schema.getTagging().get("tagUpdatable")).isEqualTo(false);
-        assertThat(schema.getTagging().get("CFNSystemTags")).isEqualTo(false);
+        assertThat(schema.getTagging().get("cloudFormationSystemTags")).isEqualTo(false);
         assertThat(schema.definesProperty("propertyB")).isTrue();
         assertThat(schema.getTagging().get("tagProperty")).asString().isEqualTo("/properties/propertyB");
-        assertThat(schema.getTagging().get("tagPropertyType")).isEqualTo("List");
     }
 
     /**
@@ -401,15 +400,15 @@ public class ResourceTypeSchemaTest {
 
     /**
      * validate that tagging metadata are processed and will throw exception
-     * when CFNSystemTags is false and taggable is true
+     * when cloudFormationSystemTags is false and taggable is true
      */
 
     @Test
-    public void schemaWithTagging_withInvalid_CFNSystemTags_shouldThrow() {
+    public void schemaWithTagging_withInvalid_cloudFormationSystemTags_shouldThrow() {
         JSONObject resourceDefinition = loadJSON(INVALID_SCHEMA_WITH_SYSTEM_TAGS);
 
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> ResourceTypeSchema.load(resourceDefinition))
-            .withMessage("Invalid CFNSystemTags value since taggable is marked false");
+            .withMessage("Invalid cloudFormationSystemTags value since taggable is marked false");
     }
 
     /**
@@ -422,6 +421,7 @@ public class ResourceTypeSchemaTest {
         JSONObject resourceDefinition = loadJSON(INVALID_SCHEMA_WITH_TAGGABLE);
 
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> ResourceTypeSchema.load(resourceDefinition))
-            .withMessage("Conflicting taggable value");
+            .withMessage("More than one configuration found for taggable value. " +
+                "Please remove the deprecated taggable property.");
     }
 }
