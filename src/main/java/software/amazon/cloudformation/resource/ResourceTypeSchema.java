@@ -51,7 +51,9 @@ public class ResourceTypeSchema {
 
     private final String replacementStrategy;
     private final boolean taggable;
-    private final Map<String, Object> tagging = new HashMap<>();
+    private final ResourceTagging tagging = new ResourceTagging(true, true, true,
+                                                                true, new JSONPointer("/properties/Tags"));
+    private boolean hasConfiguredTagging = false;
     private final List<JSONPointer> createOnlyProperties = new ArrayList<>();
     private final List<JSONPointer> conditionalCreateOnlyProperties = new ArrayList<>();
     private final List<JSONPointer> deprecatedProperties = new ArrayList<>();
@@ -151,30 +153,35 @@ public class ResourceTypeSchema {
         });
 
         this.unprocessedProperties.computeIfPresent("tagging", (k, v) -> {
+            hasConfiguredTagging = true;
             ((Map<?, ?>) v).forEach((key, value) -> {
-                if (key.equals("taggable") || key.equals("tagOnCreate") || key.equals("tagUpdatable")
-                    || key.equals("cloudFormationSystemTags")) {
-                    this.tagging.put(key.toString(), Boolean.valueOf(value.toString()));
+                if (key.equals("taggable")) {
+                    this.tagging.setTaggable(Boolean.parseBoolean(value.toString()));
+                } else if (key.equals("tagOnCreate")) {
+                    this.tagging.setTagOnCreate(Boolean.parseBoolean(value.toString()));
+                } else if (key.equals("tagUpdatable")) {
+                    this.tagging.setTagUpdatable(Boolean.parseBoolean(value.toString()));
+                } else if (key.equals("cloudFormationSystemTags")) {
+                    this.tagging.setCloudFormationSystemTags(Boolean.parseBoolean(value.toString()));
                 } else if (key.equals("tagProperty")) {
-                    this.tagging.put(key.toString(), new JSONPointer(value.toString()));
+                    this.tagging.setTagProperty(new JSONPointer(value.toString()));
                 } else {
                     throw new ValidationException("Unexpected tagging metadata attribute", "tagging", "#/tagging/" + key);
                 }
             });
-            validateTaggingMetadata();
+            if (!this.tagging.isTaggable()) {
+                // reset other metadata values if resource is not taggable
+                this.tagging.resetTaggable(this.tagging.isTaggable());
+            }
+            tagging.validateTaggingMetadata(this.handlers.containsKey("update"), this.schema);
             return null;
         });
 
         if (this.unprocessedProperties.containsKey("taggable")) {
             this.taggable = Boolean.parseBoolean(this.unprocessedProperties.get("taggable").toString());
-            if (!this.tagging.containsKey("taggable")) {
-                this.tagging.put("taggable", this.taggable);
-                if (this.taggable) {
-                    // default value to true when taggable to enforce tagging feature
-                    tagging.put("tagOnCreate", tagging.getOrDefault("tagOnCreate", true));
-                    tagging.put("tagUpdatable", tagging.getOrDefault("tagUpdatable", true));
-                    tagging.put("cloudFormationSystemTags", tagging.getOrDefault("cloudFormationSystemTags", true));
-                }
+            if (!hasConfiguredTagging) {
+                // set tagging metadata based on deprecated taggable value
+                this.tagging.resetTaggable(this.taggable);
             } else {
                 throw new ValidationException("More than one configuration found for taggable value." +
                     " Please remove the deprecated taggable property.", "tagging", "#/tagging/taggable");
@@ -183,29 +190,6 @@ public class ResourceTypeSchema {
             this.taggable = true;
         }
         this.unprocessedProperties.remove("taggable");
-    }
-
-    private void validateTaggingMetadata() {
-        final boolean taggable_value = (boolean) this.tagging.getOrDefault("taggable", true);
-        final boolean tagOnCreate_value = (boolean) this.tagging.getOrDefault("tagOnCreate", taggable_value);
-        final boolean tagUpdatable_value = (boolean) this.tagging.getOrDefault("tagUpdatable", taggable_value);
-        final boolean systemTags_value = (boolean) this.tagging.getOrDefault("cloudFormationSystemTags", taggable_value);
-        if (!taggable_value && tagOnCreate_value) {
-            throw new ValidationException("Invalid tagOnCreate value since taggable is marked false", "tagging",
-                                          "#/tagging/tagOnCreate");
-        }
-        if (!taggable_value && tagUpdatable_value) {
-            throw new ValidationException("Invalid tagUpdatable value since taggable is marked false", "tagging",
-                                          "#/tagging/tagUpdatable");
-        }
-        if (!taggable_value && systemTags_value) {
-            throw new ValidationException("Invalid cloudFormationSystemTags value since taggable is marked false", "tagging",
-                                          "#/tagging/cloudFormationSystemTags");
-        }
-        if (tagUpdatable_value && !this.handlers.containsKey("update")) {
-            throw new ValidationException("Invalid tagUpdatable value since update handler is missing", "tagging",
-                                          "#/tagging/tagUpdatable");
-        }
     }
 
     public static ResourceTypeSchema load(final JSONObject resourceDefinition) {

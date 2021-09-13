@@ -37,7 +37,7 @@ public class ResourceTypeSchemaTest {
     private static final String SCHEMA_WITH_ALLOF = "/valid-with-allof-schema.json";
     private static final String SCHEMA_WITH_TAGGING = "/valid-with-tagging-schema.json";
     private static final String INVALID_SCHEMA_WITH_UPDATE_TAGS = "/invalid-update-tagging-schema.json";
-    private static final String INVALID_SCHEMA_WITH_SYSTEM_TAGS = "/invalid-system-tags-schema.json";
+    private static final String INVALID_SCHEMA_WITH_TAG_PROPERTY = "/invalid-tagProperty-schema.json";
     private static final String INVALID_SCHEMA_WITH_TAGGABLE = "/invalid-taggable-schema.json";
     private static final String MINIMAL_SCHEMA_PATH = "/minimal-schema.json";
     private static final String MINIMAL_SCHEMA_WITH_TYPE_CONFIGURATION_PATH = "/minimal-schema-with-typeconfiguration.json";
@@ -377,12 +377,12 @@ public class ResourceTypeSchemaTest {
         JSONObject resourceDefinition = loadJSON(SCHEMA_WITH_TAGGING);
         ResourceTypeSchema schema = ResourceTypeSchema.load(resourceDefinition);
 
-        assertThat(schema.getTagging().get("taggable")).isEqualTo(true);
-        assertThat(schema.getTagging().get("tagOnCreate")).isEqualTo(true);
-        assertThat(schema.getTagging().get("tagUpdatable")).isEqualTo(false);
-        assertThat(schema.getTagging().get("cloudFormationSystemTags")).isEqualTo(false);
+        assertThat(schema.getTagging().isTaggable()).isEqualTo(true);
+        assertThat(schema.getTagging().isTagOnCreate()).isEqualTo(true);
+        assertThat(schema.getTagging().isTagUpdatable()).isEqualTo(false);
+        assertThat(schema.getTagging().isCloudFormationSystemTags()).isEqualTo(false);
         assertThat(schema.definesProperty("propertyB")).isTrue();
-        assertThat(schema.getTagging().get("tagProperty")).asString().isEqualTo("/properties/propertyB");
+        assertThat(schema.getTagging().getTagProperty()).asString().isEqualTo("/properties/propertyB");
     }
 
     /**
@@ -400,15 +400,15 @@ public class ResourceTypeSchemaTest {
 
     /**
      * validate that tagging metadata are processed and will throw exception
-     * when cloudFormationSystemTags is false and taggable is true
+     * when tagProperty cannot be found
      */
 
     @Test
-    public void schemaWithTagging_withInvalid_cloudFormationSystemTags_shouldThrow() {
-        JSONObject resourceDefinition = loadJSON(INVALID_SCHEMA_WITH_SYSTEM_TAGS);
+    public void schemaWithTagging_withInvalid_tagProperty_shouldThrow() {
+        JSONObject resourceDefinition = loadJSON(INVALID_SCHEMA_WITH_TAG_PROPERTY);
 
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> ResourceTypeSchema.load(resourceDefinition))
-            .withMessage("Invalid cloudFormationSystemTags value since taggable is marked false");
+            .withMessage("Invalid tagProperty value since propertyB not found in schema");
     }
 
     /**

@@ -114,7 +114,7 @@
             "$ref": "base.definition.schema.v1.json#/definitions/httpsUrl"
         },
         "taggable": {
-            "description": "(deprecated) A boolean flag indicating whether this resource type supports tagging.",
+            "description": "(Deprecated, please use new metadata attribute tagging) A boolean flag indicating whether this resource type supports tagging.",
             "type": "boolean",
             "default": true
         },
