@@ -143,7 +143,8 @@
                 },
                 "tagProperty": {
                     "description": "A reference to the Tags property in the schema.",
-                    "$ref": "http://json-schema.org/draft-07/schema#/properties/$ref"
+                    "$ref": "http://json-schema.org/draft-07/schema#/properties/$ref",
+                    "default": "/properties/Tags"
                 }
             },
             "required": [
