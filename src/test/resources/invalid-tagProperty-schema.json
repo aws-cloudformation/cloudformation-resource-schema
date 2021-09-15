@@ -1,0 +1,21 @@
+{
+    "typeName": "AWS::Test::TestModel",
+    "description": "A test schema for unit tests.",
+    "properties": {
+        "propertyA": {
+            "type": "boolean"
+        }
+    },
+    "primaryIdentifier": [
+        "/properties/propertyA"
+    ],
+    "replacementStrategy": "delete_then_create",
+    "tagging": {
+        "taggable": true,
+        "tagOnCreate": false,
+        "tagUpdatable": false,
+        "cloudFormationSystemTags": true,
+        "tagProperty": "/properties/propertyB"
+    },
+    "additionalProperties": false
+}

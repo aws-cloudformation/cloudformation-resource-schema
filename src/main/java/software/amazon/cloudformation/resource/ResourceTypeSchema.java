@@ -51,6 +51,8 @@ public class ResourceTypeSchema {
 
     private final String replacementStrategy;
     private final boolean taggable;
+    private final ResourceTagging tagging = ResourceTagging.DEFAULT;
+    private boolean hasConfiguredTagging = false;
     private final List<JSONPointer> createOnlyProperties = new ArrayList<>();
     private final List<JSONPointer> conditionalCreateOnlyProperties = new ArrayList<>();
     private final List<JSONPointer> deprecatedProperties = new ArrayList<>();
@@ -91,11 +93,6 @@ public class ResourceTypeSchema {
             ? this.unprocessedProperties.get("replacementStrategy").toString()
             : "create_then_delete";
         this.unprocessedProperties.remove("replacementStrategy");
-
-        this.taggable = this.unprocessedProperties.containsKey("taggable")
-            ? Boolean.valueOf(this.unprocessedProperties.get("taggable").toString())
-            : true;
-        this.unprocessedProperties.remove("taggable");
 
         this.unprocessedProperties.computeIfPresent("conditionalCreateOnlyProperties", (k, v) -> {
             ((ArrayList<?>) v).forEach(p -> this.conditionalCreateOnlyProperties.add(new JSONPointer(p.toString())));
@@ -153,6 +150,45 @@ public class ResourceTypeSchema {
             });
             return null;
         });
+
+        this.unprocessedProperties.computeIfPresent("tagging", (k, v) -> {
+            hasConfiguredTagging = true;
+            ((Map<?, ?>) v).forEach((key, value) -> {
+                if (key.equals(ResourceTagging.TAGGABLE)) {
+                    this.tagging.setTaggable(Boolean.parseBoolean(value.toString()));
+                } else if (key.equals(ResourceTagging.TAG_ON_CREATE)) {
+                    this.tagging.setTagOnCreate(Boolean.parseBoolean(value.toString()));
+                } else if (key.equals(ResourceTagging.TAG_UPDATABLE)) {
+                    this.tagging.setTagUpdatable(Boolean.parseBoolean(value.toString()));
+                } else if (key.equals(ResourceTagging.CLOUDFORMATION_SYSTEM_TAGS)) {
+                    this.tagging.setCloudFormationSystemTags(Boolean.parseBoolean(value.toString()));
+                } else if (key.equals(ResourceTagging.TAG_PROPERTY)) {
+                    this.tagging.setTagProperty(new JSONPointer(value.toString()));
+                } else {
+                    throw new ValidationException("Unexpected tagging metadata attribute", "tagging", "#/tagging/" + key);
+                }
+            });
+            if (!this.tagging.isTaggable()) {
+                // reset other metadata values if resource is not taggable
+                this.tagging.resetTaggable(this.tagging.isTaggable());
+            }
+            tagging.validateTaggingMetadata(this.handlers.containsKey("update"), this.schema);
+            return null;
+        });
+
+        if (this.unprocessedProperties.containsKey("taggable")) {
+            this.taggable = Boolean.parseBoolean(this.unprocessedProperties.get("taggable").toString());
+            if (!hasConfiguredTagging) {
+                // set tagging metadata based on deprecated taggable value
+                this.tagging.resetTaggable(this.taggable);
+            } else {
+                throw new ValidationException("More than one configuration found for taggable value." +
+                    " Please remove the deprecated taggable property.", "tagging", "#/tagging/taggable");
+            }
+        } else {
+            this.taggable = true;
+        }
+        this.unprocessedProperties.remove("taggable");
     }
 
     public static ResourceTypeSchema load(final JSONObject resourceDefinition) {
