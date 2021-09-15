@@ -51,8 +51,7 @@ public class ResourceTypeSchema {
 
     private final String replacementStrategy;
     private final boolean taggable;
-    private final ResourceTagging tagging = new ResourceTagging(true, true, true,
-                                                                true, new JSONPointer("/properties/Tags"));
+    private final ResourceTagging tagging = ResourceTagging.DEFAULT;
     private boolean hasConfiguredTagging = false;
     private final List<JSONPointer> createOnlyProperties = new ArrayList<>();
     private final List<JSONPointer> conditionalCreateOnlyProperties = new ArrayList<>();
@@ -155,15 +154,15 @@ public class ResourceTypeSchema {
         this.unprocessedProperties.computeIfPresent("tagging", (k, v) -> {
             hasConfiguredTagging = true;
             ((Map<?, ?>) v).forEach((key, value) -> {
-                if (key.equals("taggable")) {
+                if (key.equals(ResourceTagging.TAGGABLE)) {
                     this.tagging.setTaggable(Boolean.parseBoolean(value.toString()));
-                } else if (key.equals("tagOnCreate")) {
+                } else if (key.equals(ResourceTagging.TAG_ON_CREATE)) {
                     this.tagging.setTagOnCreate(Boolean.parseBoolean(value.toString()));
-                } else if (key.equals("tagUpdatable")) {
+                } else if (key.equals(ResourceTagging.TAG_UPDATABLE)) {
                     this.tagging.setTagUpdatable(Boolean.parseBoolean(value.toString()));
-                } else if (key.equals("cloudFormationSystemTags")) {
+                } else if (key.equals(ResourceTagging.CLOUDFORMATION_SYSTEM_TAGS)) {
                     this.tagging.setCloudFormationSystemTags(Boolean.parseBoolean(value.toString()));
-                } else if (key.equals("tagProperty")) {
+                } else if (key.equals(ResourceTagging.TAG_PROPERTY)) {
                     this.tagging.setTagProperty(new JSONPointer(value.toString()));
                 } else {
                     throw new ValidationException("Unexpected tagging metadata attribute", "tagging", "#/tagging/" + key);

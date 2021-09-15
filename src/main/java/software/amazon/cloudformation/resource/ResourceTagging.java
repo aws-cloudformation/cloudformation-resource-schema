@@ -25,6 +25,14 @@ import software.amazon.cloudformation.resource.exceptions.ValidationException;
 @Data
 @AllArgsConstructor
 public class ResourceTagging {
+    public static final String TAGGABLE = "taggable";
+    public static final String TAG_ON_CREATE = "tagOnCreate";
+    public static final String TAG_UPDATABLE = "tagUpdatable";
+    public static final String CLOUDFORMATION_SYSTEM_TAGS = "cloudFormationSystemTags";
+    public static final String TAG_PROPERTY = "tagProperty";
+    public static final ResourceTagging DEFAULT = new ResourceTagging(true, true, true,
+                                                                      true, new JSONPointer("/properties/Tags"));
+
     private boolean taggable;
     private boolean tagOnCreate;
     private boolean tagUpdatable;
@@ -32,19 +40,19 @@ public class ResourceTagging {
     private JSONPointer tagProperty;
 
     public void resetTaggable(final boolean taggableValue) {
-        taggable = taggableValue;
-        tagOnCreate = taggableValue;
-        tagUpdatable = taggableValue;
-        cloudFormationSystemTags = taggableValue;
+        this.taggable = taggableValue;
+        this.tagOnCreate = taggableValue;
+        this.tagUpdatable = taggableValue;
+        this.cloudFormationSystemTags = taggableValue;
     }
 
     public void validateTaggingMetadata(final boolean containUpdateHandler, final Schema schema) {
-        if (tagUpdatable && !containUpdateHandler) {
+        if (this.tagUpdatable && !containUpdateHandler) {
             throw new ValidationException("Invalid tagUpdatable value since update handler is missing", "tagging",
                                           "#/tagging/tagUpdatable");
         }
-        final String propertyName = tagProperty.toString().substring(tagProperty.toString().lastIndexOf('/') + 1);
-        if (taggable && !schema.definesProperty(propertyName)) {
+        final String propertyName = this.tagProperty.toString().substring(this.tagProperty.toString().lastIndexOf('/') + 1);
+        if (this.taggable && !schema.definesProperty(propertyName)) {
             final String errorMessage = String.format("Invalid tagProperty value since %s not found in schema", propertyName);
             throw new ValidationException(errorMessage, "tagging", "#/tagging/tagProperty");
         }
