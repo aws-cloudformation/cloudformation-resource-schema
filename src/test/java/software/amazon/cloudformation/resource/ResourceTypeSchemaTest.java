@@ -101,7 +101,7 @@ public class ResourceTypeSchemaTest {
         final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
 
         Map<String, String> result = schema.getPropertyTransform();
-        assertThat(result).containsEntry("/properties/propertyB", "$count(propertyB) = 0 ? null : propertyB");
+        assertThat(result).containsEntry("/properties/propertyB", "if .propertyB | length == 0 then null else .propertyB end");
     }
 
     @Test

@@ -34,8 +34,8 @@
         }
     },
     "propertyTransform": {
-        "/properties/propertyA": "$join([$string(test), propertyA])",
-        "/properties/propertyB": "$count(propertyB) = 0 ? null : propertyB"
+        "/properties/propertyA": "\"test\" + .propertyA",
+        "/properties/propertyB": "if .propertyB | length == 0 then null else .propertyB end"
     },
     "required": [
         "propertyB"
