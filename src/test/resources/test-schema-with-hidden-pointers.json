@@ -1,0 +1,45 @@
+{
+    "typeName": "AWS::Test::TestModel",
+    "description": "A test schema with hidden paths for unit tests",
+    "sourceUrl": "https://mycorp.com/my-repo.git",
+    "definitions": {
+        "definition1": {
+            "type": "string"
+        }
+    },
+    "properties": {
+        "propertyA": {
+            "type": "string"
+        },
+        "propertyB": {
+            "type": "array",
+            "items": {
+                "type": "integer"
+            }
+        },
+        "propertyC": {
+            "type": "object",
+            "properties": {
+                "nestedProperty": {
+                    "type": "string"
+                },
+                "writeOnlyArray": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "nonPublicProperties": [
+        "/properties/propertyC/properties/nestedProperty",
+        "/properties/propertyA"
+    ],
+    "nonPublicDefinitions": [
+        "/definitions/definition1"
+    ],
+    "primaryIdentifier": [
+        "/properties/propertyA"
+    ],
+    "replacementStrategy": "create_then_delete",
+    "taggable": false,
+    "additionalProperties": false
+}

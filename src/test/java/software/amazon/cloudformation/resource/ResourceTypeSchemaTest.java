@@ -44,6 +44,8 @@ public class ResourceTypeSchemaTest {
     private static final String MINIMAL_SCHEMA_WITH_INVALID_TYPE_CONFIGURATION_PATH = "/minimal-schema-with-invalid-typeconfiguration.json";
     private static final String NO_ADDITIONAL_PROPERTIES_SCHEMA_PATH = "/no-additional-properties-schema.json";
     private static final String HANDLERS_SCHEMA_PATH = "/valid-with-handlers-schema.json";
+    private static final String SCHEMA_WITH_HIDDEN_PATHS = "/test-schema-with-hidden-pointers.json";
+    private static final String SCHEMA_WITH_HIDDEN_PATHS_INVALID = "/test-schema-with-invalid-hidden-pointers.json";
 
     @Test
     public void getProperties() {
@@ -366,6 +368,26 @@ public class ResourceTypeSchemaTest {
 
         assertThat(schema.hasHandler("list")).isTrue();
         assertThat(schema.getHandlerPermissions("list")).contains("test:permissionB");
+    }
+
+    /**
+     * Test loading the nonPublicProperties and nonPublicDefinitions
+     */
+    @Test
+    public void test_loadSchemaWithHiddenPaths() {
+        JSONObject resourceDefinition = loadJSON(SCHEMA_WITH_HIDDEN_PATHS);
+        ResourceTypeSchema.load(resourceDefinition);
+    }
+
+    /**
+     * Test loading an invalid schema with hidden paths in incorrect section
+     */
+    @Test
+    public void test_loadSchemaWithHiddenPaths_withInvalidHiddenPaths() {
+        JSONObject resourceDefinition = loadJSON(SCHEMA_WITH_HIDDEN_PATHS_INVALID);
+        assertThatExceptionOfType(ValidationException.class)
+            .isThrownBy(() -> ResourceTypeSchema.load(resourceDefinition))
+            .withMessageContaining("2 schema violations found"); // nonPublicProperties and definitions in properties section
     }
 
     /**
