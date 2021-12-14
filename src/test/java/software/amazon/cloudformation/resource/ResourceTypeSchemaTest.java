@@ -36,6 +36,7 @@ public class ResourceTypeSchemaTest {
     private static final String SCHEMA_WITH_ANYOF = "/valid-with-anyof-schema.json";
     private static final String SCHEMA_WITH_ALLOF = "/valid-with-allof-schema.json";
     private static final String SCHEMA_WITH_TAGGING = "/valid-with-tagging-schema.json";
+    private static final String SCHEMA_WITH_NON_TAGGABLE = "/valid-with-non-taggable-schema.json";
     private static final String INVALID_SCHEMA_WITH_UPDATE_TAGS = "/invalid-update-tagging-schema.json";
     private static final String INVALID_SCHEMA_WITH_TAG_PROPERTY = "/invalid-tagProperty-schema.json";
     private static final String INVALID_SCHEMA_WITH_TAGGABLE = "/invalid-taggable-schema.json";
@@ -445,5 +446,13 @@ public class ResourceTypeSchemaTest {
         assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> ResourceTypeSchema.load(resourceDefinition))
             .withMessage("More than one configuration found for taggable value. " +
                 "Please remove the deprecated taggable property.");
+    }
+
+    @Test
+    public void schemaWithTagging_with_taggabe_false() {
+        JSONObject resourceDefinition = loadJSON(SCHEMA_WITH_NON_TAGGABLE);
+        ResourceTypeSchema schema = ResourceTypeSchema.load(resourceDefinition);
+
+        assertThat(schema.getTagging().isTaggable()).isEqualTo(false);
     }
 }
