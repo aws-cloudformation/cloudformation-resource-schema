@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -266,8 +267,9 @@ public class ResourceTypeSchema {
                 if (refTokens.size() > 1) {
                     // use sublist to specify to point at the parent object
                     final JSONPointer parentObjectPointer = new JSONPointer(refTokens.subList(0, refTokens.size() - 1));
-                    final JSONObject parentObject = (JSONObject) parentObjectPointer.queryFrom(resourceModel);
-                    parentObject.remove(key);
+                    final Optional<JSONObject> parentObject = Optional.ofNullable(
+                        (JSONObject) parentObjectPointer.queryFrom(resourceModel));
+                    parentObject.ifPresent(jsonObject -> jsonObject.remove(key));
                 } else {
                     resourceModel.remove(key);
                 }
