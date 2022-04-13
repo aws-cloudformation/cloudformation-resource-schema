@@ -217,6 +217,27 @@ public class ResourceTypeSchemaTest {
     }
 
     @Test
+    public void removeWriteOnlyProperties_hasNestedWriteOnlyPropertyWithNullParent_shouldRemove() {
+        JSONObject o = loadJSON(TEST_SCHEMA_PATH);
+        ResourceTypeSchema schema = ResourceTypeSchema.load(o);
+        JSONObject resourceModel = o.getJSONObject("properties");
+
+        // remove parent element which contains writeOnlyProperty "/properties/propertyE/nestedProperty"
+        resourceModel.remove("propertyE");
+
+        schema.removeWriteOnlyProperties(resourceModel);
+
+        // check that model doesn't contain the writeOnly properties
+
+        assertThat(schema.getWriteOnlyPropertiesAsStrings().stream()
+            .anyMatch(writeOnlyProperty -> new PublicJSONPointer(writeOnlyProperty.replaceFirst("^/properties", ""))
+                .isInObject(resourceModel))).isFalse();
+
+        // ensure that other non writeOnlyProperty is not removed
+        assertThat(resourceModel.has("propertyB")).isTrue();
+    }
+
+    @Test
     public void removeWriteOnlyProperties_hasWriteOnlyProperties_shouldDoNothing() {
         JSONObject o = loadJSON(TEST_SCHEMA_WITH_EMPTY_WRITE_ONLY_PATH);
         ResourceTypeSchema schema = ResourceTypeSchema.load(o);
