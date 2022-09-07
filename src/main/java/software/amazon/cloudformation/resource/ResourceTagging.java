@@ -30,14 +30,21 @@ public class ResourceTagging {
     public static final String TAG_UPDATABLE = "tagUpdatable";
     public static final String CLOUDFORMATION_SYSTEM_TAGS = "cloudFormationSystemTags";
     public static final String TAG_PROPERTY = "tagProperty";
-    public static final ResourceTagging DEFAULT = new ResourceTagging(true, true, true,
-                                                                      true, new JSONPointer("/properties/Tags"));
+    public static final ResourceTagging DEFAULT = new ResourceTagging(true);
 
     private boolean taggable;
     private boolean tagOnCreate;
     private boolean tagUpdatable;
     private boolean cloudFormationSystemTags;
     private JSONPointer tagProperty;
+
+    public ResourceTagging(final boolean taggableValue) {
+        this.taggable = taggableValue;
+        this.tagOnCreate = taggableValue;
+        this.tagUpdatable = taggableValue;
+        this.cloudFormationSystemTags = taggableValue;
+        this.tagProperty = new JSONPointer("/properties/Tags");
+    }
 
     public void resetTaggable(final boolean taggableValue) {
         this.taggable = taggableValue;
