@@ -36,7 +36,28 @@ Certain properties of a resource are _semantic_ and have special meaning when us
 * **`createOnlyProperties`**: A property in the `createOnlyProperties` cannot be specified in an **UPDATE** request, and can only be specified in a **CREATE** request. Another way to think about this - these are properties which are 'write-once', such as the [`Engine`](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-rds-database-instance.html#cfn-rds-dbinstance-engine) property for an [`AWS::RDS::DBInstance`](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-rds-database-instance.html) and if you wish to change such a property on a live resource, you should replace that resource by creating a new instance of the resource and terminating the old one. This is the behaviour CloudFormation follows for all properties documented as _'Update Requires: Replacement'_. An attempt to supply these properties to an **UPDATE** request will produce a runtime error from the handler.
 * **`deprecatedProperties`**: A property in the `deprecatedProperties` is not guaranteed to be present in the response from a **READ** request. These fields will still be accepted as input to **CREATE** and **UPDATE** requests however they may be ignored, or converted to new API forms when outbound service calls are made.
 * **`replacementStrategy`**: As mentioned above, changing a `createOnlyProperty` requires replacement of the resource by creating a new one and deleting the old one. The default CloudFormation replacement behavior is to create a new resource first, then delete the old resource, so as to avoid any downtime. However, some resources are singleton resources, meaning that only one can exist at a time. In this case, it is not possible to create a second resource first, so CloudFormation must Delete first and then Create. Specify either `create_then_delete` or `delete_then_create`. Default value is `create_then_delete`
-* **`taggable`**: A boolean type property which defaults to true, indicating this resource type supports updatable [`tagging property`](https://docs.aws.amazon.com/general/latest/gr/aws_tagging.html). Otherwise, it indicates this resource type does not contain any updatable [`tagging properties`](https://docs.aws.amazon.com/general/latest/gr/aws_tagging.html).
+* **`taggable`**: [DEPRECATED] ~~A boolean type property which defaults to true, indicating this resource type supports updatable [`tagging property`](https://docs.aws.amazon.com/general/latest/gr/aws_tagging.html). Otherwise, it indicates this resource type does not contain any updatable [`tagging properties`](https://docs.aws.amazon.com/general/latest/gr/aws_tagging.html)~~.
+* **`tagging`**: An object type property that indicates whether this resource type supports [AWS tags](https://docs.aws.amazon.com/general/latest/gr/aws_tagging.html), tagging behavior, and what property is used to set tags:
+    * `taggable`: A boolean flag indicating whether the resource type supports tagging.
+    * `tagOnCreate`: A boolean flag indicating whether the resource type supports passing tags in the create API.
+    * `tagUpdatable`: A boolean flag indicating whether the resource type can the update resouce's tags using update handler.
+    * `cloudFormationSystemTags`: A boolean flag indicating whether the resource type create handler can apply `aws` prefixed tags, [CloudFormation system tags](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-resource-tags.html).
+    * `tagProperty`: A reference to the Tags property in the schema.
+    * Examples:
+        *   ```json
+            "tagging": {
+                "taggable": false
+            }
+            ```
+        *   ```json
+            "tagging": {
+                "taggable": true,
+                "tagOnCreate": true,
+                "tagUpdatable": true,
+                "cloudFormationSystemTags": true,
+                "tagProperty": "/properties/Tags"
+            }
+            ```
 * **`propertyTransform`**: Is a map (Map<String, String>) with the keys being property paths and values being jsonata transformation functions (https://jsonata.org/). This property is used to avoid falsely drifted resources. If the handler transforms the input to the resource to an expected value a transform function can be defined for this property to avoid drift.
 #### Application
 
@@ -177,7 +198,6 @@ Together with the `uniqueItems` property (which is native to JSON Schema), compl
 * **`properties` and `patternProperties`** it is not valid to use both properties and patternProperties together in the same shape, as a shape should not contain both defined and undefined values. In order to implement this, the set of undefined values should itself be a subshape.
 * **`items` and `additionalItems`** the `items` in an array may only have one schema and may not use a list of schemas, as an ordered tuple of different objects is confusing for both developers and customers. This should be expressed as key:value object pairs. Similarly, `additionalItems` is not allowed.
 * **`replacementStrategy`**: a `replacementStrategy` is not valid for a mutable resource that does not need replacement during an update.
-* **`taggable`**: marking a resource `taggable` as true requires an update handler to handle tagging update.
 
 ## handlers
 
