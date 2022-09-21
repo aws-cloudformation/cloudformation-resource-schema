@@ -40,7 +40,7 @@ Certain properties of a resource are _semantic_ and have special meaning when us
 * **`tagging`**: An object type property that indicates whether this resource type supports [AWS tags](https://docs.aws.amazon.com/general/latest/gr/aws_tagging.html), tagging behavior, and what property is used to set tags:
     * `taggable`: A boolean flag indicating whether the resource type supports tagging.
     * `tagOnCreate`: A boolean flag indicating whether the resource type supports passing tags in the create API.
-    * `tagUpdatable`: A boolean flag indicating whether the resource type can the update resouce's tags using update handler.
+    * `tagUpdatable`: A boolean flag indicating whether the resource type can modify resouce's tags using update handler.
     * `cloudFormationSystemTags`: A boolean flag indicating whether the resource type create handler can apply `aws` prefixed tags, [CloudFormation system tags](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-resource-tags.html).
     * `tagProperty`: A reference to the Tags property in the schema.
     * Examples:
