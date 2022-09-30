@@ -187,6 +187,9 @@ Together with the `uniqueItems` property (which is native to JSON Schema), compl
 | true           | true           | ordered set    |
 | false          | true           | set      |
 
+#### arrayType
+
+`arrayType` is used to specify the type of array and is only applicable for properties of type array. When  set to `AttributeList`, it indicates that the array is of nested type objects, and when set to `Standard` it indicates that the array consists of primitive types. The default for `arrayType` is `Standard`.
 
 ### Constraints
 

@@ -8,6 +8,7 @@
         },
         "propertyB": {
             "type": "array",
+            "arrayType": "AttributeList",
             "items": {
                 "type": "integer"
             }
