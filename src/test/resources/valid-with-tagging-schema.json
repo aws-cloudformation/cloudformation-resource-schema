@@ -9,6 +9,7 @@
             "description": "A list of tags to apply to the resource.",
             "type": "array",
             "uniqueItems": true,
+            "arrayType": "Standard",
             "insertionOrder": false
         }
     },

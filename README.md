@@ -187,6 +187,11 @@ Together with the `uniqueItems` property (which is native to JSON Schema), compl
 | true           | true           | ordered set    |
 | false          | true           | set      |
 
+#### arrayType
+
+`arrayType` is used to specify the type of array and is only applicable for properties of type array. When set to `AttributeList`, it indicates that the array is used to represent a list of additional properties, and when set to `Standard` it indicates that the array consists of a list of values. The default for `arrayType` is `Standard`. 
+For example, 'Standard' would be used for an array of Arn values, where the addition of the values themselves has significance. 
+An example of using 'AttributeList' would be for a list of optional, and often defaulted, values that can be specified. For example, 'AttributeList' would be used for an array of TargetGroupAttributes for ELB where addition of the default values has no significance.
 
 ### Constraints
 
