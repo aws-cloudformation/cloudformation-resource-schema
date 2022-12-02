@@ -31,5 +31,6 @@ public interface SchemaValidator {
      * @throws ValidationException Thrown for any schema validation errors
      */
     void validateObject(JSONObject modelObject, JSONObject schemaObject) throws ValidationException;
+    void validateObjectByListHandlerSchema(JSONObject modelObject, JSONObject schemaObject) throws ValidationException;
 
 }

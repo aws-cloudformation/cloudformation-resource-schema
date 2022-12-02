@@ -49,6 +49,8 @@ public class ResourceTypeSchema {
     private final String documentationUrl;
     private final String typeName;
     private final String schemaUrl; // $schema
+    @Getter(AccessLevel.NONE)
+    private JSONObject schemaDefinition = null;
 
     private final String replacementStrategy;
     private final boolean taggable;
@@ -67,7 +69,6 @@ public class ResourceTypeSchema {
     private final Schema schema;
 
     public ResourceTypeSchema(Schema schema) {
-
         this.schema = schema;
         schema.getUnprocessedProperties().forEach(this.unprocessedProperties::put);
 
@@ -199,7 +200,6 @@ public class ResourceTypeSchema {
     }
 
     public static ResourceTypeSchema load(final JSONObject resourceDefinition) {
-
         Schema schema = VALIDATOR.loadResourceDefinitionSchema(resourceDefinition);
         return new ResourceTypeSchema(schema);
     }
@@ -207,6 +207,7 @@ public class ResourceTypeSchema {
     public String getDescription() {
         return schema.getDescription();
     }
+
 
     public List<String> getConditionalCreateOnlyPropertiesAsStrings() throws ValidationException {
         return this.conditionalCreateOnlyProperties.stream().map(JSONPointer::toString).collect(Collectors.toList());
