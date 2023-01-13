@@ -142,7 +142,7 @@ class BaseValidator implements SchemaValidator {
 
         if (schemaObject.has(SOURCE_URL)) {
             final String sourceUrl = schemaObject.getString(SOURCE_URL);
-            final String schema_file = schemaObject.getString(TYPE_NAME).toLowerCase().replace("::", "-") + ".json";
+            final String schema_file = "resource-schema.json";
             schemaLoader.registerSchemaByURI(newURI(sourceUrl + "/" + schema_file), schemaObject)
                     .resolutionScope(newURI(sourceUrl + "/"));
         }

@@ -28,7 +28,7 @@
       "handlerSchema": {
         "properties": {
           "Person": {
-            "$ref": "aws-test-resource.json#/properties/Person"
+            "$ref": "resource-schema.json#/properties/Person"
           },
           "Human": {
             "type": "object",
