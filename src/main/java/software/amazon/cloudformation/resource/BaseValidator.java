@@ -82,7 +82,7 @@ class BaseValidator implements SchemaValidator {
     }
 
     @Override
-    public void validateObjectByListHandlerSchema(final JSONObject modelObject, final JSONObject definitionSchemaObject)
+    public Schema getListHandlerSchema(final JSONObject definitionSchemaObject )
             throws ValidationException {
         final JSONObject handlers = definitionSchemaObject.has("handlers")
                 ? definitionSchemaObject.getJSONObject("handlers")
@@ -92,10 +92,16 @@ class BaseValidator implements SchemaValidator {
         emptySchema.put("additionalProperties", true);
 
         final JSONObject schemaOverride = list.has("handlerSchema") ? list.getJSONObject("handlerSchema") : emptySchema;
-
         final SchemaLoaderBuilder loader = getSchemaLoader(definitionSchemaObject, schemaOverride);
 
         final Schema schema = loader.build().load().build();
+        return schema;
+    }
+
+    @Override
+    public void validateObjectByListHandlerSchema(final JSONObject modelObject, final JSONObject definitionSchemaObject)
+            throws ValidationException {
+        final Schema schema = getListHandlerSchema(definitionSchemaObject);
         schema.validate(modelObject); // throws a ValidationException if this object is invalid
     }
 
