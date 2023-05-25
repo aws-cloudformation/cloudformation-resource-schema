@@ -14,8 +14,8 @@
 */
 package software.amazon.cloudformation.resource;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -41,7 +41,7 @@ public class ResourceTagging {
     private boolean tagUpdatable;
     private boolean cloudFormationSystemTags;
     private JSONPointer tagProperty;
-    private Set<String> tagPermissions;
+    private List<String> tagPermissions;
 
     public ResourceTagging(final boolean taggableValue) {
         this.taggable = taggableValue;
@@ -49,7 +49,7 @@ public class ResourceTagging {
         this.tagUpdatable = taggableValue;
         this.cloudFormationSystemTags = taggableValue;
         this.tagProperty = new JSONPointer("/properties/Tags");
-        this.tagPermissions = new HashSet<>();
+        this.tagPermissions = new ArrayList<>();
     }
 
     public void resetTaggable(final boolean taggableValue) {

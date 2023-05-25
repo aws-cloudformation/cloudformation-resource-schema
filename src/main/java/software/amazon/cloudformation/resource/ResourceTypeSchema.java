@@ -167,7 +167,7 @@ public class ResourceTypeSchema {
                 } else if (key.equals(ResourceTagging.TAG_PROPERTY)) {
                     taggingValue.setTagProperty(new JSONPointer(value.toString()));
                 } else if (key.equals(ResourceTagging.TAG_PERMISSIONS)) {
-                    HashSet<String> tagPermissions = new HashSet<>();
+                    List<String> tagPermissions = new ArrayList<>();
                     ((List<?>) value).forEach(p -> tagPermissions.add(p.toString()));
                     taggingValue.setTagPermissions(tagPermissions);
                 } else {
