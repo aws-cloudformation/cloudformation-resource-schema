@@ -166,6 +166,10 @@ public class ResourceTypeSchema {
                     taggingValue.setCloudFormationSystemTags(Boolean.parseBoolean(value.toString()));
                 } else if (key.equals(ResourceTagging.TAG_PROPERTY)) {
                     taggingValue.setTagProperty(new JSONPointer(value.toString()));
+                } else if (key.equals(ResourceTagging.TAG_PERMISSIONS)) {
+                    HashSet<String> tagPermissions = new HashSet<>();
+                    ((List<?>) value).forEach(p -> tagPermissions.add(p.toString()));
+                    taggingValue.setTagPermissions(tagPermissions);
                 } else {
                     throw new ValidationException("Unexpected tagging metadata attribute", "tagging", "#/tagging/" + key);
                 }

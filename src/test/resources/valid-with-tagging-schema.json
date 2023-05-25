@@ -22,7 +22,10 @@
         "tagOnCreate": true,
         "tagUpdatable": false,
         "cloudFormationSystemTags": false,
-        "tagProperty": "/properties/propertyB"
+        "tagProperty": "/properties/propertyB",
+        "permissions": [
+            "test:permission"
+        ]
     },
     "additionalProperties": false
 }

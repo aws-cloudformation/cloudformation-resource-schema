@@ -16,6 +16,8 @@ package software.amazon.cloudformation.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.HashSet;
+
 import org.everit.json.schema.JSONPointer;
 import org.junit.jupiter.api.Test;
 
@@ -24,7 +26,7 @@ public class ResourceTaggingTest {
     public void testResetTaggable() {
 
         final ResourceTagging resourceTagging = new ResourceTagging(true, true, true,
-                                                                    true, new JSONPointer("/properties/tags"));
+                                                                    true, new JSONPointer("/properties/tags"), new HashSet<>());
         resourceTagging.resetTaggable(false);
 
         assertThat(resourceTagging.isTaggable()).isEqualTo(false);
@@ -32,5 +34,6 @@ public class ResourceTaggingTest {
         assertThat(resourceTagging.isTagUpdatable()).isEqualTo(false);
         assertThat(resourceTagging.isCloudFormationSystemTags()).isEqualTo(false);
         assertThat(resourceTagging.getTagProperty().toString()).isEqualTo("/properties/tags");
+        assertThat(resourceTagging.getTagPermissions().isEmpty());
     }
 }
