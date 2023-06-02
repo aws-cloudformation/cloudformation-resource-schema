@@ -427,6 +427,7 @@ public class ResourceTypeSchemaTest {
         assertThat(schema.getTagging().isCloudFormationSystemTags()).isEqualTo(false);
         assertThat(schema.definesProperty("propertyB")).isTrue();
         assertThat(schema.getTagging().getTagProperty()).asString().isEqualTo("/properties/propertyB");
+        assertThat(schema.getTagging().getTagPermissions()).contains("test:permission");
     }
 
     /**
