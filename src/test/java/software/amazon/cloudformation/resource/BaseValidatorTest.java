@@ -62,24 +62,23 @@ public class BaseValidatorTest {
         assertThatExceptionOfType(URISyntaxException.class).isThrownBy(() -> BaseValidator.newURI(uriString));
     }
 
-
     @Test
     public void validateObject_validObject_shouldPassHandlerSchemaValidation() {
         final JSONObject object = new JSONObject().put("Person", new JSONObject().put("Name", "Jon")).put("Human",
-                new JSONObject().put("LastName", "Snow"));
+            new JSONObject().put("LastName", "Snow"));
 
         baseValidator.validateObjectByListHandlerSchema(object,
-                new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_RESOURCE_SCHEMA_WITH_OVERRIDE_PATH))));
+            new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_RESOURCE_SCHEMA_WITH_OVERRIDE_PATH))));
     }
 
     @Test
     public void validateObject_validObject_shouldNotPassHandlerSchemaValidation() {
         final JSONObject object = new JSONObject().put("Person", new JSONObject().put("Name", "Jon")).put("Human",
-                new JSONObject().put("LastName", "Snow").put("LastName2", "Stark"));
+            new JSONObject().put("LastName", "Snow").put("LastName2", "Stark"));
         final org.everit.json.schema.ValidationException e = catchThrowableOfType(
-                () -> baseValidator.validateObjectByListHandlerSchema(object,
-                        new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_RESOURCE_SCHEMA_WITH_OVERRIDE_PATH)))),
-                org.everit.json.schema.ValidationException.class);
+            () -> baseValidator.validateObjectByListHandlerSchema(object,
+                new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_RESOURCE_SCHEMA_WITH_OVERRIDE_PATH)))),
+            org.everit.json.schema.ValidationException.class);
         assertThat(e.getMessage()).isEqualTo("#/Human: extraneous key [LastName2] is not permitted");
     }
 
@@ -87,7 +86,7 @@ public class BaseValidatorTest {
     public void validateObject_validObject_shouldPassHandlerSchemaValidationEmptySchema() {
         final JSONObject object = new JSONObject().put("Person", new JSONObject().put("Name", "Jon"));
         baseValidator.validateObjectByListHandlerSchema(object,
-                new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_MINIMAL_SCHEMA_PATH))));
+            new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_MINIMAL_SCHEMA_PATH))));
     }
 
     /**

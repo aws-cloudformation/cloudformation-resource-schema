@@ -208,7 +208,6 @@ public class ResourceTypeSchema {
         return schema.getDescription();
     }
 
-
     public List<String> getConditionalCreateOnlyPropertiesAsStrings() throws ValidationException {
         return this.conditionalCreateOnlyProperties.stream().map(JSONPointer::toString).collect(Collectors.toList());
     }

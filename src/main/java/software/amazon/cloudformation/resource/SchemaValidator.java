@@ -14,10 +14,10 @@
 */
 package software.amazon.cloudformation.resource;
 
+import org.everit.json.schema.Schema;
 import org.json.JSONObject;
 
 import software.amazon.cloudformation.resource.exceptions.ValidationException;
-import org.everit.json.schema.Schema;
 
 public interface SchemaValidator {
 
@@ -32,7 +32,9 @@ public interface SchemaValidator {
      * @throws ValidationException Thrown for any schema validation errors
      */
     void validateObject(JSONObject modelObject, JSONObject schemaObject) throws ValidationException;
+
     void validateObjectByListHandlerSchema(JSONObject modelObject, JSONObject schemaObject) throws ValidationException;
+
     Schema getListHandlerSchema(JSONObject definitionSchemaObject) throws ValidationException;
 
 }

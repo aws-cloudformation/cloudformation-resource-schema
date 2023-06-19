@@ -37,7 +37,7 @@ public class ValidationException extends RuntimeException {
         "minItems", "maxItems", "uniqueItems", "contains",
         // misc keywords
         "type", "allOf", "anyOf", "oneOf");
-
+    @SuppressWarnings({"serial"})
     private final List<ValidationException> causingExceptions;
     private final String keyword;
     private final String schemaPointer;

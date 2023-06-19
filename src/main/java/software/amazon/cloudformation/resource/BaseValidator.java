@@ -82,11 +82,11 @@ class BaseValidator implements SchemaValidator {
     }
 
     @Override
-    public Schema getListHandlerSchema(final JSONObject definitionSchemaObject )
-            throws ValidationException {
+    public Schema getListHandlerSchema(final JSONObject definitionSchemaObject)
+        throws ValidationException {
         final JSONObject handlers = definitionSchemaObject.has("handlers")
-                ? definitionSchemaObject.getJSONObject("handlers")
-                : new JSONObject(); // MUST always exist
+            ? definitionSchemaObject.getJSONObject("handlers")
+            : new JSONObject(); // MUST always exist
         final JSONObject list = handlers.has("list") ? handlers.getJSONObject("list") : new JSONObject(); //
         final JSONObject emptySchema = new JSONObject();
         emptySchema.put("additionalProperties", true);
@@ -100,7 +100,7 @@ class BaseValidator implements SchemaValidator {
 
     @Override
     public void validateObjectByListHandlerSchema(final JSONObject modelObject, final JSONObject definitionSchemaObject)
-            throws ValidationException {
+        throws ValidationException {
         final Schema schema = getListHandlerSchema(definitionSchemaObject);
         schema.validate(modelObject); // throws a ValidationException if this object is invalid
     }
@@ -150,7 +150,7 @@ class BaseValidator implements SchemaValidator {
             final String sourceUrl = schemaObject.getString(SOURCE_URL);
             final String schema_file = "resource-schema.json";
             schemaLoader.registerSchemaByURI(newURI(sourceUrl + "/" + schema_file), schemaObject)
-                    .resolutionScope(newURI(sourceUrl + "/"));
+                .resolutionScope(newURI(sourceUrl + "/"));
         }
         return schemaLoader.schemaJson(handlerSchema);
     }
