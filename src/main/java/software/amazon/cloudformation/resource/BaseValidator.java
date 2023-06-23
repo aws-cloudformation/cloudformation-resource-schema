@@ -31,6 +31,8 @@ import software.amazon.cloudformation.resource.exceptions.ValidationException;
 
 class BaseValidator implements SchemaValidator {
     protected static final String ID_KEY = "$id";
+    protected static final String SOURCE_URL = "sourceUrl";
+    protected static final String TYPE_NAME = "typeName";
     protected static final URI JSON_SCHEMA_URI_HTTP = newURI("http://json-schema.org/draft-07/schema");
     protected static final String JSON_SCHEMA_PATH = "/schema/schema";
     protected static final String BASE_DEFINITION_SCHEMA_PATH = "/schema/base.definition.schema.v1.json";
@@ -79,6 +81,30 @@ class BaseValidator implements SchemaValidator {
         }
     }
 
+    @Override
+    public Schema getListHandlerSchema(final JSONObject definitionSchemaObject)
+        throws ValidationException {
+        final JSONObject handlers = definitionSchemaObject.has("handlers")
+            ? definitionSchemaObject.getJSONObject("handlers")
+            : new JSONObject(); // MUST always exist
+        final JSONObject list = handlers.has("list") ? handlers.getJSONObject("list") : new JSONObject(); //
+        final JSONObject emptySchema = new JSONObject();
+        emptySchema.put("additionalProperties", true);
+
+        final JSONObject schemaOverride = list.has("handlerSchema") ? list.getJSONObject("handlerSchema") : emptySchema;
+        final SchemaLoaderBuilder loader = getSchemaLoader(definitionSchemaObject, schemaOverride);
+
+        final Schema schema = loader.build().load().build();
+        return schema;
+    }
+
+    @Override
+    public void validateObjectByListHandlerSchema(final JSONObject modelObject, final JSONObject definitionSchemaObject)
+        throws ValidationException {
+        final Schema schema = getListHandlerSchema(definitionSchemaObject);
+        schema.validate(modelObject); // throws a ValidationException if this object is invalid
+    }
+
     /**
      * Register a meta-schema with the SchemaLoaderBuilder. The meta-schema $id is used to generate schema URI
      * This has the effect of caching the meta-schema. When SchemaLoaderBuilder is used to build the Schema object,
@@ -115,6 +141,18 @@ class BaseValidator implements SchemaValidator {
      */
     SchemaLoaderBuilder getSchemaLoader(JSONObject schemaObject) {
         return getSchemaLoader().schemaJson(schemaObject);
+    }
+
+    SchemaLoaderBuilder getSchemaLoader(JSONObject schemaObject, JSONObject handlerSchema) {
+        SchemaLoaderBuilder schemaLoader = getSchemaLoader();
+
+        if (schemaObject.has(SOURCE_URL)) {
+            final String sourceUrl = schemaObject.getString(SOURCE_URL);
+            final String schema_file = "resource-schema.json";
+            schemaLoader.registerSchemaByURI(newURI(sourceUrl + "/" + schema_file), schemaObject)
+                .resolutionScope(newURI(sourceUrl + "/"));
+        }
+        return schemaLoader.schemaJson(handlerSchema);
     }
 
     /** get schema-builder preloaded with JSON draft V7 meta-schema */

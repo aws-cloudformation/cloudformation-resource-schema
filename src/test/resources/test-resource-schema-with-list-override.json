@@ -1,0 +1,58 @@
+{
+    "typeName": "AWS::TEST::RESOURCE",
+    "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-test",
+    "definitions": {
+        "PersonalInfo": {
+            "type": "object",
+            "properties": {
+                "Name": {
+                    "type": "string"
+                },
+                "LastName": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "Name"
+            ],
+            "additionalProperties": false
+        }
+    },
+    "properties": {
+        "ID": {
+            "type": "string"
+        },
+        "Person": {
+            "$ref": "#/definitions/PersonalInfo"
+        },
+        "Human": {
+            "$ref": "#/definitions/PersonalInfo"
+        }
+    },
+    "handlers": {
+        "list": {
+            "handlerSchema": {
+                "properties": {
+                    "Person": {
+                        "$ref": "resource-schema.json#/properties/Person"
+                    },
+                    "Human": {
+                        "type": "object",
+                        "properties": {
+                            "LastName": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "LastName"
+                        ],
+                        "additionalProperties": false
+                    }
+                }
+            },
+            "permissions": [
+                "..."
+            ]
+        }
+    }
+}

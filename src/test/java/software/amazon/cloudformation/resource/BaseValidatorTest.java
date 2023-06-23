@@ -39,6 +39,8 @@ public class BaseValidatorTest {
 
     private static final String RESOURCE_DEFINITION_SCHEMA_PATH = "/schema/provider.definition.schema.v1.json";
     private static final String TEST_SCHEMA_PATH = "/test-schema.json";
+    private static final String TEST_MINIMAL_SCHEMA_PATH = "/minimal-schema.json";
+    private static final String TEST_RESOURCE_SCHEMA_WITH_OVERRIDE_PATH = "/test-resource-schema-with-list-override.json";
     private static final String TEST_VALUE_SCHEMA_PATH = "/scrubbed-values-schema.json";
 
     private BaseValidator baseValidator;
@@ -58,6 +60,33 @@ public class BaseValidatorTest {
     public void testNewURI_IncorrectSyntax_ShouldThrow() {
         final String uriString = "json-schema.org/draft-07?schema/q/h?s=^IXIC";
         assertThatExceptionOfType(URISyntaxException.class).isThrownBy(() -> BaseValidator.newURI(uriString));
+    }
+
+    @Test
+    public void validateObject_validObject_shouldPassHandlerSchemaValidation() {
+        final JSONObject object = new JSONObject().put("Person", new JSONObject().put("Name", "Jon")).put("Human",
+            new JSONObject().put("LastName", "Snow"));
+
+        baseValidator.validateObjectByListHandlerSchema(object,
+            new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_RESOURCE_SCHEMA_WITH_OVERRIDE_PATH))));
+    }
+
+    @Test
+    public void validateObject_validObject_shouldNotPassHandlerSchemaValidation() {
+        final JSONObject object = new JSONObject().put("Person", new JSONObject().put("Name", "Jon")).put("Human",
+            new JSONObject().put("LastName", "Snow").put("LastName2", "Stark"));
+        final org.everit.json.schema.ValidationException e = catchThrowableOfType(
+            () -> baseValidator.validateObjectByListHandlerSchema(object,
+                new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_RESOURCE_SCHEMA_WITH_OVERRIDE_PATH)))),
+            org.everit.json.schema.ValidationException.class);
+        assertThat(e.getMessage()).isEqualTo("#/Human: extraneous key [LastName2] is not permitted");
+    }
+
+    @Test
+    public void validateObject_validObject_shouldPassHandlerSchemaValidationEmptySchema() {
+        final JSONObject object = new JSONObject().put("Person", new JSONObject().put("Name", "Jon"));
+        baseValidator.validateObjectByListHandlerSchema(object,
+            new JSONObject(new JSONTokener(this.getClass().getResourceAsStream(TEST_MINIMAL_SCHEMA_PATH))));
     }
 
     /**
