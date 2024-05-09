@@ -1,61 +1,61 @@
 {
-  "typeName": "AWS::Test::TestModel",
-  "description": "A test schema for unit tests.",
-  "definitions": {
-    "propertyC": {
-      "type": "object",
-      "properties":{
-        "Tags": {
-          "description": "An array of arbitrary tags (key-value pairs) to associate with the stage.",
-          "type": "array",
-          "uniqueItems": false,
-          "insertionOrder": false,
-          "items": {
-            "$ref": "#/definitions/Tag"
-          }
-        }
-      }
-    },
-    "Tag": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "Key": {
-          "description": "The key name of the tag",
-          "type": "string"
+    "typeName": "AWS::Test::TestModel",
+    "description": "A test schema for unit tests.",
+    "definitions": {
+        "propertyC": {
+            "type": "object",
+            "properties": {
+                "Tags": {
+                    "description": "An array of arbitrary tags (key-value pairs) to associate with the stage.",
+                    "type": "array",
+                    "uniqueItems": false,
+                    "insertionOrder": false,
+                    "items": {
+                        "$ref": "#/definitions/Tag"
+                    }
+                }
+            }
         },
-        "Value": {
-          "description": "The value for the tag",
-          "type": "string"
+        "Tag": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "Key": {
+                    "description": "The key name of the tag",
+                    "type": "string"
+                },
+                "Value": {
+                    "description": "The value for the tag",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "Value",
+                "Key"
+            ]
         }
-      },
-      "required": [
-        "Value",
-        "Key"
-      ]
-    }
-  },
-  "properties": {
-    "propertyA": {
-      "type": "boolean"
     },
-    "propertyC": {
-      "$ref": "#/definitions/propertyC"
-    }
-  },
-  "primaryIdentifier": [
-    "/properties/propertyA"
-  ],
-  "replacementStrategy": "delete_then_create",
-  "tagging": {
-    "taggable": true,
-    "tagOnCreate": true,
-    "tagUpdatable": false,
-    "cloudFormationSystemTags": false,
-    "tagProperty": "/properties/propertyC/Tags",
-    "permissions": [
-      "test:permission"
-    ]
-  },
-  "additionalProperties": false
+    "properties": {
+        "propertyA": {
+            "type": "boolean"
+        },
+        "propertyC": {
+            "$ref": "#/definitions/propertyC"
+        }
+    },
+    "primaryIdentifier": [
+        "/properties/propertyA"
+    ],
+    "replacementStrategy": "delete_then_create",
+    "tagging": {
+        "taggable": true,
+        "tagOnCreate": true,
+        "tagUpdatable": false,
+        "cloudFormationSystemTags": false,
+        "tagProperty": "/properties/propertyC/Tags",
+        "permissions": [
+            "test:permission"
+        ]
+    },
+    "additionalProperties": false
 }
