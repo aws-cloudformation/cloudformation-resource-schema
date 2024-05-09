@@ -36,6 +36,14 @@ public class ResourceTypeSchemaTest {
     private static final String SCHEMA_WITH_ANYOF = "/valid-with-anyof-schema.json";
     private static final String SCHEMA_WITH_ALLOF = "/valid-with-allof-schema.json";
     private static final String SCHEMA_WITH_TAGGING = "/valid-with-tagging-schema.json";
+    private static final String SCHEMA_WITH_TAGGING_NESTED_PROPERTY = "/valid-with-tagging-nested-property-schema.json";
+
+    private static final String SCHEMA_WITH_TAGGING_MISSING_PROPERTY = "/valid-with-tagging-missing-tagProperty-schema.json";
+
+    private static final String SCHEMA_WITH_INVALID_TAGGING_BAD_POINTER = "/invalid-with-tagging-bad-pointer-schema.json";
+
+    private static final String SCHEMA_WITH_INVALID_TAGGING_BAD_REFERENCE = "/invalid-with-tagging-bad-reference-schema.json";
+
     private static final String SCHEMA_WITH_NON_TAGGABLE = "/valid-with-non-taggable-schema.json";
     private static final String INVALID_SCHEMA_WITH_UPDATE_TAGS = "/invalid-update-tagging-schema.json";
     private static final String INVALID_SCHEMA_WITH_TAG_PROPERTY = "/invalid-tagProperty-schema.json";
@@ -428,6 +436,46 @@ public class ResourceTypeSchemaTest {
         assertThat(schema.definesProperty("propertyB")).isTrue();
         assertThat(schema.getTagging().getTagProperty()).asString().isEqualTo("/properties/propertyB");
         assertThat(schema.getTagging().getTagPermissions()).contains("test:permission");
+    }
+
+    @Test
+    public void schemaWithTaggingNestedTagProperty_withValidConfiguration() {
+        JSONObject resourceDefinition = loadJSON(SCHEMA_WITH_TAGGING_NESTED_PROPERTY);
+        ResourceTypeSchema schema = ResourceTypeSchema.load(resourceDefinition);
+
+        assertThat(schema.getTagging().isTaggable()).isEqualTo(true);
+        assertThat(schema.getTagging().isTagOnCreate()).isEqualTo(true);
+        assertThat(schema.getTagging().isTagUpdatable()).isEqualTo(false);
+        assertThat(schema.getTagging().isCloudFormationSystemTags()).isEqualTo(false);
+        assertThat(schema.getTagging().getTagProperty()).asString().isEqualTo("/properties/propertyC/Tags");
+        assertThat(schema.getTagging().getTagPermissions()).contains("test:permission");
+    }
+
+    @Test
+    public void schemaWithTaggingMissingTagProperty_withValidConfiguration() {
+        JSONObject resourceDefinition = loadJSON(SCHEMA_WITH_TAGGING_MISSING_PROPERTY);
+        ResourceTypeSchema schema = ResourceTypeSchema.load(resourceDefinition);
+
+        assertThat(schema.getTagging().isTaggable()).isEqualTo(true);
+        assertThat(schema.getTagging().isTagOnCreate()).isEqualTo(true);
+        assertThat(schema.getTagging().isTagUpdatable()).isEqualTo(false);
+        assertThat(schema.getTagging().isCloudFormationSystemTags()).isEqualTo(false);
+        assertThat(schema.getTagging().getTagProperty()).asString().isEqualTo("/properties/Tags");
+        assertThat(schema.getTagging().getTagPermissions()).isEmpty();
+    }
+
+    @Test
+    public void schemaWithTaggingBadPointerTagProperty_withValidConfiguration() {
+        JSONObject resourceDefinition = loadJSON(SCHEMA_WITH_INVALID_TAGGING_BAD_POINTER);
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> ResourceTypeSchema.load(resourceDefinition))
+            .withMessage("a JSON pointer should start with '/' or '#/'");
+    }
+
+    @Test
+    public void schemaWithTaggingBadReferenceTagProperty_withValidConfiguration() {
+        JSONObject resourceDefinition = loadJSON(SCHEMA_WITH_INVALID_TAGGING_BAD_REFERENCE);
+        assertThatExceptionOfType(ValidationException.class).isThrownBy(() -> ResourceTypeSchema.load(resourceDefinition))
+            .withMessage("Invalid tagProperty value /propertyB must start with \"/properties\"");
     }
 
     /**

@@ -1,0 +1,31 @@
+{
+  "typeName": "AWS::Test::TestModel",
+  "description": "A test schema for unit tests.",
+  "properties": {
+    "propertyA": {
+      "type": "boolean"
+    },
+    "propertyB": {
+      "description": "A list of tags to apply to the resource.",
+      "type": "array",
+      "uniqueItems": true,
+      "arrayType": "Standard",
+      "insertionOrder": false
+    }
+  },
+  "primaryIdentifier": [
+    "/properties/propertyA"
+  ],
+  "replacementStrategy": "delete_then_create",
+  "tagging": {
+    "taggable": true,
+    "tagOnCreate": true,
+    "tagUpdatable": false,
+    "cloudFormationSystemTags": false,
+    "tagProperty": "/propertyB",
+    "permissions": [
+      "test:permission"
+    ]
+  },
+  "additionalProperties": false
+}
