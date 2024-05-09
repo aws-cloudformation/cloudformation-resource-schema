@@ -64,7 +64,15 @@ public class ResourceTagging {
             throw new ValidationException("Invalid tagUpdatable value since update handler is missing", "tagging",
                                           "#/tagging/tagUpdatable");
         }
-        final String propertyName = this.tagProperty.toString().substring(this.tagProperty.toString().lastIndexOf('/') + 1);
+
+        final String propertiesPrefix = "/properties/";
+        if (!this.tagProperty.toString().startsWith(propertiesPrefix)) {
+            final String errorMessage = String.format("Invalid tagProperty value %s must start with \"/properties\"",
+                this.tagProperty.toString());
+            throw new ValidationException(errorMessage, "tagging", "#/tagging/tagProperty");
+        }
+
+        final String propertyName = this.tagProperty.toString().substring(propertiesPrefix.length());
         if (this.taggable && !schema.definesProperty(propertyName)) {
             final String errorMessage = String.format("Invalid tagProperty value since %s not found in schema", propertyName);
             throw new ValidationException(errorMessage, "tagging", "#/tagging/tagProperty");
