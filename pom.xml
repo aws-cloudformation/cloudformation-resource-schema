@@ -7,7 +7,7 @@
     <description>This library contains the metaschema for CloudFormation resource types and validation tools.</description>
     <url>ttps://github.com/aws-cloudformation/aws-cloudformation-resource-schema</url>
 
-    <version>2.0.9</version>
+    <version>2.0.10</version>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
