@@ -16,6 +16,7 @@ package software.amazon.cloudformation.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static software.amazon.cloudformation.resource.ValidatorTest.loadJSON;
 
 import java.util.List;
@@ -23,12 +24,14 @@ import java.util.Map;
 
 import org.everit.json.schema.PublicJSONPointer;
 import org.json.JSONObject;
+import org.json.JSONPointer;
 import org.junit.jupiter.api.Test;
 
 import software.amazon.cloudformation.resource.exceptions.ValidationException;
 
 public class ResourceTypeSchemaTest {
     private static final String TEST_SCHEMA_PATH = "/test-schema.json";
+    private static final String TEST_NESTED_TAGGING_SCHEMA_PATH = "/test-nested-tagging-schema.json";
     private static final String TEST_SCHEMA_WITH_EMPTY_WRITE_ONLY_PATH = "/test-schema-with-empty-write-only.json";
     private static final String EMPTY_SCHEMA_PATH = "/empty-schema.json";
     private static final String SINGLETON_SCHEMA_PATH = "/singleton-test-schema.json";
@@ -66,6 +69,20 @@ public class ResourceTypeSchemaTest {
         assertThat(schema.getTypeName()).isEqualTo("AWS::Test::TestModel");
         assertThat(schema.isTaggable()).isFalse();
         assertThat(schema.getUnprocessedProperties()).isEmpty();
+    }
+
+    @Test
+    public void getProperties2() {
+        JSONPointer tagProperty = new JSONPointer("/properties/NestedTagProperty/TagSpecifications/*/Tags");
+        JSONObject o = loadJSON(TEST_NESTED_TAGGING_SCHEMA_PATH);
+        final ResourceTypeSchema schema = ResourceTypeSchema.load(o);
+
+        assertThat(schema.getDescription()).isEqualTo("A test schema for unit tests.");
+        assertThat(schema.getSourceUrl()).isEqualTo("https://mycorp.com/my-repo.git");
+        assertThat(schema.getTypeName()).isEqualTo("AWS::Test::TestModel");
+        assertThat(schema.isTaggable()).isTrue();
+        assertThat(schema.getTagging().getTagProperty().toString()).isEqualTo(tagProperty.toString());
+        assertDoesNotThrow(() -> schema.getTagging().validateTaggingMetadata(true, schema.getSchema()));
     }
 
     @Test
