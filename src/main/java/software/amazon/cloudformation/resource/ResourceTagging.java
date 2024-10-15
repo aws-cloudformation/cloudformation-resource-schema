@@ -72,7 +72,8 @@ public class ResourceTagging {
             throw new ValidationException(errorMessage, "tagging", "#/tagging/tagProperty");
         }
 
-        final String propertyName = this.tagProperty.toString().substring(propertiesPrefix.length());
+        final String propertyName = this.tagProperty.toString().substring(propertiesPrefix.length()).replaceAll("/\\*/", "/0/");
+
         if (this.taggable && !schema.definesProperty(propertyName)) {
             final String errorMessage = String.format("Invalid tagProperty value since %s not found in schema", propertyName);
             throw new ValidationException(errorMessage, "tagging", "#/tagging/tagProperty");

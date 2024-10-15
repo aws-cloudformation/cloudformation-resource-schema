@@ -300,6 +300,7 @@ public class ResourceTypeSchema {
                 .filter(subschema -> subschema instanceof ObjectSchema)
                 .findFirst().get()
             : schema;
+
         return schemaToCheck.definesProperty(field);
     }
 
